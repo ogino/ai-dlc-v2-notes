@@ -96,7 +96,7 @@ LOW は対応任意（未対応）。
 | Antigravity (agy) | ✅ | clean | PUBLISH |
 | Grok CLI | ✅ | clean | PUBLISH WITH NITS |
 | Cursor Agent | ✅ | clean | PUBLISH WITH NITS |
-| Devin CLI | ❌ 未実施（出力なし） | — | — |
+| Devin CLI | ✅ 単独リトライ後 | clean | PUBLISH WITH NITS |
 | Kiro CLI | ✅ | clean | MEDIUM は免責強化等 |
 
 ### 公開レビューで合意した MEDIUM と対応
@@ -108,9 +108,29 @@ LOW は対応任意（未対応）。
 | 作業ログを公開資料と並べすぎ | ✅ README で「公開向け / メンテナ向け」分割 |
 | 09 見出し「ローカルパス」 | ✅ 「上流リポジトリ内パス」へ変更 |
 
+### Devin CLI — 単独リトライ結果（2026-07-28）
+
+**経緯**: 公開可否レビューの **7 並列実行時**は stdout 空で helper が `Devin CLI returned no output.` を返した。CLI 未導入ではなく、並列時の空レスポンスと判断。
+
+**再診断**:
+- `devin` 3000.2.17、認証 OK
+- 極小 smoke 成功
+- 同一公開プロンプトを **単独実行** → 成功（下記）
+
+**Devin の指摘一覧（単独リトライ）**:
+
+| # | Severity | File | Issue | 本リポジトリでの扱い |
+|---|----------|------|-------|----------------------|
+| 1 | MEDIUM | `09-references.md`, `SOURCES.md` | Method Definition Paper の URL が Amplify 既定ドメイン（`prod.d13rzhkk8cj2z0.amplifyapp.com`）で、公式ホストか読者に分かりにくい | **既知**。上流 README が同 URL を参照している。二次整理として踏襲。公式ドメインが確認でき次第差し替え（任意） |
+| 2 | LOW | `README.md` | メトリクス表のライセンスが MIT-0 で本リポ MIT と混同しうる | **対応済み**（上流 MIT-0 / 本ノート MIT を分離） |
+| 3 | LOW | 複数 | 「端到端」→「エンドツーエンド」 | 任意（`docs/REMAINING_TASKS.md` に記載） |
+| 4 | LOW | `06-harnesses-install.md` | Kiro「≥2.6」が CLI 版か曖昧 | 任意（Kiro **CLI** バージョンの意味で記載） |
+
+Devin 判定: **PUBLISH WITH NITS** / **privacy: clean** / HIGH なし
+
 ### 公開可否（オーケストレータ）
 
-- **HIGH ブロッカー: なし**（privacy: clean が複数 AI で一致）
-- **Devin: 未実施**（理由: CLI が出力なしで終了）
-- **判定: PUBLISH WITH NITS（nit は上記対応済み）**
+- **HIGH ブロッカー: なし**（privacy: clean が **8 系統すべて**で一致）
+- **Devin: 単独リトライで完了**（並列時のみ失敗）
+- **判定: PUBLISH WITH NITS**（公開向け nit は主要対応済み。Devin #1 の Amplify URL は上流踏襲の任意改善）
 - **リモート push はユーザー最終確認後のみ**

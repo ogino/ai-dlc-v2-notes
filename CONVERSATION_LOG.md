@@ -19,7 +19,7 @@
 - MEDIUM: 対応済み
 - LOW: 未対応（任意）
 
-**公開可否 8-AI レビュー**: privacy clean / HIGH なし。README 免責・ライセンス区別・作業ログ案内を追加対応。Devin のみ未実施。
+**公開可否 8-AI レビュー**: privacy clean / HIGH なし。README 免責・ライセンス区別・作業ログ案内を追加対応。Devin は並列時に空出力 → **単独リトライで成功**（結果を `REVIEW-8AI.md` に追記）。
 
 **ブランチ**: `feature/prepare-public-release`  
 **コミット**: 初期 `772baf7` + 公開 nit 修正（後続）  
