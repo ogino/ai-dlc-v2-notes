@@ -19,5 +19,8 @@
 - MEDIUM: 対応済み
 - LOW: 未対応（任意）
 
+**公開可否 8-AI レビュー**: privacy clean / HIGH なし。README 免責・ライセンス区別・作業ログ案内を追加対応。Devin のみ未実施。
+
 **ブランチ**: `feature/prepare-public-release`  
-**注意**: リモート push はユーザー最終確認後のみ
+**コミット**: 初期 `772baf7` + 公開 nit 修正（後続）  
+**注意**: リモート push はユーザー最終確認後のみ（未実施）

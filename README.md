@@ -1,4 +1,10 @@
-# AWS AI-DLC Workflows 2.0 整理ノート
+# AWS AI-DLC Workflows 2.0 整理ノート（非公式）
+
+> **免責（必読）**  
+> - 本リポジトリは **非公式の二次整理** であり、AWS / awslabs / Amazon の公式文書・公式サポートではない  
+> - 生成 AI による要約・再構成を含み、**誤りがあり得る**  
+> - 実装・仕様の正は常に上流 [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows)（v2）のソースと `docs/` を参照すること  
+> - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 調査日: 2026-07-28  
 対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.5.11**）
@@ -27,6 +33,8 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 
 ## ドキュメント一覧
 
+### 公開向け（読む順番の目安）
+
 | ファイル | 内容 |
 |----------|------|
 | [01-overview.md](./01-overview.md) | 背景・方法論・2.0 GA の位置づけ |
@@ -37,9 +45,14 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [06-harnesses-install.md](./06-harnesses-install.md) | 対応ハーネスと導入手順の要点 |
 | [07-learning-loop-state.md](./07-learning-loop-state.md) | Space/Intent・Rules・Sensors・監査 |
 | [08-v1-vs-v2.md](./08-v1-vs-v2.md) | 1.x 系と 2.0 の差分 |
-| [09-references.md](./09-references.md) | 参照リンク・ローカルパス |
-| [SOURCES.md](./SOURCES.md) | 調査ソース一覧 |
-| [REVIEW-8AI.md](./REVIEW-8AI.md) | 8-AI レビュー統合結果（MEDIUM 対応状況含む） |
+| [09-references.md](./09-references.md) | 参照リンク・上流リポジトリ内パス |
+| [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
+
+### メンテナ向け（作業記録）
+
+| ファイル | 内容 |
+|----------|------|
+| [REVIEW-8AI.md](./REVIEW-8AI.md) | 複数 AI レビュー結果 |
 | [CONVERSATION_LOG.md](./CONVERSATION_LOG.md) | セッション要約 |
 | [docs/](./docs/) | 開発ルール・残タスク・会話アーカイブ・追跡性 |
 
@@ -57,7 +70,8 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | 監査イベント種別 | 74 |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, opencode |
 | 実装バージョン | 2.5.11（2026-07-24 時点 CHANGELOG） |
-| ライセンス | MIT-0 |
+| 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
+| 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 
 ---
 

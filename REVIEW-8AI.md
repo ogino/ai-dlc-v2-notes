@@ -82,4 +82,35 @@ LOW は対応任意（未対応）。
 | MEDIUM | **対応済み** |
 | ドキュメント精度 | **APPROVE WITH NITS**（LOW のみ残） |
 
-公開前の最終 8-AI レビュー結果は、実施後に本ファイルへ追記する。
+---
+
+## 公開可否レビュー（2026-07-28）
+
+観点: privacy / 二次整理の明示 / ライセンス / 公開体裁
+
+| AI | Status | privacy | 判定 |
+|----|--------|---------|------|
+| Session self | ✅ | clean | PUBLISH WITH NITS |
+| Codex CLI | ✅ | clean | PUBLISH WITH NITS |
+| Copilot CLI | ✅ | clean | PUBLISH WITH NITS |
+| Antigravity (agy) | ✅ | clean | PUBLISH |
+| Grok CLI | ✅ | clean | PUBLISH WITH NITS |
+| Cursor Agent | ✅ | clean | PUBLISH WITH NITS |
+| Devin CLI | ❌ 未実施（出力なし） | — | — |
+| Kiro CLI | ✅ | clean | MEDIUM は免責強化等 |
+
+### 公開レビューで合意した MEDIUM と対応
+
+| 指摘 | 対応 |
+|------|------|
+| 冒頭の非公式・二次整理バナー強化 | ✅ README 冒頭に免責ブロック |
+| 上流 MIT-0 と本リポ MIT の混同 | ✅ メトリクス表を分離 |
+| 作業ログを公開資料と並べすぎ | ✅ README で「公開向け / メンテナ向け」分割 |
+| 09 見出し「ローカルパス」 | ✅ 「上流リポジトリ内パス」へ変更 |
+
+### 公開可否（オーケストレータ）
+
+- **HIGH ブロッカー: なし**（privacy: clean が複数 AI で一致）
+- **Devin: 未実施**（理由: CLI が出力なしで終了）
+- **判定: PUBLISH WITH NITS（nit は上記対応済み）**
+- **リモート push はユーザー最終確認後のみ**
