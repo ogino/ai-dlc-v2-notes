@@ -1,0 +1,22 @@
+# OS / editor
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+
+# Local privacy patterns (if added later)
+patterns.json
+**/patterns.json
+
+# Local caches / scratch
+scratch/
+.tmp/
+*.log
+
+# Secrets
+.env
+.env.*
+credentials.json
+*.pem
+*.key
