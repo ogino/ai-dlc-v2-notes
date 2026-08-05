@@ -69,21 +69,42 @@ jobs:
         env:
           DENYLIST: ${{ secrets.DENYLIST_PATTERNS }}
           # fork からの pull_request には secrets が渡らない（GitHub の仕様）。
-          # その場合だけは構造的に実行不能なので警告に留め、それ以外で
-          # 未設定なら fail-closed にする。
+          # 実行不能な場合は成功扱いにせず必ず落とす（fail-closed）。警告で
+          # 通すと、外部 PR が禁止語を追加しても緑になりマージできてしまう。
           IS_FORK_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           set -uo pipefail
           if [ -z "${DENYLIST}" ]; then
             if [ "${IS_FORK_PR}" = "true" ]; then
-              echo "::warning::fork からの PR には secrets が渡らないため、禁止語スキャンを実行できません。マージ前にメンテナが PUBLIC_CONTENT_POLICY.md に照らして手動で確認してください。"
-              exit 0
+              echo "::error::fork からの PR には secrets が渡らないため、禁止語スキャンを実行できません（GitHub の仕様）。**このチェックは意図的に失敗させています**。メンテナが PUBLIC_CONTENT_POLICY.md に照らして手動で確認し、問題なければ管理者権限でマージしてください。"
+              exit 1
             fi
             echo "::error::DENYLIST_PATTERNS が未設定のため禁止語スキャンを実行できません。未設定を成功扱いにすると検査が素通りするため、job を失敗させます。設定方法は PUBLIC_CONTENT_POLICY.md を参照してください。"
             exit 1
           fi
           printf '%s\n' "${DENYLIST}" | grep -v '^[[:space:]]*$' > /tmp/denylist.txt
           echo "禁止語パターン数: $(wc -l < /tmp/denylist.txt)"
+
+          # パス自体に禁止語が含まれる場合を検出する。内容スキャンは
+          # ファイルの中身しか見ないため、`docs/<禁止語>/README.md` のように
+          # ディレクトリ名やファイル名だけに現れるケースを取りこぼす。
+          set +e
+          git ls-files | grep -niEf /tmp/denylist.txt > /tmp/path-hits.txt
+          prc=$?
+          set -e
+          if [ "$prc" -ge 2 ]; then
+            echo "::error::パスの禁止語スキャンが失敗しました（grep 終了コード $prc）。"
+            rm -f /tmp/denylist.txt /tmp/path-hits.txt
+            exit 1
+          fi
+          if [ "$prc" -eq 0 ] && [ -s /tmp/path-hits.txt ]; then
+            # 一致したパスは禁止語そのものを含むため出力しない。件数のみ示す。
+            echo "::error::ファイルパスに禁止語が含まれています（$(wc -l < /tmp/path-hits.txt) 件）。パス自体が機密のため一覧は出力しません。ローカルで同じ denylist を使って確認してください。"
+            rm -f /tmp/denylist.txt /tmp/path-hits.txt
+            exit 1
+          fi
+          rm -f /tmp/path-hits.txt
+          echo "パスの禁止語: 検出なし"
 
           # grep の終了コードを区別する。
           #   0 = 一致あり（＝機密混入）→ fail
@@ -108,7 +129,11 @@ jobs:
           rm -f /tmp/deny-err.txt
 
           if [ "$rc" -eq 0 ] && [ -s /tmp/hits.txt ]; then
-            echo "::error::禁止語が以下のファイルで検出されました（内容は非表示）:"
+            # 一致した「内容」は出力しない。ファイル名は出すが、そのパス自体に
+            # 禁止語が含まれる可能性があるため、直前のパススキャンを通過した
+            # ものに限られる。Actions はシークレット値をログ上でマスクするが、
+            # それに依存せず内容は一切出さない方針とする。
+            echo "::error::禁止語が以下のファイルで検出されました（$(wc -l < /tmp/hits.txt) 件。一致内容は非表示）:"
             cat /tmp/hits.txt
             exit 1
           fi

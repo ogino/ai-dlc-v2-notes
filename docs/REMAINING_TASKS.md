@@ -15,7 +15,7 @@
 
 - [x] 上流 2.5.11 → 2.5.37 の差分反映（2026-08-05）
 - [ ] **追従フローの定例化** — 上流には in-place upgrade も版数比較の仕組みも無い（`docs/roadmap.md` #535 未実装）ため、追従は運用で担保するしかない。担当者と頻度を決める
-  - 確認コマンド: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
+  - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
 
 ## 運用
 
