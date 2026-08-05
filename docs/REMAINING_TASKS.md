@@ -22,4 +22,5 @@
 - [ ] GitHub リポジトリの Topics / Description 整備
 - [ ] 必要なら GitHub Pages や簡易目次の追加
 - [ ] **`DENYLIST_PATTERNS` シークレットの設定**（未設定の間はリークチェックが**失敗する**。fail-closed のため、設定するまで PR はマージできない。手順は `PUBLIC_CONTENT_POLICY.md`）
-- [ ] main ブランチ保護ルールの設定（直接 push 禁止・PR 必須・CI パス必須）
+- [x] master ブランチ保護ルールの設定（直接 push 禁止・PR 必須・CI パス必須。2026-08-05 設定済み）
+  - **fork PR との相互作用**: leak-check は fork PR で必ず失敗するため（secrets 不達）、外部 PR は管理者バイパスなしにはマージできない。手順は `PUBLIC_CONTENT_POLICY.md` の「fork PR の運用手順」を参照
