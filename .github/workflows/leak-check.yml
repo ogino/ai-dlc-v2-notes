@@ -3,8 +3,12 @@ name: leak-check
 # 公開リポジトリへの機密混入を検出する。
 # 詳細は PUBLIC_CONTENT_POLICY.md を参照。
 #
-# 禁止語リストはリポジトリに平文で置かず、GitHub Actions Secrets
-# (DENYLIST_PATTERNS) から CI 実行時のみ供給する。リスト自体が機密のため。
+# 設計上の原則:
+#  1. 禁止語リストはリポジトリに平文で置かず、GitHub Actions Secrets
+#     (DENYLIST_PATTERNS) から CI 実行時のみ供給する（リスト自体が機密のため）
+#  2. Actions のログは公開される。検出時も「一致した内容」は出力せず
+#     ファイル名のみを示す
+#  3. fail-open にしない。スキャン自体が失敗した場合は成功扱いにせず job を落とす
 
 on:
   push:
@@ -13,6 +17,14 @@ on:
 
 permissions:
   contents: read
+
+env:
+  # テキストとして走査する対象。バイナリを避けつつ、Markdown 以外の
+  # 設定ファイル・スクリプトも対象に含める。
+  SCAN_INCLUDES: >-
+    --include=*.md --include=*.txt --include=*.yml --include=*.yaml
+    --include=*.json --include=*.ts --include=*.js --include=*.sh
+    --include=*.toml --include=*.cfg
 
 jobs:
   scan:
@@ -29,14 +41,26 @@ jobs:
 
       - name: Scan for personal absolute paths
         run: |
-          set -euo pipefail
-          if grep -rnE '/(Users|home)/[a-zA-Z0-9._-]+/' \
-               --include='*.md' --include='*.yml' --include='*.yaml' \
-               --exclude-dir=.git . \
-             | grep -vF 'DEVELOPMENT_RULES.md' \
-             | grep -vF 'PUBLIC_CONTENT_POLICY.md' \
-             | grep -vF 'conversation-archive'; then
-            echo "::error::個人のホームディレクトリ絶対パスが検出されました。相対パスまたはプレースホルダに置き換えてください。"
+          set -uo pipefail
+          # 除外リストは意図的に設けない。除外を置くと、その配下に将来混入した
+          # パスを見逃すため。規約文などで例示が必要な場合は
+          # `/Users/<name>/` のようなプレースホルダを使う。
+          #
+          # -l でファイル名のみ出力する。一致行そのものを出すと、
+          # 公開される Actions ログに個人パスが載ってしまうため。
+          set +e
+          # shellcheck disable=SC2086
+          grep -rlE '/(Users|home)/[a-zA-Z0-9._-]+/' \
+            $SCAN_INCLUDES --exclude-dir=.git . > /tmp/path-hits.txt 2>/tmp/path-err.txt
+          rc=$?
+          set -e
+          if [ "$rc" -ge 2 ]; then
+            echo "::error::個人パススキャンが失敗しました（grep 終了コード $rc）。ワークフローの不具合の可能性があります。"
+            exit 1
+          fi
+          if [ "$rc" -eq 0 ] && [ -s /tmp/path-hits.txt ]; then
+            echo "::error::個人のホームディレクトリ絶対パスが以下のファイルで検出されました。相対パスまたはプレースホルダに置き換えてください。"
+            cat /tmp/path-hits.txt
             exit 1
           fi
           echo "個人パス: 検出なし"
@@ -44,24 +68,48 @@ jobs:
       - name: Scan for confidential terms
         env:
           DENYLIST: ${{ secrets.DENYLIST_PATTERNS }}
+          # fork からの pull_request には secrets が渡らない（GitHub の仕様）。
+          # その場合だけは構造的に実行不能なので警告に留め、それ以外で
+          # 未設定なら fail-closed にする。
+          IS_FORK_PR: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
-          set -euo pipefail
+          set -uo pipefail
           if [ -z "${DENYLIST}" ]; then
-            echo "::warning::DENYLIST_PATTERNS が未設定です。禁止語スキャンをスキップしました。設定方法は PUBLIC_CONTENT_POLICY.md を参照してください。"
-            exit 0
+            if [ "${IS_FORK_PR}" = "true" ]; then
+              echo "::warning::fork からの PR には secrets が渡らないため、禁止語スキャンを実行できません。マージ前にメンテナが PUBLIC_CONTENT_POLICY.md に照らして手動で確認してください。"
+              exit 0
+            fi
+            echo "::error::DENYLIST_PATTERNS が未設定のため禁止語スキャンを実行できません。未設定を成功扱いにすると検査が素通りするため、job を失敗させます。設定方法は PUBLIC_CONTENT_POLICY.md を参照してください。"
+            exit 1
           fi
           printf '%s\n' "${DENYLIST}" | grep -v '^[[:space:]]*$' > /tmp/denylist.txt
           echo "禁止語パターン数: $(wc -l < /tmp/denylist.txt)"
-          # 一致した「行の内容」は出力しない（ログ自体が公開されるため）。
-          # 検出時はファイル名と行番号のみを示す。
-          if grep -rniEf /tmp/denylist.txt \
-               --include='*.md' --include='*.yml' --include='*.yaml' \
-               --exclude-dir=.git -l . > /tmp/hits.txt 2>/dev/null \
-             && [ -s /tmp/hits.txt ]; then
-            echo "::error::禁止語が以下のファイルで検出されました（内容は非表示）:"
-            cat /tmp/hits.txt
-            rm -f /tmp/denylist.txt
+
+          # grep の終了コードを区別する。
+          #   0 = 一致あり（＝機密混入）→ fail
+          #   1 = 一致なし → pass
+          #  >=2 = パターン構文エラー等のスキャン失敗 → fail
+          # 2>/dev/null で握りつぶすと、不正な正規表現が「検出なし」に化ける
+          # （fail-open）ため、終了コードで明示的に分岐する。
+          set +e
+          # shellcheck disable=SC2086
+          grep -rniEf /tmp/denylist.txt \
+            $SCAN_INCLUDES --exclude-dir=.git -l . > /tmp/hits.txt 2>/tmp/deny-err.txt
+          rc=$?
+          set -e
+          rm -f /tmp/denylist.txt
+
+          if [ "$rc" -ge 2 ]; then
+            # stderr にはパターン文字列が含まれうるため内容は出力しない。
+            echo "::error::禁止語スキャンが失敗しました（grep 終了コード $rc）。DENYLIST_PATTERNS の正規表現に構文エラーがある可能性があります。"
+            rm -f /tmp/deny-err.txt
             exit 1
           fi
-          rm -f /tmp/denylist.txt
+          rm -f /tmp/deny-err.txt
+
+          if [ "$rc" -eq 0 ] && [ -s /tmp/hits.txt ]; then
+            echo "::error::禁止語が以下のファイルで検出されました（内容は非表示）:"
+            cat /tmp/hits.txt
+            exit 1
+          fi
           echo "禁止語: 検出なし"

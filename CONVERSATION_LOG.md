@@ -29,9 +29,7 @@
 - CONDITIONAL 21ステージのスキップ経路には presence 検査が無い
 - 上流には版数比較も in-place upgrade も無く、追従は運用で担保するしかない
 
-**公開／非公開の切り分け**: Devin・Kiro に設計を相談し、完全分離を採用。機密を含む評価資料は private リポジトリへ分離。判断基準は「上流 OSS の URL を示せば読者が同じ結論に到達できるか」、判定は文単位。
-
-**公開側の整備**: `PUBLIC_CONTENT_POLICY.md` と `.github/workflows/leak-check.yml` を追加。禁止語リストはリスト自体が機密のため平文で置かず、GitHub Actions Secrets から供給する設計とした。
+**公開コンテンツ方針の整備**: `PUBLIC_CONTENT_POLICY.md` と `.github/workflows/leak-check.yml` を追加。公開判断の基準は「上流 OSS の URL を示せば読者が同じ結論に到達できるか」、判定は章単位ではなく文単位で行う。禁止語リストはリスト自体が機密になりうるため平文で置かず、GitHub Actions Secrets から CI 実行時のみ供給する設計とした。
 
 **ブランチ**: `feature/sync-upstream-2537`（マージはユーザー判断）
 
