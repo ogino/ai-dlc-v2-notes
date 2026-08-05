@@ -62,6 +62,9 @@ docs/guide/15-troubleshooting.md
 docs/guide/16-worked-examples.md
 docs/guide/17-skills.md
 docs/guide/glossary.md
+docs/guide/workshop-mode.md
+docs/guide/agents/README.md
+docs/guide/agents/*.md          # ドメインエージェント別の深掘りページ
 docs/guide/harnesses/*.md
 ```
 

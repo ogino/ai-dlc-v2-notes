@@ -6,8 +6,12 @@
 > - 実装・仕様の正は常に上流 [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows)（v2）のソースと `docs/` を参照すること  
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
-調査日: 2026-07-28  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.5.11**）
+初回調査日: 2026-07-28（実装バージョン 2.5.11）  
+最終同期日: 2026-08-05  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.5.37**）
+
+> 上流はマイナーリリースが頻繁である。本ノートは特定時点のスナップショットであり、
+> 数値・仕様は参照時に `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。
 
 ---
 
@@ -46,6 +50,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [07-learning-loop-state.md](./07-learning-loop-state.md) | Space/Intent・Rules・Sensors・監査 |
 | [08-v1-vs-v2.md](./08-v1-vs-v2.md) | 1.x 系と 2.0 の差分 |
 | [09-references.md](./09-references.md) | 参照リンク・上流リポジトリ内パス |
+| [10-release-impact-2537.md](./10-release-impact-2537.md) | 2.5.11 → 2.5.37 の差分／ソース読解で分かった挙動 |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
 ### メンテナ向け（作業記録）
@@ -69,7 +74,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | 深度 / テスト戦略 | 各 3 段階（独立） |
 | 監査イベント種別 | 74 |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, opencode |
-| 実装バージョン | 2.5.11（2026-07-24 時点 CHANGELOG） |
+| 実装バージョン | 2.5.37（2026-08-03 時点 CHANGELOG） |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 

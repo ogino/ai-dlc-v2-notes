@@ -63,6 +63,8 @@
 
 長文 + キーワード埋没時は **compose 提案**へ誘導（誤検出防止）。
 
+**既定スコープ解決（2.5.30 以降）**: プラグイン選択でコアスコープ（`feature` / `poc`）を無効化した「プラグイン専用インストール」では、従来 `Unknown scope` エラーになり得た。scope の frontmatter に `freeform_default: true` を宣言すると、そのスコープが既定候補として指名される。**コアスコープを併用する通常構成では挙動は変わらない**（コアの 9 スコープはいずれも `freeform_default` を宣言していない）。
+
 ---
 
 ## 5.3 Adaptive Composer
@@ -76,6 +78,26 @@
 - エントロピー内訳付きの提案
 - ステージ毎 EXECUTE/SKIP 理由
 - 承認後にカスタム scope が永続化し、以降 `--scope <name>` で再利用可能
+
+### ARS 演算の決定論化（2.5.25 以降）
+
+複合スコアの算出は **`aidlc-graph.ts ars` サブコマンド**が担い、モデルは計算を行わない（CHANGELOG の表現は *"a model never does the multiplication"*）。
+
+```
+aidlc-graph.ts ars --iae <s> --csu <s> --ve <s> --r <s> --ua <s> \
+  [--completed <csv>] [--project-type brownfield|greenfield]
+```
+
+出力は JSON で、加重合成値とその帯域ラベル、LOW/MED/HIGH の成分帯域、ステージ別の期待値スクリーン、近傍のストックスコープ、2 つのゲート表を返す。
+
+パラメータは `core/tools/data/ars-priors.json`（schemaVersion 1）に外出しされている。
+
+| 項目 | 値 |
+|------|-----|
+| 重み | IAE 0.20 / CSU 0.30 / VE 0.25 / R 0.15 / UA 0.10 |
+| 成分帯域の境界 | LOW < 0.30 ≤ MED < 0.70 ≤ HIGH |
+
+> **モデル依存が残る部分**: 決定論化されたのは「計算」であって「採点」ではない。5 成分（IAE/CSU/VE/R/UA）を証拠から評価してスコアを付ける工程は、引き続き Composer エージェントの判断による。
 
 ---
 

@@ -1,0 +1,67 @@
+name: leak-check
+
+# 公開リポジトリへの機密混入を検出する。
+# 詳細は PUBLIC_CONTENT_POLICY.md を参照。
+#
+# 禁止語リストはリポジトリに平文で置かず、GitHub Actions Secrets
+# (DENYLIST_PATTERNS) から CI 実行時のみ供給する。リスト自体が機密のため。
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan for credentials (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Scan for personal absolute paths
+        run: |
+          set -euo pipefail
+          if grep -rnE '/(Users|home)/[a-zA-Z0-9._-]+/' \
+               --include='*.md' --include='*.yml' --include='*.yaml' \
+               --exclude-dir=.git . \
+             | grep -vF 'DEVELOPMENT_RULES.md' \
+             | grep -vF 'PUBLIC_CONTENT_POLICY.md' \
+             | grep -vF 'conversation-archive'; then
+            echo "::error::個人のホームディレクトリ絶対パスが検出されました。相対パスまたはプレースホルダに置き換えてください。"
+            exit 1
+          fi
+          echo "個人パス: 検出なし"
+
+      - name: Scan for confidential terms
+        env:
+          DENYLIST: ${{ secrets.DENYLIST_PATTERNS }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DENYLIST}" ]; then
+            echo "::warning::DENYLIST_PATTERNS が未設定です。禁止語スキャンをスキップしました。設定方法は PUBLIC_CONTENT_POLICY.md を参照してください。"
+            exit 0
+          fi
+          printf '%s\n' "${DENYLIST}" | grep -v '^[[:space:]]*$' > /tmp/denylist.txt
+          echo "禁止語パターン数: $(wc -l < /tmp/denylist.txt)"
+          # 一致した「行の内容」は出力しない（ログ自体が公開されるため）。
+          # 検出時はファイル名と行番号のみを示す。
+          if grep -rniEf /tmp/denylist.txt \
+               --include='*.md' --include='*.yml' --include='*.yaml' \
+               --exclude-dir=.git -l . > /tmp/hits.txt 2>/dev/null \
+             && [ -s /tmp/hits.txt ]; then
+            echo "::error::禁止語が以下のファイルで検出されました（内容は非表示）:"
+            cat /tmp/hits.txt
+            rm -f /tmp/denylist.txt
+            exit 1
+          fi
+          rm -f /tmp/denylist.txt
+          echo "禁止語: 検出なし"
