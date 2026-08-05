@@ -122,6 +122,17 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 
 Codex は `$aidlc` 表記。
 
+### 直接ツール呼び出し（`/aidlc` サブコマンドではない）
+
+次の 2 つは `/aidlc <x>` の形を取らず、ツールを直接起動する。
+
+| コマンド | 意味 |
+|----------|------|
+| `bun <harness-dir>/tools/aidlc-utility.ts codekb-scope-diff --repo <repo>` | Reverse Engineering 再実行前に codekb ストアの鮮度を確認（`NO_STORE` / `CURRENT` / `STALE` / `UNVERIFIED` / `UNKNOWN_SCOPE`）。2.5.35+ |
+| `bun <harness-dir>/tools/aidlc-workspace-sync.ts [--force]` | 任意の `repos.json` に基づき不足リポジトリを clone、管理対象 `.gitignore` を更新、VSCode マルチルート生成。2.5.36+ |
+
+> `--doctor` は 2.5.36 で advisory 行が 3 つ増えた（`aidlc/` 配下の未コミット変更、`repos.json` とディスク上 sibling の drift、管理対象 `.gitignore` ブロックの陳腐化）。後者 2 つは `repos.json` が存在する場合のみ表示される。
+
 ---
 
 ## 6.5 トラブルシュート（頻出）

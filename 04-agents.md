@@ -58,6 +58,12 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 
 2.4.0 以降: **adversarial review contract**（欠陥がある前提で反証する。意見だけの NOT-READY は不可）。
 
+**エンジンによる強制（2.5.5 以降）**: `reviewer` を宣言したステージは、当該レビュアの新鮮な `REVIEW_COMPLETED` 監査行が無いと `approve` / `advance` / `finalize` / `complete-workflow` のいずれの完了経路でも**拒否される**。導体の判断でレビュアを省略することはできない。
+
+> ただしカバレッジは全ステージではない。`reviewer:` を宣言するのは **32 中 12 ステージ**で、そのうち 8 は `execution: CONDITIONAL`。CONDITIONAL ステージは条件不成立としてスキップ報告できるため、**強制が回避不能なのは ALWAYS の 4 ステージ**（intent-capture / requirements-analysis / units-generation / code-generation）である。
+
+**チェックリストの所在（2.5.33 以降）**: レビュアの `knowledge/<agent>/reviewing.md` は、パッケージング時に**レビュア agent 本体へ埋め込まれる**。実行時に知識 glob を読みに行く設計から、ビルド時埋め込みへ変わった。Kiro のレビュア JSON からは冗長な per-agent 知識 glob が削除されている。
+
 ---
 
 ## 4.4 Composer（1）
@@ -107,7 +113,11 @@ CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `ai
 
 | やりたいこと | 場所 |
 |--------------|------|
-| 会社標準・規約をエージェントに読ませる | `aidlc/spaces/<space>/knowledge/<agent>/` |
-| 行動ルールを永続化 | `aidlc/spaces/<space>/memory/` |
+| 会社標準・規約をエージェントに読ませる | `aidlc/spaces/<space>/knowledge/<agent>/` ※1 |
+| 行動ルールを永続化 | `aidlc/spaces/<space>/memory/` ※2 |
 | 新エージェントを追加 | ユーザー所有の agents ファイル（アップグレードで上書きされない場所） |
 | 出荷 14 体の本文を直接編集 | **非推奨**（アップグレードで上書き） |
+
+※1 レビュア 2 体はチェックリストがビルド時に本体へ埋め込まれるため（4.3 参照）、`knowledge/<reviewer-agent>/` への配置がドメインエージェントと同じ経路で効くかは要確認。
+
+※2 ルールは 2.5.33 以降、導体がパスを読むかどうかに依存せず、エンジンが `run-stage` 前に `load-steering` ディレクティブとして**内容を確定配信**する（7.2 参照）。知識ファイルは引き続きパス参照（path-loaded）。

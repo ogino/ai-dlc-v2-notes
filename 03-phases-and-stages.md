@@ -137,7 +137,9 @@ Bolt に入っても 3.1–3.4 が常に全部走るわけではない。
 
 ## 3.8 アーティファクトの考え方
 
-- すべて Intent の **record dir** 配下に Markdown 等で蓄積
+- 原則として Intent の **record dir** 配下に Markdown 等で蓄積
+- **例外: Reverse Engineering（2.1）の 9 成果物**は record dir ではなく **space レベルの codekb ストア** `aidlc/spaces/<space>/codekb/<repo>/` に書かれる。record dir に残るのは同ステージの `memory.md` 日誌のみ（2.5.26 で scaffold とドキュメントが是正された）
+  - codekb はリポジトリごとに 1 つの共有ビューで、brownfield の再実行が上書きする（last write wins）。2.5.35 以降はスキャン範囲を記録・比較し、狭いスキャンでの無警告上書きを防ぐ
 - ステージ間は `consumes` / `produces` でグラフ化
 - 上流引用は `upstream-coverage` センサーが advisory 検査
 - Construction の並行は contribution ファイルと worktree / swarm 機構で証拠化

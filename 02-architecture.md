@@ -95,7 +95,9 @@ core/
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数の出典差（要再確認）**: 公式 README は *25 aidlc-\*.ts engine tools* と表現。ローカル v2 clone の `core/tools/` には補助モジュール込みで **約 30 本超の `.ts`** がある。本数はリリースで増減しやすく本題ではないため、以下は代表エントリのみ。
+**tools 本数（2.5.37 時点で出典差は解消）**: 公式 README は *34 aidlc-\*.ts engine tools* と表現し、`core/tools/aidlc-*.ts` の実数も **34 本**で一致する。`.ts` 全体では 35 本だが、35 本目の `aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない。
+
+> 2.5.11 時点では README が「25」と表記しており実数と食い違っていたが、2.5.36 で README 側が更新され解消した。本数はリリースで増減するため、参照時は `ls core/tools/aidlc-*.ts | wc -l` で実測し README 記載と照合すること。
 
 主要ツール例:
 
@@ -109,6 +111,8 @@ core/
 | `aidlc-bolt.ts` / `aidlc-swarm.ts` | Construction 並列 |
 | `aidlc-learnings.ts` | 学習ループ |
 | `aidlc-sensor-*.ts` | 決定論的検証 |
+| `aidlc-steering.ts` | ルール束の配信（2.5.33 の `load-steering`） |
+| `aidlc-workspace-sync.ts` | 複数リポジトリ manifest の同期（2.5.36） |
 
 ---
 
@@ -194,7 +198,7 @@ your-project/
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.5.11"` |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.5.37"` |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|
