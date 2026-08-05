@@ -88,22 +88,43 @@ jobs:
           # パス自体に禁止語が含まれる場合を検出する。内容スキャンは
           # ファイルの中身しか見ないため、`docs/<禁止語>/README.md` のように
           # ディレクトリ名やファイル名だけに現れるケースを取りこぼす。
+          #
+          # ファイル一覧の取得と grep はパイプで繋がない。繋ぐと
+          # `git ls-files` の失敗が grep の終了コード 1（一致なし）に
+          # 隠れ、何も検査していないのに「検出なし」で通ってしまう。
           set +e
-          git ls-files | grep -niEf /tmp/denylist.txt > /tmp/path-hits.txt
+          git ls-files > /tmp/deny-filelist.txt 2>/tmp/deny-path-err.txt
+          lrc=$?
+          set -e
+          if [ "$lrc" -ne 0 ]; then
+            echo "::error::ファイル一覧の取得に失敗しました（git ls-files 終了コード $lrc）。パスの禁止語スキャンを実行できないため job を失敗させます。"
+            rm -f /tmp/denylist.txt /tmp/deny-filelist.txt /tmp/deny-path-err.txt
+            exit 1
+          fi
+
+          # stderr は捨てずにファイルへ向ける。grep のエラー文には
+          # パターン文字列（＝禁止語そのもの）が含まれうるため、
+          # 公開される Actions ログに直接流してはならない。
+          set +e
+          grep -iEf /tmp/denylist.txt /tmp/deny-filelist.txt > /tmp/deny-path-hits.txt 2>>/tmp/deny-path-err.txt
           prc=$?
           set -e
+          rm -f /tmp/deny-filelist.txt
+
           if [ "$prc" -ge 2 ]; then
-            echo "::error::パスの禁止語スキャンが失敗しました（grep 終了コード $prc）。"
-            rm -f /tmp/denylist.txt /tmp/path-hits.txt
+            echo "::error::パスの禁止語スキャンが失敗しました（grep 終了コード $prc）。DENYLIST_PATTERNS の正規表現に構文エラーがある可能性があります。エラー内容はパターンを含みうるため出力しません。"
+            rm -f /tmp/denylist.txt /tmp/deny-path-hits.txt /tmp/deny-path-err.txt
             exit 1
           fi
-          if [ "$prc" -eq 0 ] && [ -s /tmp/path-hits.txt ]; then
+          rm -f /tmp/deny-path-err.txt
+
+          if [ "$prc" -eq 0 ] && [ -s /tmp/deny-path-hits.txt ]; then
             # 一致したパスは禁止語そのものを含むため出力しない。件数のみ示す。
-            echo "::error::ファイルパスに禁止語が含まれています（$(wc -l < /tmp/path-hits.txt) 件）。パス自体が機密のため一覧は出力しません。ローカルで同じ denylist を使って確認してください。"
-            rm -f /tmp/denylist.txt /tmp/path-hits.txt
+            echo "::error::ファイルパスに禁止語が含まれています（$(wc -l < /tmp/deny-path-hits.txt) 件）。パス自体が機密のため一覧は出力しません。ローカルで同じ denylist を使って確認してください。"
+            rm -f /tmp/denylist.txt /tmp/deny-path-hits.txt
             exit 1
           fi
-          rm -f /tmp/path-hits.txt
+          rm -f /tmp/deny-path-hits.txt
           echo "パスの禁止語: 検出なし"
 
           # grep の終了コードを区別する。
