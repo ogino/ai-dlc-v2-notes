@@ -82,8 +82,17 @@ jobs:
             echo "::error::DENYLIST_PATTERNS が未設定のため禁止語スキャンを実行できません。未設定を成功扱いにすると検査が素通りするため、job を失敗させます。設定方法は PUBLIC_CONTENT_POLICY.md を参照してください。"
             exit 1
           fi
-          printf '%s\n' "${DENYLIST}" | grep -v '^[[:space:]]*$' > /tmp/denylist.txt
-          echo "禁止語パターン数: $(wc -l < /tmp/denylist.txt)"
+          # 空行を除いたうえで、有効なパターンが 1 つも無い場合を明示的に
+          # 検出する。空のパターンファイルで grep すると「一致なし」（終了
+          # コード 1）になり、何も検査していないのに緑になるため。
+          printf '%s\n' "${DENYLIST}" | grep -v '^[[:space:]]*$' > /tmp/denylist.txt || true
+          pattern_count=$(wc -l < /tmp/denylist.txt | tr -d ' ')
+          if [ "$pattern_count" -eq 0 ]; then
+            echo "::error::DENYLIST_PATTERNS に有効なパターンがありません（空行・空白のみ）。検査が素通りするため job を失敗させます。設定方法は PUBLIC_CONTENT_POLICY.md を参照してください。"
+            rm -f /tmp/denylist.txt
+            exit 1
+          fi
+          echo "禁止語パターン数: $pattern_count"
 
           # パス自体に禁止語が含まれる場合を検出する。内容スキャンは
           # ファイルの中身しか見ないため、`docs/<禁止語>/README.md` のように
@@ -93,7 +102,10 @@ jobs:
           # `git ls-files` の失敗が grep の終了コード 1（一致なし）に
           # 隠れ、何も検査していないのに「検出なし」で通ってしまう。
           set +e
-          git ls-files > /tmp/deny-filelist.txt 2>/tmp/deny-path-err.txt
+          # core.quotePath=false が必須。既定では非 ASCII のパスが 8 進
+          # エスケープ（"docs/\346\251\237..."）で出力されるため、日本語の
+          # 禁止語とは決して一致せず、このスキャンが無意味になる。
+          git -c core.quotePath=false ls-files > /tmp/deny-filelist.txt 2>/tmp/deny-path-err.txt
           lrc=$?
           set -e
           if [ "$lrc" -ne 0 ]; then
