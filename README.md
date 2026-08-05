@@ -11,7 +11,7 @@
 対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.5.37**）
 
 > 上流はマイナーリリースが頻繁である。本ノートは特定時点のスナップショットであり、
-> 数値・仕様は参照時に `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。
+> 数値・仕様は参照時に、**上流リポジトリ**（`awslabs/aidlc-workflows` v2 のローカル clone）の `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。本ノートのリポジトリには `core/` は存在しない。
 
 ---
 

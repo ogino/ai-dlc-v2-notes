@@ -15,11 +15,12 @@
 
 - [x] 上流 2.5.11 → 2.5.37 の差分反映（2026-08-05）
 - [ ] **追従フローの定例化** — 上流には in-place upgrade も版数比較の仕組みも無い（`docs/roadmap.md` #535 未実装）ため、追従は運用で担保するしかない。担当者と頻度を決める
-  - 確認コマンド: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
+  - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
 
 ## 運用
 
 - [ ] GitHub リポジトリの Topics / Description 整備
 - [ ] 必要なら GitHub Pages や簡易目次の追加
-- [ ] **`DENYLIST_PATTERNS` シークレットの設定**（未設定の間はリークチェックの禁止語スキャンがスキップされる。手順は `PUBLIC_CONTENT_POLICY.md`）
-- [ ] main ブランチ保護ルールの設定（直接 push 禁止・PR 必須・CI パス必須）
+- [ ] **`DENYLIST_PATTERNS` シークレットの設定**（未設定の間はリークチェックが**失敗する**。fail-closed のため、設定するまで PR はマージできない。手順は `PUBLIC_CONTENT_POLICY.md`）
+- [x] master ブランチ保護ルールの設定（直接 push 禁止・PR 必須・CI パス必須。2026-08-05 設定済み）
+  - **fork PR との相互作用**: leak-check は fork PR で必ず失敗するため（secrets 不達）、外部 PR は管理者バイパスなしにはマージできない。手順は `PUBLIC_CONTENT_POLICY.md` の「fork PR の運用手順」を参照
