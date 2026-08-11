@@ -9,8 +9,15 @@
 | **Kiro CLI** | ≥ 2.6 | `dist/kiro/` | `/aidlc` |
 | **Codex CLI** | ≥ **0.145.0** | `dist/codex/` | `$aidlc` |
 | **opencode** | ≥ 1.17 | `dist/opencode/` | `/aidlc` |
+| **GitHub Copilot** | CLI ≥ **1.0.74** / VS Code ≥ **1.130** | `dist/copilot/` | `/aidlc` |
 
 決定論エンジン（state machine・audit・並列の審判）はハーネス横断で同一。違うのはシェル（skills/hooks の載せ方）。
+
+> **GitHub Copilot は 2.5.60 で追加**（CLI と VS Code agent mode の両方を 1 つの dist でカバー）。
+> 他ハーネスと違い **folder trust が前提**で、プロジェクトの絶対パスが
+> `~/.copilot/config.json` の `trustedFolders` に無いと**リポジトリフックが 1 本も動かない**。
+> ヘッドレス（`copilot -p`）では `GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=1` も要る。
+> VS Code は `SessionEnd` を持たないため、次回 `SessionStart` で前セッションを事後整合する。
 
 ---
 

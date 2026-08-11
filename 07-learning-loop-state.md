@@ -121,7 +121,7 @@ org → team → project → phase → (stage: 将来)
 - Construction Autonomy Mode
 - セッション再開情報
 
-### Audit（74 イベント種別）
+### Audit（82 イベント種別・21 分類）
 
 - `audit/` 配下のシャードをタイムスタンプマージ
 - 例: STAGE_*, QUESTION_ANSWERED, REVIEW_*, SENSOR_*, RULE_LEARNED, RECOMPOSED, PLUGIN_SELECTION_CHANGED, ...

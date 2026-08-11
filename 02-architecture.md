@@ -10,6 +10,7 @@
   plugins/       拡張         ──►  dist/kiro/
   scripts/package.ts ビルド    ──►  dist/codex/
                                   dist/opencode/
+                                  dist/copilot/   ← 2.5.60 で追加
 ```
 
 | ゾーン | 役割 |
