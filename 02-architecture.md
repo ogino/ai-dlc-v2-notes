@@ -199,7 +199,7 @@ your-project/
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.5.37"` |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.5.62"`（本ノート整理時点。2.5.37 → 2.5.62 の差分は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|
