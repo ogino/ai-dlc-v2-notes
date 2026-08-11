@@ -33,10 +33,11 @@
   - https://code.visualstudio.com/updates/v1_130 — 見出し「Visual Studio Code 1.130」、`Release date: July 22, 2026`
   - https://code.visualstudio.com/updates/v1_125 — `Release date: June 17, 2026`
   - https://code.visualstudio.com/updates/v1_115 — `Release date: April 8, 2026`
+  - https://code.visualstudio.com/updates/v1_110 — 見出し「February 2026 (version 1.110)」、`Release date: March 4, 2026`
   - https://code.visualstudio.com/updates/v1_103 — 見出し「July 2025 (version 1.103)」、`Release date: August 7, 2025`
   - 用途: 上流が要求する `VS Code >= 1.130` が実在することの確認。
-    **リリース間隔は一定ではなく加速している**（1.103→1.115 は約 20 日/版、以降 7 日/版）ため、
-    単一区間からの外挿は成り立たない。4 点取ったのはそのため
+    **リリース間隔は 1.110 と 1.115 の間で月刊（29.9 日/版）から週次（7.0 日/版）へ切り替わっている**ため、
+    単一区間からの外挿は成り立たない。移行点を挟む 5 点を取ったのはそのため
 
 ---
 
