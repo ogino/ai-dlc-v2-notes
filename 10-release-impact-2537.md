@@ -22,9 +22,10 @@
 | スコープ | 9 | `wc -l < <(ls core/scopes/*.md)` |
 | センサー | 5 | `wc -l < <(ls core/sensors/*.md)` |
 | 監査イベント種別 | 74 | `docs/guide/10-state-and-audit.md` |
-
-> **2.5.62 では 82（21 分類）**。本表は 2.5.37 時点。→ [11-release-impact-2562.md](./11-release-impact-2562.md)
 | スコープ別ステージ数 | enterprise 32 / feature 32 / mvp 22 / poc 8 / bugfix 7 / refactor 8 / infra 13 / security-patch 10 / workshop 25 | 全ステージの `scopes:` を集計 |
+
+> **本表は 2.5.37 時点。監査イベント種別は 2.5.62 で 82（21 分類）に増えている。**
+> → [11-release-impact-2562.md](./11-release-impact-2562.md)
 
 変わったのは次の 2 つ。
 

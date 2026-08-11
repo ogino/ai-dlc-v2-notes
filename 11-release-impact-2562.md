@@ -5,7 +5,8 @@
 前回: [10-release-impact-2537.md](./10-release-impact-2537.md)（2.5.11 → 2.5.37）
 
 CHANGELOG の実エントリ **17 件**（2.5.38 / 39 / 40 / 41 / 42 / 43 / 44 / 45 / 53 / 54 / 55 / 56 / 57 / 58 / 59 / 60 / 62）。
-変更ファイル **627 件**（新規 290・削除 0）。うち **259 件が新規ハーネス `dist/copilot`**。
+変更ファイル **1,425 件**（新規 382・削除 196）。うち **259 件が新規ハーネス `dist/copilot`**。
+削除 196 件は主に 2.5.57 のフック改名が全 dist に波及したもの（`git diff` は改名検出なしでは削除＋追加として数える）。
 
 ---
 
@@ -21,6 +22,9 @@ CHANGELOG の実エントリ **17 件**（2.5.38 / 39 / 40 / 41 / 42 / 43 / 44 /
 | **監査イベント種別** | **74**（19 分類） | **82**（21 分類） | `core/knowledge/aidlc-shared/audit-format.md` のレジストリ表 |
 | **TypeScript フック** | **14** | **17** | `core/hooks/*.ts` |
 | フック登録数（`dist/claude`） | 14 | **18** | `settings.json` の `hooks` |
+
+> **フック 17 本に対し登録が 18 なのは**、`aidlc-fold-usage` が PreToolUse と PostToolUse の
+> **両方に登録されている**ため。ファイル数と登録数は一致しない。
 | **CLI tools** | **35** | **37** | `core/tools/*.ts`（`aidlc-*.ts` ＋ ディスパッチャ `aidlc.ts`） |
 | **ハーネス** | **5** | **6** | `dist/` 配下（`plugins/` を除く） |
 
@@ -45,17 +49,24 @@ CHANGELOG の実エントリ **17 件**（2.5.38 / 39 / 40 / 41 / 42 / 43 / 44 /
 | `aidlc-dispatch-rules` | `aidlc-deliver-stage-rules` |
 | `aidlc-sensor-fire` | `aidlc-run-sensors` |
 
-残り 10 本は据え置き。新規 3 本（`aidlc-fold-usage` / `aidlc-plan-approval-guard` / `aidlc-review-freeze`）。
-**14 → 17 は「7 改名 ＋ 3 新規」**であり、7 本消えて 10 本増えたわけではない。
+**2.5.37 時点の 14 本のうち、7 本が改名され、7 本は名前据え置き。**
+別途 3 本が新規（`aidlc-fold-usage` / `aidlc-plan-approval-guard` / `aidlc-review-freeze`。2.5.39 / 40 / 41 で追加）。
+7 ＋ 7 ＋ 3 = **17**。7 本消えて 10 本増えたわけではない。
+
+> 上流 CHANGELOG は「The other ten keep their names」と書いているが、これは **2.5.57 時点の 17 本**を
+> 基準にした数（改名時にはすでに新規 3 本が入っていた）。**2.5.37 を基準に数えると据え置きは 7 本**である。
+> 実測: `git ls-tree` で 2.5.37 の 14 本を取り出し、改名 7 本を差し引いて確認。
 
 併せて変わるもの:
 
 - **`aidlc-utility intent-birth` → `intent-create`**。ワークスペース形式も `aidlc intent birth` → `intent create`
-- **ハーネスアダプタの target word も全面改名**（`stop`→`continue-workflow`、`mint`→`record-human-turn`、
+- **ハーネスアダプタの target word も全面改名**（**フックのファイル名とは別系統のリストで、1 対 1 では対応しない**。
+  `block` / `pretool-block` に対応するフックファイル名の改名は無く、逆に `audit-logger` / `sensor-fire` に
+  対応する target word の改名は無い）（`stop`→`continue-workflow`、`mint`→`record-human-turn`、
   `block`→`enforce-approval-gate`、`pretool-block`→`guard-tool-call`、`state-sync`→`sync-workflow-state`、
   `runtime-compile`→`rebuild-stage-graph`、`dispatch-rules`→`deliver-stage-rules`）。
-  **旧 target word は受け付けられない**
-- `/aidlc --doctor` のヒートビート表示も新名に（`write-audit-log` など）
+  **旧 target word は受け付けられず、no-op になる**（エラーにはならない）
+- `/aidlc --doctor` のハートビート表示も新名に（`write-audit-log` など）
 
 **アップグレード時の注意**（上流 CHANGELOG より）:
 
@@ -92,8 +103,11 @@ CLI と VS Code agent mode を **1 つの dist** でカバーする。
 上流が「人間ゲート付きステージのレビューが長い」問題を認識し、対処した。
 
 CHANGELOG によれば、実機 A/B で adversarial な refute-fix-re-review ループが
-**inception ステージあたり 12 分以上**をレビュー段取りだけに費やしていた
-（「Requirements Analysis が 30 分待ち」という報告の正体）。
+**inception ステージあたり 12 分以上**をレビュー段取りだけに費やしていた。
+
+> **上流 CHANGELOG の原文**: 「the shape behind reports of 30-minute Requirements Analysis waits」。
+> **この「30 分待ち」は上流が受け取った報告として CHANGELOG に書かれているもの**であり、
+> 本ノートの観測でも特定組織の事例でもない。
 
 | 対象 | クラス |
 |---|---|

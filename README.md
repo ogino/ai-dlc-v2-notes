@@ -7,7 +7,7 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-08-05  
+最終同期日: 2026-08-11  
 対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.5.62**、2026-08-10 時点）
 
 > 上流はマイナーリリースが頻繁である。本ノートは特定時点のスナップショットであり、
@@ -74,7 +74,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | スコープ | 9 + 自動検出 + カスタム compose |
 | 深度 / テスト戦略 | 各 3 段階（独立） |
 | 監査イベント種別 | **82**（21 分類） |
-| 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, opencode |
+| 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, opencode, **GitHub Copilot**（計 6 種） |
 | 実装バージョン | **2.5.62**（2026-08-08 時点 CHANGELOG。取得は 2026-08-10） |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
