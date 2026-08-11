@@ -21,13 +21,22 @@
    - `core/knowledge/aidlc-shared/audit-format.md`（監査イベントの実レジストリ。2026-08-11 に独立集計）
    - `core/hooks/aidlc-fold-usage.ts` / `core/tools/aidlc-metrics.ts`（2026-08-11）
    - `docs/guide/harnesses/copilot.md` / `dist/copilot/AGENTS.md`（2026-08-11）
-
-### 二次情報（裏取りに使用）
-
-- VS Code 更新履歴 https://code.visualstudio.com/updates/archive および https://code.visualstudio.com/updates/v1_130
-  （2026-08-11 参照。`1.130` が 2026-07-22 リリースであることの確認）
    - `docs/guide/glossary.md`
    - `core/` ディレクトリ一覧（stages/tools/hooks/scopes/sensors）
+
+## 二次情報（裏取りに使用）
+
+**本リポジトリの記述は原則として上流クローンの実ファイル計測に基づく。**
+以下は例外的に外部ページを根拠にした箇所であり、区別できるよう分けて記載する。
+
+- VS Code 更新履歴
+  - https://code.visualstudio.com/updates/v1_130 — 見出し「Visual Studio Code 1.130」、
+    本文に `Release date: July 22, 2026`
+  - https://code.visualstudio.com/updates/v1_125 — 同 `Release date: June 17, 2026`
+  - いずれも 2026-08-11 参照。上流が要求する `VS Code >= 1.130` が実在する版であることの確認と、
+    リリース間隔の裏取りに使用（**VS Code は月刊ではなく、1.125 → 1.130 が約 5 週間**）
+
+---
 
 ## Web / AWS
 
