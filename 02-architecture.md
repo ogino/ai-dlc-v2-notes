@@ -108,7 +108,7 @@ core/
 | `aidlc-state.ts` | 状態ファイル |
 | `aidlc-log.ts` | 監査・質問・レビュー記録 |
 | `aidlc-graph.ts` | ステージグラフ compile |
-| `aidlc-utility.ts` | intent-birth / space / doctor 等 |
+| `aidlc-utility.ts` | intent-create / space / doctor 等（**`intent-birth` は 2.5.57 で `intent-create` に改名。旧名は no-op**） |
 | `aidlc-bolt.ts` / `aidlc-swarm.ts` | Construction 並列 |
 | `aidlc-learnings.ts` | 学習ループ |
 | `aidlc-sensor-*.ts` | 決定論的検証 |

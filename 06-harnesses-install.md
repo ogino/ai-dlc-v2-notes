@@ -75,6 +75,29 @@ cp dist/kiro-ide/AGENTS.md your-project/AGENTS.md
 CLI は `dist/kiro/` を同様に。  
 `aidlc/` は `.kiro/` の**兄弟**（内側ではない）。
 
+### GitHub Copilot（2.5.60 で追加）
+
+**他ハーネスと違い、コピーだけでは動かない。folder trust の設定が要る。**
+
+```bash
+mkdir -p your-project/.aidlc your-project/aidlc your-project/.github
+cp -R dist/copilot/.aidlc/.  your-project/.aidlc/
+cp -R dist/copilot/aidlc/.   your-project/aidlc/    # .aidlc/ の兄弟（内側ではない）
+cp -R dist/copilot/.github/. your-project/.github/  # マージ。すべて aidlc- 接頭辞なので既存は上書きされない
+cp dist/copilot/AGENTS.md    your-project/AGENTS.md # 既存があればマージ（@-import ブロックは残す）
+```
+
+その後:
+
+1. **プロジェクトを信頼する**（必須）。`copilot` を対話起動して trust プロンプトを承認するか、
+   `~/.copilot/config.json` の `trustedFolders` にプロジェクトの絶対パスを追加する。
+   **未信頼だとリポジトリフックが 1 本も動かない**
+2. ヘッドレス（`copilot -p`）で使う場合は `GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=1`
+3. `AGENTS.md` の「Git Integration」節の `.gitignore` 記述を適用してからワークフローを開始する
+
+配置先: `/aidlc` とステージ／スコープランナーは `.github/skills/`、
+14 ペルソナは `.github/agents/`、フック定義は `.github/hooks/aidlc.json`。
+
 ### Codex CLI
 
 ```bash
