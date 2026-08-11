@@ -22,7 +22,6 @@ CHANGELOG の実エントリ **17 件**（2.5.38 / 39 / 40 / 41 / 42 / 43 / 44 /
 | **監査イベント種別** | **74**（19 分類） | **82**（21 分類） | `core/knowledge/aidlc-shared/audit-format.md` のレジストリ表 |
 | **TypeScript フック** | **14** | **17** | `core/hooks/*.ts` |
 | フック登録数（`dist/claude`） | 14 | **18** | `settings.json` の `hooks` |
-
 | **CLI tools** | **35** | **37** | `core/tools/*.ts`（`aidlc-*.ts` ＋ ディスパッチャ `aidlc.ts`） |
 | **ハーネス** | **5** | **6** | `dist/` 配下（`plugins/` を除く） |
 

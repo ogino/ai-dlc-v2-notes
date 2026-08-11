@@ -96,7 +96,7 @@ core/
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数（2.5.37 時点で出典差は解消）**: 公式 README は *34 aidlc-\*.ts engine tools* と表現し、`core/tools/aidlc-*.ts` の実数も **34 本**で一致する。`.ts` 全体では 35 本だが、35 本目の `aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない。
+**tools 本数（2.5.37 時点で出典差は解消。2.5.62 では `aidlc-*.ts` が 36 本＋ディスパッチャで計 37）**: 公式 README は *34 aidlc-\*.ts engine tools* と表現し、`core/tools/aidlc-*.ts` の実数も **34 本**で一致する。`.ts` 全体では 35 本だが、35 本目の `aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない。
 
 > 2.5.11 時点では README が「25」と表記しており実数と食い違っていたが、2.5.36 で README 側が更新され解消した。本数はリリースで増減するため、参照時は `ls core/tools/aidlc-*.ts | wc -l` で実測し README 記載と照合すること。
 
@@ -207,3 +207,4 @@ your-project/
 | Codex CLI | 出荷 `config.toml` は Bedrock ブロック。OpenAI 認証等への差し替え余地あり（ガイド参照） |
 | Kiro IDE / CLI | **Kiro サインイン + セッションモデル**が中心。2.5.6 以降エージェントはセッションモデル継承 |
 | opencode | プロジェクト `opencode.json` はセッションモデルを固定しない。**グローバル opencode 設定のプロバイダ** |
+| GitHub Copilot | GitHub Copilot の認証を使用。**folder trust が前提**（`~/.copilot/config.json` の `trustedFolders`）。2.5.60 で追加 |

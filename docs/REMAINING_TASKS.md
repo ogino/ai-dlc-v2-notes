@@ -11,9 +11,10 @@
 - [ ] `docs/reference/*` 精読後のエンジン内部メモ追加
 - [ ] `docs/guide/agents/*.md`・`workshop-mode.md` が 2.5.11 時点で既に存在したか（新規追加か索引漏れか）の切り分け
 
-## 上流追従（2.5.37 まで同期済み）
+## 上流追従（2.5.62 まで同期済み）
 
 - [x] 上流 2.5.11 → 2.5.37 の差分反映（2026-08-05）
+- [x] 上流 2.5.37 → 2.5.62 の差分反映（2026-08-11）→ [11-release-impact-2562.md](../11-release-impact-2562.md)
 - [ ] **追従フローの定例化** — 上流には in-place upgrade も版数比較の仕組みも無い（`docs/roadmap.md` #535 未実装）ため、追従は運用で担保するしかない。担当者と頻度を決める
   - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
 
