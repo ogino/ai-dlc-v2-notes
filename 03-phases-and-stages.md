@@ -26,7 +26,8 @@ INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (
 ## 3.2 Phase 0: Initialization（自動・ゲートなし）
 
 目的: ワークスペースのブートストラップ。  
-実行: `aidlc-utility intent-birth` 内の決定論処理（LLM 委任なし、1 秒未満）。
+実行: `aidlc-utility intent-create` 内の決定論処理（LLM 委任なし、1 秒未満）。
+※ 2.5.57 で `intent-birth` から改名。**旧名はエラーにならず no-op**。
 
 | # | ステージ | 成果 |
 |---|----------|------|

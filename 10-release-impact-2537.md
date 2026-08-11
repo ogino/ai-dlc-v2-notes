@@ -24,6 +24,9 @@
 | 監査イベント種別 | 74 | `docs/guide/10-state-and-audit.md` |
 | スコープ別ステージ数 | enterprise 32 / feature 32 / mvp 22 / poc 8 / bugfix 7 / refactor 8 / infra 13 / security-patch 10 / workshop 25 | 全ステージの `scopes:` を集計 |
 
+> **本表は 2.5.37 時点。監査イベント種別は 2.5.62 で 82（21 分類）に増えている。**
+> → [11-release-impact-2562.md](./11-release-impact-2562.md)
+
 変わったのは次の 2 つ。
 
 | 項目 | 2.5.11 | 2.5.37 |
@@ -176,5 +179,7 @@ f) 不正 JSON / pass 欠如             → PASSED (script-error: bad-output)
 
 - Spec PDF の全文（他章と同じく未精読）
 - Codex CLI / opencode 向け配布物の権限設定（Claude Code の `settings.json` と Kiro の agent config のみ確認）
-- 監査イベント 74 種の独立集計（ドキュメント間の内部一貫性のみ確認）
+- ~~監査イベント 74 種の独立集計（ドキュメント間の内部一貫性のみ確認）~~
+  → **2026-08-11 に実施**。`core/knowledge/aidlc-shared/audit-format.md` のレジストリ表を数え、
+  2.5.37 で 74、2.5.62 で 82、いずれも見出しの自称値と一致することを確認
 - 各ハーネス固有 projection における挙動差の全件確認（`core/` の共通ロジックを中心に確認した）

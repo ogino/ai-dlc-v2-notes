@@ -9,8 +9,15 @@
 | **Kiro CLI** | ≥ 2.6 | `dist/kiro/` | `/aidlc` |
 | **Codex CLI** | ≥ **0.145.0** | `dist/codex/` | `$aidlc` |
 | **opencode** | ≥ 1.17 | `dist/opencode/` | `/aidlc` |
+| **GitHub Copilot** | CLI ≥ **1.0.74** / VS Code ≥ **1.130** | `dist/copilot/` | `/aidlc` |
 
 決定論エンジン（state machine・audit・並列の審判）はハーネス横断で同一。違うのはシェル（skills/hooks の載せ方）。
+
+> **GitHub Copilot は 2.5.60 で追加**（CLI と VS Code agent mode の両方を 1 つの dist でカバー）。
+> 他ハーネスと違い **folder trust が前提**で、プロジェクトの絶対パスが
+> `~/.copilot/config.json` の `trustedFolders` に無いと**リポジトリフックが 1 本も動かない**。
+> ヘッドレス（`copilot -p`）では `GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=1` も要る。
+> VS Code は `SessionEnd` を持たないため、次回 `SessionStart` で前セッションを事後整合する。
 
 ---
 
@@ -36,6 +43,7 @@ cd aidlc-workflows && git checkout v2
 |----------|------|
 | **Claude Code** | 出荷設定は Bedrock。モデルアクセス有効化 + AWS SDK 資格情報が実質必要 |
 | **Codex CLI** | 出荷 `config.toml` は Bedrock ブロック。OpenAI 認証等への代替はガイド参照 |
+| **GitHub Copilot** | GitHub Copilot の認証をそのまま使う。**加えて folder trust が必須**（`~/.copilot/config.json` の `trustedFolders`）。ヘッドレスは `GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=1` |
 | **Kiro IDE / CLI** | Kiro サインイン + セッションで選ぶモデル（≥2.6 等は公式 README の Kiro CLI 要件） |
 | **opencode** | グローバル opencode 設定のプロバイダ／モデル |
 
@@ -66,6 +74,29 @@ cp dist/kiro-ide/AGENTS.md your-project/AGENTS.md
 
 CLI は `dist/kiro/` を同様に。  
 `aidlc/` は `.kiro/` の**兄弟**（内側ではない）。
+
+### GitHub Copilot（2.5.60 で追加）
+
+**他ハーネスと違い、コピーだけでは動かない。folder trust の設定が要る。**
+
+```bash
+mkdir -p your-project/.aidlc your-project/aidlc your-project/.github
+cp -R dist/copilot/.aidlc/.  your-project/.aidlc/
+cp -R dist/copilot/aidlc/.   your-project/aidlc/    # .aidlc/ の兄弟（内側ではない）
+cp -R dist/copilot/.github/. your-project/.github/  # マージ。すべて aidlc- 接頭辞なので既存は上書きされない
+cp dist/copilot/AGENTS.md    your-project/AGENTS.md # 既存があればマージ（@-import ブロックは残す）
+```
+
+その後:
+
+1. **プロジェクトを信頼する**（必須）。`copilot` を対話起動して trust プロンプトを承認するか、
+   `~/.copilot/config.json` の `trustedFolders` にプロジェクトの絶対パスを追加する。
+   **未信頼だとリポジトリフックが 1 本も動かない**
+2. ヘッドレス（`copilot -p`）で使う場合は `GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=1`
+3. `AGENTS.md` の「Git Integration」節の `.gitignore` 記述を適用してからワークフローを開始する
+
+配置先: `/aidlc` とステージ／スコープランナーは `.github/skills/`、
+14 ペルソナは `.github/agents/`、フック定義は `.github/hooks/aidlc.json`。
 
 ### Codex CLI
 

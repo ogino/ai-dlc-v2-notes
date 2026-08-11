@@ -11,13 +11,16 @@
 3. 同 clone 内（精読・突合済み）:
    - `README.md`（GA、ハーネス、バージョン要件）
    - `CHANGELOG.md`（**2.5.x を中心**に参照。2.4 / 2.3 も一部）
-   - `core/tools/aidlc-version.ts` → `2.5.37`（初回調査時は `2.5.11`）
+   - `core/tools/aidlc-version.ts` → `2.5.62`（2026-08-10 再取得。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37`）
    - `docs/guide/00-introduction.md`
    - `docs/guide/03-spaces-and-intents.md`
    - `docs/guide/04-phases-and-stages.md`
    - `docs/guide/05-scopes-and-depth.md`
    - `docs/guide/06-agents.md`
    - `docs/guide/09-rules-and-the-learning-loop.md`
+   - `core/knowledge/aidlc-shared/audit-format.md`（監査イベントの実レジストリ。2026-08-11 に独立集計）
+   - `core/hooks/aidlc-fold-usage.ts` / `core/tools/aidlc-metrics.ts`（2026-08-11）
+   - `docs/guide/harnesses/copilot.md` / `dist/copilot/AGENTS.md`（2026-08-11）
    - `docs/guide/glossary.md`
    - `core/` ディレクトリ一覧（stages/tools/hooks/scopes/sensors）
 
