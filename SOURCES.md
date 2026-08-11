@@ -24,6 +24,22 @@
    - `docs/guide/glossary.md`
    - `core/` ディレクトリ一覧（stages/tools/hooks/scopes/sensors）
 
+## 二次情報（裏取りに使用）
+
+**本リポジトリの記述は原則として上流クローンの実ファイル計測に基づく。**
+以下は例外的に外部ページを根拠にした箇所であり、区別できるよう分けて記載する。
+
+- VS Code 更新履歴（いずれも 2026-08-11 参照）
+  - https://code.visualstudio.com/updates/v1_130 — 見出し「Visual Studio Code 1.130」、`Release date: July 22, 2026`
+  - https://code.visualstudio.com/updates/v1_125 — `Release date: June 17, 2026`
+  - https://code.visualstudio.com/updates/v1_115 — `Release date: April 8, 2026`
+  - https://code.visualstudio.com/updates/v1_103 — 見出し「July 2025 (version 1.103)」、`Release date: August 7, 2025`
+  - 用途: 上流が要求する `VS Code >= 1.130` が実在することの確認。
+    **リリース間隔は一定ではなく加速している**（1.103→1.115 は約 20 日/版、以降 7 日/版）ため、
+    単一区間からの外挿は成り立たない。4 点取ったのはそのため
+
+---
+
 ## Web / AWS
 
 4. AI-Driven Development Life Cycle ブログ  
