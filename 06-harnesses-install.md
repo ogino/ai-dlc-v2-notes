@@ -9,7 +9,7 @@
 | **Kiro CLI** | ≥ 2.6 | `dist/kiro/` | `/aidlc` |
 | **Codex CLI** | ≥ **0.145.0** | `dist/codex/` | `$aidlc` |
 | **opencode** | ≥ 1.17 | `dist/opencode/` | `/aidlc` |
-| **GitHub Copilot** | CLI ≥ **1.0.74** / VS Code ≥ **1.130** | `dist/copilot/` | `/aidlc` |
+| **GitHub Copilot** | CLI ≥ **1.0.74** / VS Code ≥ **1.130**（2026-07-22 リリース） | `dist/copilot/` | `/aidlc` |
 
 決定論エンジン（state machine・audit・並列の審判）はハーネス横断で同一。違うのはシェル（skills/hooks の載せ方）。
 

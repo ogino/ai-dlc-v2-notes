@@ -21,6 +21,11 @@
    - `core/knowledge/aidlc-shared/audit-format.md`（監査イベントの実レジストリ。2026-08-11 に独立集計）
    - `core/hooks/aidlc-fold-usage.ts` / `core/tools/aidlc-metrics.ts`（2026-08-11）
    - `docs/guide/harnesses/copilot.md` / `dist/copilot/AGENTS.md`（2026-08-11）
+
+### 二次情報（裏取りに使用）
+
+- VS Code 更新履歴 https://code.visualstudio.com/updates/archive および https://code.visualstudio.com/updates/v1_130
+  （2026-08-11 参照。`1.130` が 2026-07-22 リリースであることの確認）
    - `docs/guide/glossary.md`
    - `core/` ディレクトリ一覧（stages/tools/hooks/scopes/sensors）
 
