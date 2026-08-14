@@ -97,7 +97,8 @@ core/
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数（2.6.2 実測）**: `core/tools/aidlc-*.ts` は **37 本**、ディスパッチャ `aidlc.ts` を含む `.ts` 全体では **38 本**（`aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない）。2.5.62 時点は 36 本＋ディスパッチャで計 37 だった（増えた 1 本は `aidlc-sensor-traceability.ts` で、**追加は 2.5.71**）。一方、**公式 README のツリー図は `25 aidlc-*.ts engine tools` と表記しており（`README.md:365`）、実数と 12 本ずれている**。
+**tools 本数（2.6.2 実測）**: `core/tools/aidlc-*.ts` は **37 本**、ディスパッチャ `aidlc.ts` を含む `.ts` 全体では **38 本**（`aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない）。2.5.62 時点は 36 本＋ディスパッチャで計 37 だった（増えた 1 本は `aidlc-sensor-traceability.ts` で、**追加は 2.5.71**）。一方、**公式 README のツリー図は `25 aidlc-*.ts engine tools` と表記しており、実数と 12 本ずれている**
+（行番号は版で動くので `grep 'engine tools' README.md` で確認すること）。
 
 > **本ノート旧記述の訂正（2.6.2 起因ではない先行誤り）**: 本節は以前「公式 README は *34 aidlc-\*.ts engine tools* と表現し、実数も 34 本で一致する」「2.5.36 で README 側が更新され食い違いは解消した」と書いていたが、これは**誤りだった**。README の「34」は確かに 2.5.36（commit `046a9a6c`）で 25 → 34 に更新されたが、**2.5.58（commit `8c60e1ab`）で 34 → 25 に差し戻されている**。差し戻し時点の実数は 36 本なので、**食い違いは 2.5.58 以降ずっと復活したままで、2.5.62 時点でも既に一致していなかった**。本数はリリースで増減し、README 側の追随も保証されないため、参照時は `ls core/tools/aidlc-*.ts | wc -l` で実測し、README 記載を鵜呑みにしないこと。
 
