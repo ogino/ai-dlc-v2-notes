@@ -125,6 +125,7 @@ AWS ブログが挙げる便益:
 実装側の現実的な注意:
 
 - ゲート数・アーティファクト量はスコープにより桁違い（例: `poc` は 8 ステージ / 5 ゲート、`feature` は 33 ステージ / 29 ゲート）
+  — ゲート数は上流 `docs/guide/05-scopes-and-depth.md` の逐語（*"poc runs 8 stages with 5 approval gates, while feature runs all 33 with 29 gates"*）による。**本ノートで独自に集計した数ではない**
 - 弱いモデルでは任意ステップ（レビュア・学習儀式）がスキップされ得る
 
 ---

@@ -236,9 +236,12 @@ git clone --depth 1 --branch v2 https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows
 
 ls dist/     # claude  codex  copilot  cursor  kiro  kiro-ide  opencode  plugins
-             # （＋ "AI-DLC Workflows 2.0 Specification.pdf" が同階層に置かれている）
+             # ＋ "AI-DLC Workflows 2.0 Specification.pdf"（空白区切りの名前）
 ls harness/  # claude  codex  copilot  cursor  kiro  kiro-ide  opencode  ← ハーネスは 7 種
-ls assets/   # AI-DLC-Workflows-2.0-Specification.pdf（公式パス）
+ls assets/   # AI-DLC-Workflows-2.0-Specification.pdf（ハイフン区切りの名前）
 ```
 
-> **Spec PDF**: リポジトリ上の正は `assets/AI-DLC-Workflows-2.0-Specification.pdf`。`dist/` 配下に同名が同梱される場合もあるが、リンク・引用は `assets/` を使う。
+> **Spec PDF**: 2.6.2 時点で PDF は 2 箇所にあり、**ファイル名が異なる**。
+> `assets/AI-DLC-Workflows-2.0-Specification.pdf`（ハイフン区切り）と
+> `dist/AI-DLC Workflows 2.0 Specification.pdf`（空白区切り）。**リンク・引用は `assets/` を正とする。**
+> なお PDF の内容が 33 ステージ構成に更新されているかは**未確認**。

@@ -74,7 +74,9 @@
 - Method Definition Paper 全文（Amplify ホスト）
 - `docs/reference/*` 各章（エンジン内部）
 - `docs/harness-engineering/*`
-- `docs/rfcs/*`（2.6.1 のステージ分解・設計出力再編の根拠が置かれている。`IMPLEMENTATION-PLAN.md`、`reviewer-reliability-and-stage-decomposition.md` 等）
+- `docs/rfcs/` のうち **HTML 版 2 本**（`IMPLEMENTATION-PLAN.html` / `kiro-ide-hooks-fix-plan.html`）。
+  Markdown 版 2 本（`IMPLEMENTATION-PLAN.md` / `reviewer-reliability-and-stage-decomposition.md`）は
+  **精読済み**で、第12.9節で逐語引用している（ただし仕様ではなく上流の作業用メモとして扱う）
 - 全 stage ファイルの frontmatter マトリクス
 
 ## 正本の優先順位（本ノート内）

@@ -1,15 +1,18 @@
 # 12. リリース差分 2.5.62 → 2.6.2
 
 作成日: 2026-08-14
-基準: `awslabs/aidlc-workflows` branch `v2` HEAD `4569754e`（2026-08-14）／実装バージョン **2.6.2**
+基準: `awslabs/aidlc-workflows` branch `v2` HEAD `4569754e`（**コミット日 2026-08-14 / 取得 2026-08-14**）／実装バージョン **2.6.2**
+（CHANGELOG の 2.6.2 見出しは `- 2026-08-13` と書かれているが、これは上流が記した**リリース日表記**であり、
+コミット日とは 1 日ずれる。本ノート内で日付が食い違って見える箇所はこの違いによる。）
 前回: [11-release-impact-2562.md](./11-release-impact-2562.md)（2.5.37 → 2.5.62、HEAD `2ce654d1`）
 
 CHANGELOG の実エントリ **12 件**（2.5.63 / 64 / 67 / 68 / 69 / 71 / 72 / 73 / 74 / 75 / 2.6.1 / 2.6.2）。
 変更ファイル **1,083 件**（新規 361・削除 14）。うち **276 件が新規ハーネス Cursor**（`dist/cursor` 259 ＋ `harness/cursor` 17）。
 
-**この差分は前回までと性質が違う。** 2.5 系は機能追加が中心で、既存の成果物名やステージ構成は動かなかった。
+**この差分は前回までと性質が違う。** 2.5 系にも成果物の追加や移動はあったが（2.5.71 の `traceability`、
+2.5.73 のパス移動、2.5.75 の可観測性成果物）、**ステージの構成そのものは 32 本のまま動かなかった**。
 2.6.1 は**設計ステージの成果物名を作り直し、永続化状態のスキーマを上げた**。
-進行中のワークフローは 2.6.2 で動かず、自動移行も無い（→ [12.3](#123-移行手順必ず読むこと)）。
+進行中のワークフローは 2.6.2 で先に進められず、自動移行も無い（→ [12.3](#123-移行手順必ず読むこと)）。
 
 ---
 
@@ -62,7 +65,8 @@ CHANGELOG の実エントリ **12 件**（2.5.63 / 64 / 67 / 68 / 69 / 71 / 72 /
 
 ### 消えた成果物と、その行き先
 
-`application-design` が出していた 5 本のうち、名前がそのまま残るのは `decisions` だけである。
+`application-design` が出していた 5 本のうち、名前が残るのは `components` と `decisions` の 2 本だけである
+（ただし `components.md` は名前が同じでも中身が作り直されている）。残る 3 本は吸収・分割・廃止された。
 
 | 旧成果物 | 行き先 |
 |---|---|
@@ -80,7 +84,11 @@ Functional Design と Infrastructure Design の成果物も置き換わった。
 | infrastructure-design | `deployment-architecture` / `infrastructure-services` / `shared-infrastructure` | `infrastructure-specification`（`shared-infrastructure` は CONDITIONAL セクションに格下げ） |
 | infrastructure-design | `monitoring-design` / `cicd-pipeline` | 独立のまま維持 |
 
-**成果物を読んでいる自作ツールやドキュメントは、合わせて 11 個の名前を書き換える必要がある。**
+**成果物を読んでいる自作ツールやドキュメントは、合わせて 11 個の旧名を手当てする必要がある。**
+内訳は inception 側 3（`component-methods` / `services` / `component-dependency`）、
+functional-design 側 3（`business-logic-model` / `business-rules` / `domain-entities`）、
+infrastructure-design 側 3（`deployment-architecture` / `infrastructure-services` / `shared-infrastructure`）、
+ステージ名 2（`application-design`、および番号が動いた `delivery-planning` 2.8 → 2.9）で計 11。
 `core/` と `dist/` の側に旧名は残っていない（残っているのは CHANGELOG、後述の `docs/rfcs/`、
 移行ガードのエラーメッセージ本文、テストの negative assertion のみ）。
 
@@ -96,22 +104,31 @@ CONDITIONAL で、上流の記述では次の場合だけスキップされる�
 
 ### CHANGELOG に書かれていない影響
 
-`produces_kinds` の変更により、**`ui` kind のユニットが新たに `infrastructure-specification.md` と
-`monitoring-design.md` を負う**。2.5.62 では ui ユニットにこれらは課されていなかった。
-ui ユニットを回している場合、生成される成果物が増える。CHANGELOG にこの記載は無い。
+`produces_kinds` の変更により、**`ui` kind のユニットが新たに `monitoring-design.md` を負う**。
+2.5.62 では `monitoring-design` の対象は `[service, packaging]` で ui は含まれていなかったが、
+2.6.2 では `[service, ui, packaging]` になっている。ui ユニットを回している場合、生成される成果物が増える。
+**CHANGELOG にこの記載は無い。**
+
+> 一方 `infrastructure-specification` のほうは ui にとって**新規の負担ではない**。
+> 統合前の `deployment-architecture` が既に `[service, ui, packaging]` を対象にしており、
+> 同じ枠が名前を変えただけである。増えたのは `monitoring-design`（と、全 kind 対象の `traceability`）だけ。
 
 ---
 
 ## 12.3 移行手順（必ず読むこと）
 
-**進行中のワークフローは 2.6.2 では動かない。** 永続化状態のスキーマが v7 → v8 に上がり、
+**進行中のワークフローは 2.6.2 では先に進められない。** 永続化状態のスキーマが v7 → v8 に上がり、
 `next` / `report` / `/aidlc --doctor` のすべてが旧状態を拒否する。
+（正確には、拒否が確認できているのはこの 3 経路である。`park` / `continue` と各フックには
+同じ状態バージョン検査が掛かっていないことを確認しており、それらの挙動は**未検証**。）
 
 上流はこれを意図的な設計として明言している（`core/tools/aidlc-utility.ts`）。
 
 > The framework ships no user-visible migration pre-1.0, so fail loud here with archive-and-reinit guidance rather than let a stale-graph state look healthy.
 
-**移行コードは 1 行も存在しない。** 取れる手は 2 つだけである。
+**状態スキーマの移行コードは 1 行も存在しない。** 取れる手は 2 つだけである。
+（`core/` には `aidlc-docs/` の配置変更にともなうディレクトリ移行コードが別途あるが、
+状態スキーマとは無関係で、v7 の状態を v8 に変換するものではない。）
 
 1. 進行中のワークフローを**旧シェルで完走させてから**上げる
 2. 状態をアーカイブして（例: `mv aidlc aidlc.v7-archive`）作り直す
@@ -128,7 +145,18 @@ CHANGELOG が名指しで警告している。`cp -R` によるマージコピ�
 > **delete the renamed stage-runner skill left behind by the merge copy** — the old `skills/aidlc-application-design/` directory (now `skills/aidlc-domain-design/`)
 
 残ると、グラフに存在しないステージを起動する死んだ `/aidlc-application-design` ランナーになる。
-**`--doctor` にこの残骸を検出するチェックは無い**（確認済み）。手で消すしかない。
+**`--doctor` にこの残骸を検出するチェックは無い**（`aidlc-utility.ts` を読んで確認。
+本ノートは上流のテストを実行していないので、**静的な確認であって実機検証ではない**）。手で消すしかない。
+
+検出も削除も自前でやる必要がある。プロジェクト直下で:
+
+```bash
+# 残骸の検出（ハーネスによって .claude / .kiro / .cursor / .aidlc / .codex 配下）
+find . -type d -name 'aidlc-application-design'
+# 見つかったら削除
+find . -type d -name 'aidlc-application-design' -exec rm -rf {} +
+```
+
 なお上流が配布する `dist/` 自体は正しく、旧名のスキルディレクトリは含まれていない。
 つまりこれは**利用者側のアップグレード操作でのみ起きる問題**である。
 
@@ -152,7 +180,8 @@ v9 のような未来のバージョンには誤って「アーカイブして�
 
 ## 12.4 Cursor ハーネス（2.5.63 / 2.5.69）
 
-7 つ目のハーネスとして Cursor が加わった。`dist/cursor` の 259 ファイルは生成物で、手書きは 15 ファイルのみ。
+7 つ目のハーネスとして Cursor が加わった。`dist/cursor` の 259 ファイルはすべて生成物である。
+手書きは `harness/cursor/` の 17 ファイルのうち 15 で、残る 2 は生成データ（`harness.json` / `stage-graph.json`）。
 規模は他ハーネス（claude 251・codex 305・kiro 265）と同程度で、突出して大きいわけではない。
 
 Cursor 固有なのは主に配布方法である。ハーネス唯一の同梱インストーラ（`install.ts`、1,131 行）を持ち、
