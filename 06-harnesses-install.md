@@ -164,6 +164,8 @@ bun .cursor/tools/aidlc-utility.ts doctor
 > Cursor 固有の `Delete` ツールは reviewer スコープガードに「書き込み」として提示される。
 
 > **既知の不具合と修正**: 2.5.63〜2.5.68 の Cursor 配布物は、allow 経路で stdout に何も書かずに終了していた。
+> （この範囲のうち **2.5.65 / 2.5.66 は欠番**で存在しない。実在するのは 2.5.63 / 64 / 67 / 68。
+> 自分の版を照合するときは `core/tools/aidlc-version.ts` を見ること。）
 > `failClosed: true` の下では空 stdout が不正 JSON と扱われるため、**Cursor IDE ではあらゆるツール呼び出しが
 > ブロックされた**（CLI は沈黙を allow と解釈したため無症状）。**2.5.69 で修正済み**。
 > 該当版を入れている場合は `dist/cursor/` を更新して `bun dist/cursor/install.ts <project>` を再実行する。
