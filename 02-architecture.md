@@ -11,11 +11,12 @@
   scripts/package.ts ビルド    ──►  dist/codex/
                                   dist/opencode/
                                   dist/copilot/   ← 2.5.60 で追加
+                                  dist/cursor/    ← 2.5.63 で追加
 ```
 
 | ゾーン | 役割 |
 |--------|------|
-| **core/** | エンジン・32 ステージ・14 エージェント・スコープ・センサー・知識・hooks |
+| **core/** | エンジン・33 ステージ・14 エージェント・スコープ・センサー・知識・hooks |
 | **harness/** | 各 CLI への薄いアダプタ（manifest, settings, orchestrator skill） |
 | **dist/** | ユーザーがプロジェクトへコピーする配布物 |
 | **docs/** | User Guide / Harness Engineer Guide / Developer Reference |
@@ -82,23 +83,24 @@ core/
 │   ├── stages/
 │   │   ├── initialization/   # 0.1–0.3
 │   │   ├── ideation/         # 1.1–1.7
-│   │   ├── inception/        # 2.1–2.8
+│   │   ├── inception/        # 2.1–2.9
 │   │   ├── construction/     # 3.1–3.7
 │   │   └── operation/        # 4.1–4.7
 │   └── protocols/            # stage-protocol 等
 ├── tools/            # TypeScript CLI（エンジン本体）。出典により本数が揺れる → 下表注記
 ├── hooks/            # session-start, stop, sensors, reviewer-scope 等
 ├── scopes/           # 9 スコープ定義
-├── sensors/          # claim-sources, required-sections, upstream-coverage, linter, type-check
+├── sensors/          # claim-sources, required-sections, upstream-coverage, linter, type-check, traceability（2.5.71 追加）
 ├── knowledge/        # 方法論ナレッジ（エージェント別）
 ├── memory/           # フレームワーク既定の method ツリー
 ├── skills/           # セッション用スキル（session-cost, replay, outcomes-pack 等）
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数（2.5.37 時点で出典差は解消。2.5.62 では `aidlc-*.ts` が 36 本＋ディスパッチャで計 37）**: 公式 README は *34 aidlc-\*.ts engine tools* と表現し、`core/tools/aidlc-*.ts` の実数も **34 本**で一致する。`.ts` 全体では 35 本だが、35 本目の `aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない。
+**tools 本数（2.6.2 実測）**: `core/tools/aidlc-*.ts` は **37 本**、ディスパッチャ `aidlc.ts` を含む `.ts` 全体では **38 本**（`aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない）。2.5.62 時点は 36 本＋ディスパッチャで計 37 だった（増えた 1 本は `aidlc-sensor-traceability.ts` で、**追加は 2.5.71**）。一方、**公式 README のツリー図は `25 aidlc-*.ts engine tools` と表記しており、実数と 12 本ずれている**
+（行番号は版で動くので `grep 'engine tools' README.md` で確認すること）。
 
-> 2.5.11 時点では README が「25」と表記しており実数と食い違っていたが、2.5.36 で README 側が更新され解消した。本数はリリースで増減するため、参照時は `ls core/tools/aidlc-*.ts | wc -l` で実測し README 記載と照合すること。
+> **本ノート旧記述の訂正（2.6.2 起因ではない先行誤り）**: 本節は以前「公式 README は *34 aidlc-\*.ts engine tools* と表現し、実数も 34 本で一致する」「2.5.36 で README 側が更新され食い違いは解消した」と書いていたが、これは**誤りだった**。README の「34」は確かに 2.5.36（commit `046a9a6c`）で 25 → 34 に更新されたが、**2.5.58（commit `8c60e1ab`）で 34 → 25 に差し戻されている**。差し戻し時点の実数は 36 本なので、**食い違いは 2.5.58 以降ずっと復活したままで、2.5.62 時点でも既に一致していなかった**。本数はリリースで増減し、README 側の追随も保証されないため、参照時は `ls core/tools/aidlc-*.ts | wc -l` で実測し、README 記載を鵜呑みにしないこと。
 
 主要ツール例:
 
@@ -123,7 +125,7 @@ core/
 
 | Mode（正式値） | 通信トポロジの説明 | 代表ステージ |
 |----------------|-------------------|--------------|
-| **inline** | 導体がペルソナを採用し会話内で実行 | 大半（28。Init の決定論 3 段含む） |
+| **inline** | 導体がペルソナを採用し会話内で実行 | 大半（29。Init の決定論 3 段含む） |
 | **subagent** | **hub-and-spoke 形状**: リード草稿 → 支援が独立 contribution → リード統合。Code Generation は支援なしの focused subagent | Practices Discovery, Code Generation |
 | **pipeline** | 鎖。順に成果物を完成 | Reverse Engineering（2-link） |
 | **mob** | メッシュ。リード草稿 + 並行ブラインド貢献 | User Stories |
@@ -183,7 +185,7 @@ your-project/
 | 側 | 例 |
 |----|-----|
 | Rules | org.md / team.md / project.md / phases/*.md |
-| Sensors | claim-sources, required-sections, upstream-coverage, linter, type-check |
+| Sensors | claim-sources, required-sections, upstream-coverage, linter, type-check, traceability |
 
 センサーは現状 **advisory**（監査に記録するがゲートを自動ブロックしない）ものが中心。  
 レビュア（Product Lead / Architecture Reviewer）は敵対的レビュー契約で READY/NOT-READY を付与。
@@ -199,7 +201,7 @@ your-project/
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.5.62"`（本ノート整理時点。2.5.37 → 2.5.62 の差分は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.6.2"`（本ノート整理時点。2.5.62 → 2.6.2 の差分は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|
@@ -208,3 +210,4 @@ your-project/
 | Kiro IDE / CLI | **Kiro サインイン + セッションモデル**が中心。2.5.6 以降エージェントはセッションモデル継承 |
 | opencode | プロジェクト `opencode.json` はセッションモデルを固定しない。**グローバル opencode 設定のプロバイダ** |
 | GitHub Copilot | GitHub Copilot の認証を使用。**folder trust が前提**（`~/.copilot/config.json` の `trustedFolders`）。2.5.60 で追加 |
+| Cursor | Cursor 自身のランタイムに設定したプロバイダ／認証を使用。**出荷ペルソナにモデル pin が無く、セッションモデルを継承**。named model（`--model` やペルソナ pin）は有料プラン必須で、Free は `Auto`。導入だけコピーではなく **インストーラ実行**（`bun dist/cursor/install.ts <project>`）。2.5.63 で追加 |

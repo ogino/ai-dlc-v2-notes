@@ -14,19 +14,21 @@
 
 | Scope | ステージ数 | 既定 Depth | 用途 |
 |-------|-----------|------------|------|
-| `enterprise` | 32/32 | Comprehensive | 規制・フル監査・本番級運用 |
-| `feature` | 32/32 | Standard | 既定。新機能全般 |
-| `mvp` | 22/32 | Standard | グリーンフィールド MVP（下表のスキップ） |
-| `poc` | 8/32 | Minimal | 実現可能性の迅速検証 |
-| `bugfix` | 7/32 | Minimal | 特定バグ修正 |
-| `refactor` | 8/32 | Minimal | 振る舞いを変えない整理 |
-| `infra` | 13/32 | Standard | インフラ・環境・IaC |
-| `security-patch` | 10/32 | Minimal | CVE 等の迅速対応 |
-| `workshop` | 25/32 | Standard（**Test=Minimal**） | 研修。Ideation 全スキップ |
+| `enterprise` | 33/33 | Comprehensive | 規制・フル監査・本番級運用 |
+| `feature` | 33/33 | Standard | 既定。新機能全般 |
+| `mvp` | 23/33 | Standard | グリーンフィールド MVP（下表のスキップ） |
+| `poc` | 8/33 | Minimal | 実現可能性の迅速検証 |
+| `bugfix` | 7/33 | Minimal | 特定バグ修正 |
+| `refactor` | 8/33 | Minimal | 振る舞いを変えない整理 |
+| `infra` | 13/33 | Standard | インフラ・環境・IaC |
+| `security-patch` | 10/33 | Minimal | CVE 等の迅速対応 |
+| `workshop` | 26/33 | Standard（**Test=Minimal**） | 研修。Ideation 全スキップ |
+
+**分母が 33 になった理由**: 2.6.1 で Inception に `contract-design`（2.8）が新設され、全体が 32 → 33 ステージになった。同ステージの `scopes:` は **`enterprise` / `feature` / `mvp` / `workshop` の 4 つのみ**なので、分子が +1 されるのはこの 4 行だけである（`poc` / `bugfix` / `refactor` / `infra` / `security-patch` は分子据え置きで分母のみ 32 → 33）。
 
 ### `mvp` のスキップ内訳（公式 05-scopes-and-depth）
 
-**10 SKIP / 22 EXECUTE**:
+**10 SKIP / 23 EXECUTE**:
 
 - Operation **全 7**（4.1–4.7）
 - Ideation: **Market Research（1.2）**, **Team Formation（1.5）**, **Approval & Handoff（1.7）**
@@ -78,6 +80,8 @@
 - エントロピー内訳付きの提案
 - ステージ毎 EXECUTE/SKIP 理由
 - 承認後にカスタム scope が永続化し、以降 `--scope <name>` で再利用可能
+
+**在庫スコープ一致判定の一本化（2.5.64 以降）**: 最終提案が在庫スコープに一致するかの判定は **`aidlc-graph.ts validate-grid` の `nearest_stock`** に一本化された。従来の機械的 ARS 距離は advisory 扱いに降格し、証拠由来の fold を打ち消さない。`validate-grid` はコンパイル済み全ステージについて EXECUTE/SKIP の明示エントリを 1 件ずつ要求するため、**キーの欠落・余剰があるグリッドは在庫一致候補になれない**。また、一致した在庫プランを編集すると、その時点で **custom プランへ転換**して編集内容が永続化される（在庫スコープ側は書き換わらない）。
 
 ### ARS 演算の決定論化（2.5.25 以降）
 

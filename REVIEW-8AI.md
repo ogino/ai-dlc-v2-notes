@@ -65,6 +65,12 @@ LOW は対応任意（未対応）。
 
 ## 正確と確認された中核
 
+> **本節は 2026-07-28・実装 2.5.11 時点の確認結果**であり、現在値ではない。
+> **2.6.2（CHANGELOG 日付 2026-08-13 / 取得日 2026-08-14）時点では 5 フェーズ / 33 ステージ / 14 agents / 9 scopes / 7 harnesses、
+> センサー 6 種、監査 82 イベント種別（21 分類）、mode 集計 29 inline / 2 subagent / 1 pipeline / 1 mob。**
+> 変化の経緯は [11-release-impact-2562.md](./11-release-impact-2562.md) と
+> [12-release-impact-2602.md](./12-release-impact-2602.md) を参照。
+
 - 5 フェーズ / 32 ステージ / 14 agents / 9 scopes / 5 harnesses
 - バージョン 2.5.11、GA 表記、MIT-0（上流実装）
 - Engine / Conductor、Bolt / walking skeleton / ladder

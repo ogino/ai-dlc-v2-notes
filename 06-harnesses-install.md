@@ -2,16 +2,26 @@
 
 ## 6.1 対応ハーネス（v2）
 
-| Harness | 最低バージョン目安 | コピー元 | 起動 |
-|---------|-------------------|----------|------|
-| **Claude Code** | 最新推奨 | `dist/claude/` | `/aidlc` |
-| **Kiro IDE** | hooks v2 対応含む | `dist/kiro-ide/` | `/aidlc` |
-| **Kiro CLI** | ≥ 2.6 | `dist/kiro/` | `/aidlc` |
-| **Codex CLI** | ≥ **0.145.0** | `dist/codex/` | `$aidlc` |
-| **opencode** | ≥ 1.17 | `dist/opencode/` | `/aidlc` |
-| **GitHub Copilot** | CLI ≥ **1.0.74** / VS Code ≥ **1.130**（2026-07-22 リリース） | `dist/copilot/` | `/aidlc` |
+| Harness | 最低バージョン目安 | 導入元 | 起動 |
+|---------|-------------------|--------|------|
+| **Claude Code** | 最新推奨 | `dist/claude/` をコピー | `/aidlc` |
+| **Kiro IDE** | hooks v2 対応含む | `dist/kiro-ide/` をコピー | `/aidlc` |
+| **Kiro CLI** | ≥ 2.6 | `dist/kiro/` をコピー | `/aidlc` |
+| **Codex CLI** | ≥ **0.145.0** | `dist/codex/` をコピー | `$aidlc` |
+| **Cursor** | 明示の最低版なし（上流は cursor-agent **2026.07** で検証） | **コピーではなく同梱インストーラ実行**: `bun dist/cursor/install.ts <project>` | `/aidlc` |
+| **opencode** | ≥ 1.17 | `dist/opencode/` をコピー | `/aidlc` |
+| **GitHub Copilot** | CLI ≥ **1.0.74** / VS Code ≥ **1.130**（2026-07-22 リリース） | `dist/copilot/` をコピー | `/aidlc` |
 
+**計 7 種**（`ls harness/` = claude / codex / copilot / cursor / kiro / kiro-ide / opencode）。
 決定論エンジン（state machine・audit・並列の審判）はハーネス横断で同一。違うのはシェル（skills/hooks の載せ方）。
+
+> **Cursor は 2.5.63 で追加**（IDE と CLI `agent` の両方を 1 つの `.cursor/` で兼ねる）。
+> **7 種のうち Cursor だけ導入形態が違う**。他の 6 種は `dist/<harness>/` を `cp` するのに対し、
+> Cursor は配布物に同梱された**インストーラ `dist/cursor/install.ts` を bun で実行**する
+> （`bun dist/cursor/install.ts <project>`）。
+> インストーラはプロジェクト所有ファイルとの衝突を拒否し、`.cursor/.gitignore` と既存の method memory を保全、
+> `.cursor/hooks.json` と `.cursor/cli.json` は配列を構造マージ、`AGENTS.md` と `.gitignore` には
+> AI-DLC 用のマーク付き区画を追記する。再実行はアップグレードとして働き、active-space ポインタは保たれる。
 
 > **GitHub Copilot は 2.5.60 で追加**（CLI と VS Code agent mode の両方を 1 つの dist でカバー）。
 > 他ハーネスと違い **folder trust が前提**で、プロジェクトの絶対パスが
@@ -44,6 +54,7 @@ cd aidlc-workflows && git checkout v2
 | **Claude Code** | 出荷設定は Bedrock。モデルアクセス有効化 + AWS SDK 資格情報が実質必要 |
 | **Codex CLI** | 出荷 `config.toml` は Bedrock ブロック。OpenAI 認証等への代替はガイド参照 |
 | **GitHub Copilot** | GitHub Copilot の認証をそのまま使う。**加えて folder trust が必須**（`~/.copilot/config.json` の `trustedFolders`）。ヘッドレスは `GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=1` |
+| **Cursor** | Cursor 自身のサインイン。**出荷ペルソナはモデルを一切 pin していない**ため、全エージェントがセッションのモデルを継承する。名前付きモデル（`--model` 等）は**有料プランが必要**で、Free は `Auto` のみ |
 | **Kiro IDE / CLI** | Kiro サインイン + セッションで選ぶモデル（≥2.6 等は公式 README の Kiro CLI 要件） |
 | **opencode** | グローバル opencode 設定のプロバイダ／モデル |
 
@@ -122,6 +133,43 @@ cp dist/codex/AGENTS.md   your-project/AGENTS.md
 
 詳細は公式 `docs/guide/harnesses/codex-cli.md`。
 
+### Cursor（2.5.63 で追加）
+
+**他ハーネスと違い、`cp` ではない。同梱インストーラを bun で実行する。**
+
+```bash
+bun dist/cursor/install.ts your-project
+# 検証（プロジェクトルートに入ってから相対パスで実行）
+cd your-project
+bun .cursor/tools/aidlc-utility.ts doctor
+```
+
+その後、`your-project/` を Cursor IDE で開く（または中で `agent` を起動する）と `/aidlc` が使える。
+
+- IDE と CLI（`agent`）は**同じ `.cursor/` を読む**ので、インストールは 1 回でよい
+- `aidlc/` は `.cursor/` の**兄弟**。エンジンが読む `aidlc/spaces/default/memory/` のメソッドツリーが同梱されており、
+  これが無いと `/aidlc --doctor` の "workspace shell ready" チェックが落ちる
+- 再実行は**アップグレード**として働き、フレームワーク管理ファイルだけを更新して active-space や
+  プラグイン選択状態は保つ。管理下のどのパスを保全したかはインストーラが出力する
+- Cursor ネイティブのショートカットとして `/aidlc-status`・`/aidlc-jump --stage <slug>`（または `--phase <name>`）・
+  `/aidlc-scope <name>` が入る（同じ決定論エンジンを叩く）
+
+> **このハーネスで違うこと**（公式 `docs/guide/harnesses/cursor.md`）:
+> 質問は構造化ウィジェットではなく**番号付きの散文**で描画される（正は `[Answer]:` タグ付きの質問ファイル）。
+> フックは `.cursor/hooks.json` から**アダプタ 1 本**（`.cursor/hooks/aidlc-cursor-adapter.ts`）を経由し、
+> Cursor の camelCase イベントを core のフック本体に写す。PreToolUse ガードは
+> `{"permission":"allow"|"deny"}` を stdout に返し、`failClosed: true` で登録されている
+> （＝入力不正・ガード欠落・ガードのクラッシュはいずれも deny）。
+> 一方 `stop` フックは停止を拒否できないため、**転送ループの強制は advisory**（opencode と同じ姿勢）。
+> Cursor 固有の `Delete` ツールは reviewer スコープガードに「書き込み」として提示される。
+
+> **既知の不具合と修正**: 2.5.63〜2.5.68 の Cursor 配布物は、allow 経路で stdout に何も書かずに終了していた。
+> （この範囲のうち **2.5.65 / 2.5.66 は欠番**で存在しない。実在するのは 2.5.63 / 64 / 67 / 68。
+> 自分の版を照合するときは `core/tools/aidlc-version.ts` を見ること。）
+> `failClosed: true` の下では空 stdout が不正 JSON と扱われるため、**Cursor IDE ではあらゆるツール呼び出しが
+> ブロックされた**（CLI は沈黙を allow と解釈したため無症状）。**2.5.69 で修正済み**。
+> 該当版を入れている場合は `dist/cursor/` を更新して `bun dist/cursor/install.ts <project>` を再実行する。
+
 ### opencode
 
 ```bash
@@ -147,11 +195,14 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 | `/aidlc bugfix ...` | 明示 scope |
 | `/aidlc compose "..."` | カスタム計画 |
 | `/aidlc --scope X --stage Y` | ジャンプ |
-| `/aidlc config list` | depth / test-strategy |
-| `/aidlc space` / `intent` | ワークスペース操作 |
+| `/aidlc --review <class>` | この実行中のレビュークラス上限（`adversarial` / `advisory` / `none`）。2.5.54+ |
+| `/aidlc config list` | depth / test-strategy / review |
+| `/aidlc space [name]` / `space-create <name>` | Space の一覧・切替 ／ 新規作成 |
+| `/aidlc intent [name]` | Intent の一覧・切替 |
+| `/aidlc plugin select [names]` | このインストールで有効なプラグイン一覧の表示・設定 |
 | `/aidlc plugin list|sync` | プラグイン |
 
-Codex は `$aidlc` 表記。
+Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-status`・`/aidlc-jump`・`/aidlc-scope` がある。
 
 ### 直接ツール呼び出し（`/aidlc` サブコマンドではない）
 
@@ -176,6 +227,7 @@ Codex は `$aidlc` 表記。
 | Codex hooks が動かない | §6.3 の trust（TUI または config.toml へ TOML 反映） |
 | 新 dist をコピーしたが反映されない | **新セッション**起動 |
 | Kiro IDE hooks 無反応 | v2 schema hooks の正しい中身コピー（2.5.10） |
+| Cursor IDE で全ツール呼び出しがブロックされる | 2.5.63〜2.5.68 の既知不具合（allow JSON 未出力 × `failClosed`）。**2.5.69 以降**へ更新し `bun dist/cursor/install.ts <project>` を再実行 |
 
 ---
 
@@ -185,8 +237,13 @@ Codex は `$aidlc` 表記。
 git clone --depth 1 --branch v2 https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows
 
-ls dist/     # claude  codex  kiro  kiro-ide  opencode  plugins
-ls assets/   # AI-DLC-Workflows-2.0-Specification.pdf（公式パス）
+ls dist/     # claude  codex  copilot  cursor  kiro  kiro-ide  opencode  plugins
+             # ＋ "AI-DLC Workflows 2.0 Specification.pdf"（空白区切りの名前）
+ls harness/  # claude  codex  copilot  cursor  kiro  kiro-ide  opencode  ← ハーネスは 7 種
+ls assets/   # AI-DLC-Workflows-2.0-Specification.pdf（ハイフン区切りの名前）
 ```
 
-> **Spec PDF**: リポジトリ上の正は `assets/AI-DLC-Workflows-2.0-Specification.pdf`。`dist/` 配下に同名が同梱される場合もあるが、リンク・引用は `assets/` を使う。
+> **Spec PDF**: 2.6.2 時点で PDF は 2 箇所にあり、**ファイル名が異なる**。
+> `assets/AI-DLC-Workflows-2.0-Specification.pdf`（ハイフン区切り）と
+> `dist/AI-DLC Workflows 2.0 Specification.pdf`（空白区切り）。**リンク・引用は `assets/` を正とする。**
+> なお PDF の内容が 33 ステージ構成に更新されているかは**未確認**。

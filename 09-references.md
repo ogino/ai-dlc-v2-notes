@@ -35,6 +35,7 @@
 | `docs/guide/` | User Guide |
 | `docs/harness-engineering/` | ハーネス拡張ガイド |
 | `docs/reference/` | 開発者リファレンス |
+| `docs/rfcs/` | 上流の**作業用メモ置き場。仕様書ではない**（上流自身が「コミットしない scratch」「Draft」と明記し、記述が実装より古い）。読み方は [12.9 節](./12-release-impact-2602.md) を参照 |
 | `core/` | 手書き正本 |
 | `dist/` | 生成配布物 |
 | `CHANGELOG.md` | 2.x 変更履歴 |

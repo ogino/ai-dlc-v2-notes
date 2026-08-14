@@ -1,4 +1,4 @@
-# 03. フェーズとステージ（5 × 32）
+# 03. フェーズとステージ（5 × 33）
 
 ## 3.1 全体フロー
 
@@ -6,7 +6,7 @@
 INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (1.1–1.7)
                                                       │ Verification Gate 1（自動検査）
                                                       ▼
-                                                 INCEPTION (2.1–2.8)
+                                                 INCEPTION (2.1–2.9)
                                                       │ Verification Gate 2（自動検査）
                                                       ▼
                                               CONSTRUCTION
@@ -57,7 +57,7 @@ INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (
 
 ## 3.4 Phase 2: Inception（要件精緻化）
 
-目的: コードベース分析、要件、設計、Unit 分解、納品計画。
+目的: コードベース分析、要件、設計、Unit 分解、契約定義、納品計画。
 
 | # | ステージ | Lead | mode / 特記 |
 |---|----------|------|-------------|
@@ -66,9 +66,14 @@ INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (
 | 2.3 | Requirements Analysis | product | ALWAYS（inline） |
 | 2.4 | User Stories | product | `mode: mob`（design/developer/quality） |
 | 2.5 | Refined Mockups | design | UI（CONDITIONAL） |
-| 2.6 | Application Design | architect | 実行計画による（CONDITIONAL） |
+| 2.6 | Domain Design | architect | 実行計画による（CONDITIONAL）。`components.md` / `decisions.md`（ADR） |
 | 2.7 | Units Generation | architect | ALWAYS（DAG） |
-| 2.8 | Delivery Planning | delivery | ALWAYS（`bolt-plan.md` 等） |
+| 2.8 | Contract Design | architect | CONDITIONAL。`contract-summary.md` |
+| 2.9 | Delivery Planning | delivery | ALWAYS（`bolt-plan.md` 等） |
+
+**2.6.1 の Inception 再編**: 2.6 は `application-design` から **`domain-design`** へ改名（ステージファイル自体が置き換えられており、旧名はステージとして存在しない）。設計成果物も 5 本（`components` / `component-methods` / `services` / `component-dependency` / `decisions`）から **`components` / `decisions` の 2 本**へ整理された（ほかに共通の `traceability` を産出）。整理された 3 本のうち **`component-methods` は廃止**であって改名ではない点に注意。
+
+**2.8 Contract Design（新設）**: Unit をまたぐ境界と外部公開 API を**先に固定して並行開発を可能にする**ステージ。Construction の設計 3 段と違い **per-unit ではなく、ワークフローにつき 1 回**走り、Units Generation の依存 DAG を使って境界を一括で洗い出す。成果物は `contract-summary.md` 1 本のみで、境界ごとの仕様（OpenAPI / AsyncAPI / 共有スキーマ）をフェンス済みブロックとして同一ファイルに埋め込む。単一 Unit で境界も外部公開 API も無い場合のみスキップされる。この新設に伴い Delivery Planning は 2.8 → **2.9** へ繰り下がった。
 
 ---
 
@@ -108,7 +113,7 @@ Bolt に入っても 3.1–3.4 が常に全部走るわけではない。
 ## 3.6 Phase 4: Operation（運用）
 
 全 7 ステージが CONDITIONAL。`mvp` / `poc` / `bugfix` / `refactor` 等では Operation が丸ごと省略され得る。  
-（`mvp` はさらに Ideation の Market Research / Team Formation / Approval & Handoff もスキップ → 合計 10 SKIP / 22 EXECUTE。詳細は [05](./05-scopes-depth-test.md)。）
+（`mvp` はさらに Ideation の Market Research / Team Formation / Approval & Handoff もスキップ → 合計 10 SKIP / 23 EXECUTE。詳細は [05](./05-scopes-depth-test.md)。）
 
 | # | ステージ | Lead |
 |---|----------|------|
@@ -124,15 +129,15 @@ Bolt に入っても 3.1–3.4 が常に全部走るわけではない。
 
 ## 3.7 実行モード集計
 
-公式ガイドのトポロジ集計（**32 ステージ全体**。Init 0.1–0.3 も mode 分類上は inline 側に含まれる）:
+公式ガイドのトポロジ集計（**33 ステージ全体**。Init 0.1–0.3 も mode 分類上は inline 側に含まれる）:
 
 | Mode（正式値） | 数 | 備考 |
 |----------------|-----|------|
-| Inline | 28 | Init の決定論 3 段を含む |
+| Inline | 29 | Init の決定論 3 段を含む |
 | Subagent | 2 | Practices Discovery（hub-and-spoke 形状）+ Code Generation |
 | Pipeline | 1 | Reverse Engineering |
 | Mob | 1 | User Stories |
-| **合計** | **32** | |
+| **合計** | **33** | |
 
 ---
 

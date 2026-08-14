@@ -65,11 +65,11 @@ AI: 計画を作る
 
 2.0 実装は方法論を **「検証可能で自己修正するエンジニアリング・ワークフロー」**として具体化し、次を実現する。
 
-- **5 フェーズ / 32 ステージ**（原典 3 フェーズを実装都合で細分化・拡張）
+- **5 フェーズ / 33 ステージ**（原典 3 フェーズを実装都合で細分化・拡張）
 - **14 エージェント・ロスタ**
 - **9 アダプティブ・スコープ** + Composer
 - **決定論的エンジン + LLM 導体**
-- **1 core → 多ハーネス**（Claude Code / Kiro IDE / Kiro CLI / Codex / opencode / **GitHub Copilot**）
+- **1 core → 多ハーネス**（Claude Code / Kiro IDE / Kiro CLI / Codex / **Cursor** / opencode / **GitHub Copilot**）
 - **承認ゲート・監査・学習ループ**（人が重要決定を持つ。ただし次の例外あり）
 
 **ゲートの例外（実装の正確な姿）**:
@@ -124,7 +124,12 @@ AWS ブログが挙げる便益:
 
 実装側の現実的な注意:
 
-- ゲート数・アーティファクト量はスコープにより桁違い（例: `poc` は 8 ステージ / 数ゲート、`feature` は 32 ステージ / 約 29 ゲート）
+- ゲート数・アーティファクト量はスコープにより桁違い（例: `poc` は 8 ステージ / 5 ゲート、`feature` は 33 ステージ / 29 ゲート）
+  — 上流 `docs/guide/05-scopes-and-depth.md` の逐語による（**本ノートで独自に集計した数ではない**）:
+  *"`poc` runs 8 stages with 5 approval gates, while `feature` runs all 33 with 29 gates and five design stages that fan out per Unit of Work in Construction."*
+  **後半が重要**で、Construction の設計 5 ステージは Unit ごとに展開されるため、
+  **実際の 1 回の実行で通るゲート数は Unit 数に応じて 29 より増える**。29 は展開前の基数である。
+  上流は同じ段落で、スコープ確認行が展開後の実数を毎回提示する（推定しない）と述べている
 - 弱いモデルでは任意ステップ（レビュア・学習儀式）がスキップされ得る
 
 ---

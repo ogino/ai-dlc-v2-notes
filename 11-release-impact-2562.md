@@ -3,6 +3,12 @@
 作成日: 2026-08-11
 基準: `awslabs/aidlc-workflows` branch `v2` HEAD `2ce654d1`（2026-08-10）／実装バージョン **2.5.62**
 前回: [10-release-impact-2537.md](./10-release-impact-2537.md)（2.5.11 → 2.5.37）
+次回: [12-release-impact-2602.md](./12-release-impact-2602.md)（2.5.62 → 2.6.2）
+
+> **本章は 2.5.62 時点の測定記録であり、上流の最新の姿ではない。**
+> 表・数値・ステージ名は「その時点でこう測れた」という記録として当時のまま保存してあり、現在値には書き換えていない。
+> **以降の変化（ステージ 32 → 33、センサー 5 → 6、ハーネス 6 → 7、CLI tools 37 → 38、ステージ名の刷新など）は
+> 第12章を参照すること。** → [12-release-impact-2602.md](./12-release-impact-2602.md)
 
 CHANGELOG の実エントリ **17 件**（2.5.38 / 39 / 40 / 41 / 42 / 43 / 44 / 45 / 53 / 54 / 55 / 56 / 57 / 58 / 59 / 60 / 62）。
 変更ファイル **1,425 件**（新規 382・削除 196）。うち **259 件が新規ハーネス `dist/copilot`**。
@@ -11,6 +17,12 @@ CHANGELOG の実エントリ **17 件**（2.5.38 / 39 / 40 / 41 / 42 / 43 / 44 /
 ---
 
 ## 11.1 数値の変化
+
+**下表の「2.5.62」欄は 2026-08-10 / HEAD `2ce654d1` 時点の測定であり、現在値ではない。値は当時のまま保存してある。**
+2.6.2（HEAD `4569754e`）での再測定は次のとおり — **ステージ 32 → 33**（2.6.1）、**センサー 5 → 6**（2.5.71）、
+**CLI tools 37 → 38**、**ハーネス 6 → 7**（2.5.63 の Cursor）。
+フェーズ 5 / エージェント 14 / スコープ 9 / 監査 82（21 分類）/ フック 17 / フック登録 18 は **2.6.2 でも不変**。
+→ [12-release-impact-2602.md](./12-release-impact-2602.md)
 
 | 項目 | 2.5.37 | 2.5.62 | 測定方法 |
 |---|---:|---:|---|
@@ -152,6 +164,15 @@ CHANGELOG によれば、実機 A/B で adversarial な refute-fix-re-review ル
 | 散文 7 ステージ（intent-capture / rough-mockups / requirements-analysis / user-stories / refined-mockups / application-design / units-generation） | **advisory 既定**（1 パス。指摘は承認ゲートで逐語引用され、人間が仕分ける） |
 | Construction 設計・実装 5 ステージ（functional-design / nfr-requirements / nfr-design / infrastructure-design / code-generation） | **adversarial 維持** |
 
+> **上表は 2.5.62 時点のステージ名での記録**である。**2.6.1 で Inception のステージ構成が変わったため、
+> 現在の顔ぶれは異なる。** `application-design` はステージとして削除され、`domain-design`（2.6）に改称、
+> さらに `contract-design`（2.8・CONDITIONAL）が新設された。両方とも `review_class: advisory` を宣言するため、
+> **2.6.2 では advisory 既定が 7 ステージ → 8 ステージ**になっている
+> （contract-design / domain-design / intent-capture / refined-mockups / requirements-analysis /
+> rough-mockups / units-generation / user-stories）。
+> Construction 側の 5 ステージが `review_class` 未宣言（＝既定 adversarial）である点は 2.6.2 でも変わらない。
+> → [12-release-impact-2602.md](./12-release-impact-2602.md)
+
 新しい制御:
 
 - ステージ frontmatter `review_class: adversarial | advisory`
@@ -177,6 +198,10 @@ CHANGELOG によれば、実機 A/B で adversarial な refute-fix-re-review ル
 - 2.5.53 でキルスイッチ `AIDLC_DISABLE_USAGE_TRACKING` を追加
 - モデル単価は `tools/data/model-rates.json`。**未知のモデルはコストを捏造せず出さない**
 
+> **2.6.2 で再確認済み**: 「どのハーネスの設定にもエンドポイントは同梱されていない」は、**新規ハーネス Cursor を含めた
+> `dist/` 全体の再走査でも成立する**（設定ファイル `.json` / `.toml` / `.yaml` / `.yml` / `.md` / `.mdc` に
+> `AIDLC_METRICS_ENDPOINT` の記述は 0 件。参照は `.ts` の実装側のみ）。
+
 ---
 
 ## 11.6 その他
@@ -196,6 +221,11 @@ CHANGELOG によれば、実機 A/B で adversarial な refute-fix-re-review ル
 | 2.5.59 | Stop フックの会話カーブアウトに 2 つ目の根拠（`.aidlc-human-turn` / `.aidlc-engine-touch` の mtime）。transcript を出さないハーネス（Kiro IDE / Kiro CLI / opencode）で、純粋な会話ターンが no-progress ブロック扱いになるのを解消 |
 | 2.5.62 | `intent-create` が work details 無しで**fail closed**。2 本目の無関係な intent は**fresh session** に渡し、前の intent の transcript を継承しない |
 
+> **上表は 2.5.62 で終わっている。これは本章の対象区間の終端であって、上流の最新版ではない。**
+> **2.5.63 以降の 12 エントリ（2.5.63 / 64 / 67 / 68 / 69 / 71 / 72 / 73 / 74 / 75 / 2.6.1 / 2.6.2）は第12章で扱う。**
+> とくに **2.6.1 は破壊的変更**（設計成果物名の刷新・永続 state スキーマ v8）を含むので、
+> アップグレード前に必ず読むこと。→ [12-release-impact-2602.md](./12-release-impact-2602.md)
+
 ---
 
 ## 11.7 本ノートの限界
@@ -205,3 +235,6 @@ CHANGELOG によれば、実機 A/B で adversarial な refute-fix-re-review ル
   いずれも**上流の記述による**
 - 監査イベント 82 は**レジストリ表の集計**であり、82 種すべてが実際に発火することは確認していない
   （上流は `tests/feature/t48-audit-event-emitters.sh` が MANDATORY 印のものを検証すると記載）
+  - **上記の引用は上流の記載そのままだが、そのパスは実在しない。** 実ファイルは
+    `tests/integration/t48-audit-event-emitters.test.ts` で、`tests/feature/` ディレクトリは 2.5.62 にも 2.6.2 にも無い。
+    **上流ドキュメント側（`core/knowledge/aidlc-shared/audit-format.md:10`）の陳腐化**であり、2.6.2 でも未修正

@@ -21,9 +21,14 @@
 ```
 /aidlc intent                 # 一覧
 /aidlc intent <slug>          # 切替（例: export-bug は intent のラベル／スラッグ）
-/aidlc space create teamB
-/aidlc space switch teamB
+/aidlc space                  # Space 一覧
+/aidlc space teamB            # 既存 Space へ切替（引数付きが「切替」）
+/aidlc space-create teamB     # 新規 Space をフレームワーク基準から作成
 ```
+
+> **コマンド形の訂正**: 以前の版で `space create` / `space switch` と書いていたが、上流の正式形は
+> **`space [name]`（一覧・切替）と `space-create <name>`（作成）** である（`docs/guide/12-cli-commands.md`）。
+> この形は 2.5.62 時点でも同じで、2.6.2 での変更ではない。
 
 **Human presence**: 承認ゲートでは、モデルが単独で承認を確定できないよう、人間ターン（`HUMAN_TURN`）が要求される。UserPromptSubmit フックが人間の実プロンプトごとに `HUMAN_TURN` を監査台帳へ追記し、承認処理は「前回のゲート解決以降に `HUMAN_TURN` があること」を検査して無ければ拒否する。**プロンプト契約ではなくエンジンによる機械的強制**であり、監査上も人間の関与が残る。
 
@@ -98,6 +103,11 @@ org → team → project → phase → (stage: 将来)
 | **upstream-coverage** | 上流成果物への参照 |
 | **linter** | ESLint 等（コード） |
 | **type-check** | tsc 等 |
+| **traceability**（2.5.71 で追加） | 各ステージの `traceability.json` を要素レベルで検証。`GAP` / `ORPHAN`、カバレッジ行の欠落、未宣言の上流 ID で FAIL |
+
+**計 6 本**（`ls core/sensors/`）。2.5.62 までは 5 本で、2.5.71 で `aidlc-traceability` が加わった。
+`traceability` センサーの manifest は `matches: "**/traceability.json"` / `default_severity: advisory` /
+`command: bun {{HARNESS_DIR}}/tools/aidlc-sensor-traceability.ts`（CLI tools も 37 → 38 本になった要因）。
 
 - Write/Edit 時に hook で発火
 - 結果は監査行（**現行の受理値は `advisory` のみ**。マニフェストのフィールド名は `severity` ではなく `default_severity`。`blocking` は将来の "v0.10.0 ralph driver" 向けに予約）

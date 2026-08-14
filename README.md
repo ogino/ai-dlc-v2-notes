@@ -7,8 +7,8 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-08-11  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.5.62**、2026-08-10 時点）
+最終同期日: 2026-08-14  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.2**。CHANGELOG 日付 2026-08-13 / 取得日 2026-08-14）
 
 > 上流はマイナーリリースが頻繁である。本ノートは特定時点のスナップショットであり、
 > 数値・仕様は参照時に、**上流リポジトリ**（`awslabs/aidlc-workflows` v2 のローカル clone）の `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。本ノートのリポジトリには `core/` は存在しない。
@@ -31,7 +31,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 - **承認ゲートでは人が最終判断**する（レビュアは最終拒否権を持たない）
   - 例外: Initialization はゲートなし／フェーズ境界の Verification Gate は自動／Construction で ladder 後に **autonomous** を選ぶと残 Bolt のゲートは省略可（失敗時は halt-and-ask）
 - 決定論的エンジンがルーティングし、LLM 導体（conductor）が実行品質を担う
-- 1 つの `core/` から Claude Code / Kiro IDE / Kiro CLI / Codex / opencode / **GitHub Copilot** 向け配布物を生成する
+- 1 つの `core/` から Claude Code / Kiro IDE / Kiro CLI / Codex / **Cursor** / opencode / **GitHub Copilot** 向け配布物を生成する
 
 ---
 
@@ -43,7 +43,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 |----------|------|
 | [01-overview.md](./01-overview.md) | 背景・方法論・2.0 GA の位置づけ |
 | [02-architecture.md](./02-architecture.md) | リポジトリ構成・Engine/Conductor・平面モデル |
-| [03-phases-and-stages.md](./03-phases-and-stages.md) | 5 フェーズ / 32 ステージの全体像 |
+| [03-phases-and-stages.md](./03-phases-and-stages.md) | 5 フェーズ / 33 ステージの全体像 |
 | [04-agents.md](./04-agents.md) | 14 エージェント体制 |
 | [05-scopes-depth-test.md](./05-scopes-depth-test.md) | 9 スコープ・深度・テスト戦略・Composer |
 | [06-harnesses-install.md](./06-harnesses-install.md) | 対応ハーネスと導入手順の要点 |
@@ -52,6 +52,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [09-references.md](./09-references.md) | 参照リンク・上流リポジトリ内パス |
 | [10-release-impact-2537.md](./10-release-impact-2537.md) | 2.5.11 → 2.5.37 の差分／ソース読解で分かった挙動 |
 | [11-release-impact-2562.md](./11-release-impact-2562.md) | 2.5.37 → 2.5.62 の差分。**監査 74→82**、フック 7 本改名、GitHub Copilot ハーネス追加 |
+| [12-release-impact-2602.md](./12-release-impact-2602.md) | 2.5.62 → 2.6.2 の差分。**ステージ 32→33**、`application-design` 廃止と `domain-design` / `contract-design`、成果物名の作り直し、state スキーマ v8、Cursor ハーネス追加 |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
 ### メンテナ向け（作業記録）
@@ -69,13 +70,13 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | 項目 | 値 |
 |------|-----|
 | フェーズ | 5（Initialization / Ideation / Inception / Construction / Operation） |
-| ステージ | 32 |
+| ステージ | 33 |
 | エージェント | 14（ドメイン 11 + レビュア 2 + Composer 1） |
 | スコープ | 9 + 自動検出 + カスタム compose |
 | 深度 / テスト戦略 | 各 3 段階（独立） |
 | 監査イベント種別 | **82**（21 分類） |
-| 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, opencode, **GitHub Copilot**（計 6 種） |
-| 実装バージョン | **2.5.62**（2026-08-08 時点 CHANGELOG。取得は 2026-08-10） |
+| 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
+| 実装バージョン | **2.6.2**（2026-08-13 時点 CHANGELOG。取得は 2026-08-14） |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 

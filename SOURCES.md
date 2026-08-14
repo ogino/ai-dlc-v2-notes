@@ -11,7 +11,7 @@
 3. 同 clone 内（精読・突合済み）:
    - `README.md`（GA、ハーネス、バージョン要件）
    - `CHANGELOG.md`（**2.5.x を中心**に参照。2.4 / 2.3 も一部）
-   - `core/tools/aidlc-version.ts` → `2.5.62`（2026-08-10 再取得。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37`）
+   - `core/tools/aidlc-version.ts` → `2.6.2`（2026-08-14 再取得。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62`）
    - `docs/guide/00-introduction.md`
    - `docs/guide/03-spaces-and-intents.md`
    - `docs/guide/04-phases-and-stages.md`
@@ -21,6 +21,9 @@
    - `core/knowledge/aidlc-shared/audit-format.md`（監査イベントの実レジストリ。2026-08-11 に独立集計）
    - `core/hooks/aidlc-fold-usage.ts` / `core/tools/aidlc-metrics.ts`（2026-08-11）
    - `docs/guide/harnesses/copilot.md` / `dist/copilot/AGENTS.md`（2026-08-11）
+   - `docs/guide/harnesses/cursor.md`（2026-08-14。2.5.63 で追加された Cursor ハーネス）
+   - `core/sensors/aidlc-traceability.md`（2026-08-14。2.5.71 で追加された 6 本目のセンサー）
+   - `core/aidlc-common/stages/inception/domain-design.md` / `contract-design.md`（2026-08-14。2.6.1 で `application-design` を置き換え）
    - `docs/guide/glossary.md`
    - `core/` ディレクトリ一覧（stages/tools/hooks/scopes/sensors）
 
@@ -71,6 +74,9 @@
 - Method Definition Paper 全文（Amplify ホスト）
 - `docs/reference/*` 各章（エンジン内部）
 - `docs/harness-engineering/*`
+- `docs/rfcs/` のうち **HTML 版 2 本**（`IMPLEMENTATION-PLAN.html` / `kiro-ide-hooks-fix-plan.html`）。
+  Markdown 版 2 本（`IMPLEMENTATION-PLAN.md` / `reviewer-reliability-and-stage-decomposition.md`）は
+  **精読済み**で、第12.9節で逐語引用している（ただし仕様ではなく上流の作業用メモとして扱う）
 - 全 stage ファイルの frontmatter マトリクス
 
 ## 正本の優先順位（本ノート内）

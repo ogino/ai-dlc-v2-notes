@@ -19,8 +19,8 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 |-------|----------|---------|
 | **product** | 要件・ストーリー・スコープ・市場 | 1.1, 1.2, 1.4, 2.3, 2.4 |
 | **design** | UX/UI・モック | 1.6, 2.5 |
-| **delivery** | チーム・納品計画・ハンドオフ | 1.5, 1.7, 2.8 |
-| **architect** | 設計・NFR・Unit 分解 | 1.3, 2.6, 2.7, 3.1–3.3 |
+| **delivery** | チーム・納品計画・ハンドオフ | 1.5, 1.7, 2.9 |
+| **architect** | 設計・NFR・Unit 分解・契約定義 | 1.3, 2.6–2.8, 3.1–3.3 |
 | **aws-platform** | AWS インフラ・CDK | 3.4, 4.2 |
 | **compliance** | 規制・データ分類 | サポート専用 |
 | **devsecops** | 脅威モデル・セキュリティ | サポート専用 |
@@ -60,7 +60,7 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 
 **エンジンによる強制（2.5.5 以降）**: `reviewer` を宣言したステージは、当該レビュアの新鮮な `REVIEW_COMPLETED` 監査行が無いと `approve` / `advance` / `finalize` / `complete-workflow` のいずれの完了経路でも**拒否される**。導体の判断でレビュアを省略することはできない。
 
-> ただしカバレッジは全ステージではない。`reviewer:` を宣言するのは **32 中 12 ステージ**で、そのうち 8 は `execution: CONDITIONAL`。CONDITIONAL ステージは条件不成立としてスキップ報告できるため、**強制が回避不能なのは ALWAYS の 4 ステージ**（intent-capture / requirements-analysis / units-generation / code-generation）である。
+> ただしカバレッジは全ステージではない。`reviewer:` を宣言するのは **33 中 13 ステージ**で、そのうち 9 は `execution: CONDITIONAL`。CONDITIONAL ステージは条件不成立としてスキップ報告できるため、**強制が回避不能なのは ALWAYS の 4 ステージ**（intent-capture / requirements-analysis / units-generation / code-generation）である。
 
 **チェックリストの所在（2.5.33 以降）**: レビュアの `knowledge/<agent>/reviewing.md` は、パッケージング時に**レビュア agent 本体へ埋め込まれる**。実行時に知識 glob を読みに行く設計から、ビルド時埋め込みへ変わった。Kiro のレビュア JSON からは冗長な per-agent 知識 glob が削除されている。
 
