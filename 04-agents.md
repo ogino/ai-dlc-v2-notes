@@ -93,7 +93,7 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 | ハーネス | CodeKB MCP |
 |----------|------------|
 | Claude Code / Codex / opencode | 設定すれば Composer が構造推定に利用可能（接続方法は各 harness ガイド） |
-| **Kiro CLI / Kiro IDE** | 出荷の Composer エージェント設定に **MCP ツールが付与されない**。常に **workspace-scan フォールバック** |
+| **Kiro CLI / Kiro IDE** | **2.5.74 で出荷設定が変わった**。Composer の `tools` に MCP サーバ 5 本（`@context7` / `@aws-mcp` / `@aws-pricing` / `@aws-iac` / `@aws-serverless`）が付与された。ただし**全サーバが `disabled: true` で出荷される**ため、**何もしなければ従来どおり workspace-scan フォールバック**。有効化すれば到達できるが、`allowedTools` には入っていないので呼び出しごとに承認が要る |
 
 CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `aidlc/spaces/<space>/codekb/`（Reverse Engineering 成果のローカル store）とは別物。
 

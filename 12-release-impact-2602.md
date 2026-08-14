@@ -269,7 +269,13 @@ Kiro ハーネスに MCP サーバのレジストリが同梱されたが、**�
 
 設計上重要なのは、上流が**その `@server` をどのペルソナにも与えていない**ことである
 （14 ペルソナすべてで `allowedTools` を確認。実際の値は `fs_read` / `thinking` 等のみで、
-テストが不変条件として固定している）。指揮役（conductor）は MCP アクセスを一切持たない。
+テストが不変条件として固定している）。
+なおサーバ自体は 14 ペルソナの `tools` には並んでおり、**到達はできるが毎回承認が要る**という形になっている。
+
+**指揮役（conductor）はこの 14 に含まれない。** `dist/kiro/.kiro/agents/` には 15 個の設定があり、
+うち 14 が `*-agent.json`（ペルソナ）、残る 1 つが指揮役の `aidlc.json` である。
+指揮役は `includeMcpJson` キーを**持たず**、`allowedTools` も `fs_read` / `thinking` / `todo_list` のみで、
+`tools` にも `@server` が無い。**指揮役だけは MCP に到達しない。**
 
 参考までに、Claude 版の MCP 設定には `disabled` フィールドが無く既定で有効なので、
 **この点では Kiro のほうが保守的**である。
