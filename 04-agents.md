@@ -93,7 +93,7 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 | ハーネス | CodeKB MCP |
 |----------|------------|
 | Claude Code / Codex / opencode | 設定すれば Composer が構造推定に利用可能（接続方法は各 harness ガイド） |
-| **Kiro CLI** | **2.5.74 で接続可能になった**。出荷 Composer 設定が `includeMcpJson: true` になったため、`.kiro/settings/mcp.json` に CodeKB を `"disabled": true` **なしで**追加し、Composer の `tools` に `@<server>` を足せば使える（**CodeKB 自体は同梱されない**） |
+| **Kiro CLI** | **2.5.74 で接続可能になった**。出荷 Composer 設定が `includeMcpJson: true` になったため、`.kiro/settings/mcp.json` に CodeKB を `"disabled": true` **なしで**追加し、Composer の `tools` に `@<server>` を足せば使える（**CodeKB 自体は同梱されない**）。**追加しても `allowedTools` には入らないため、呼び出しごとに承認が要る** |
 | **Kiro IDE** | **フォールバック専用のまま**。常に **workspace-scan フォールバック** |
 
 CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `aidlc/spaces/<space>/codekb/`（Reverse Engineering 成果のローカル store）とは別物。
@@ -105,6 +105,9 @@ CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `ai
 > means adding it to `.kiro/settings/mcp.json` without `"disabled": true` and adding its `@<server>` grant
 > to the composer agent's `tools`; **Kiro IDE remains fallback-only**."*
 > 実ファイルでも Kiro CLI の Composer に `includeMcpJson` が 2.5.62 では無く 2.6.2 で `true` になっている。
+> **版の帰属も特定済み**: `git log -S'includeMcpJson' -- dist/kiro/.kiro/agents/aidlc-composer-agent.json`
+> が返すのは 1 コミット（`bf1a9c36`）だけで、そのコミットが CHANGELOG に足した見出しは `## [2.5.74]`。
+> （このコミットは subject に `(2.5.71)` と書かれているが実体は 2.5.74。→ [12 章 12.10](./12-release-impact-2602.md)）
 
 > **同梱された 5 本と CodeKB を混同しないこと。** 2.5.74 が Kiro CLI に入れたレジストリは
 > `@context7` / `@aws-mcp` / `@aws-pricing` / `@aws-iac` / `@aws-serverless` の 5 本で、**CodeKB は含まれない**。
