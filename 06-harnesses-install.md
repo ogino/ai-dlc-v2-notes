@@ -139,7 +139,8 @@ cp dist/codex/AGENTS.md   your-project/AGENTS.md
 
 ```bash
 bun dist/cursor/install.ts your-project
-# 検証
+# 検証（プロジェクトルートに入ってから相対パスで実行）
+cd your-project
 bun .cursor/tools/aidlc-utility.ts doctor
 ```
 

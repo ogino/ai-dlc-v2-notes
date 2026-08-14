@@ -8,7 +8,7 @@
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
 最終同期日: 2026-08-14  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.2**、2026-08-14 時点）
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.2**。CHANGELOG 日付 2026-08-13 / 取得日 2026-08-14）
 
 > 上流はマイナーリリースが頻繁である。本ノートは特定時点のスナップショットであり、
 > 数値・仕様は参照時に、**上流リポジトリ**（`awslabs/aidlc-workflows` v2 のローカル clone）の `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。本ノートのリポジトリには `core/` は存在しない。
