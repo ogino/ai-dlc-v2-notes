@@ -253,7 +253,9 @@ Construction の per-unit 実行が、Bolt の DAG から作った 1 バッチ�
 
 ## 12.7 Kiro の MCP レジストリ（2.5.74）
 
-Kiro ハーネスに MCP サーバのレジストリが同梱されたが、**既定ですべて無効**である。
+**Kiro CLI に**（Kiro IDE ではない）MCP サーバのレジストリが同梱されたが、**既定ですべて無効**である。
+`mcp.json` を持つのは `dist/kiro` のみで、`dist/kiro-ide` には無い。per-agent の付与も Kiro CLI の 14 ペルソナだけで、
+他 6 ハーネス（claude / codex / copilot / cursor / kiro-ide / opencode）のエージェント定義に `@server` は 1 件も無い。
 
 **「使えるようにする」と「承認を省く」は別物なので、分けて理解すること。**
 

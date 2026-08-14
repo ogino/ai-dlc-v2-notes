@@ -93,7 +93,8 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 | ハーネス | CodeKB MCP |
 |----------|------------|
 | Claude Code / Codex / opencode | 設定すれば Composer が構造推定に利用可能（接続方法は各 harness ガイド） |
-| **Kiro CLI / Kiro IDE** | **2.5.74 で出荷設定が変わった**。Composer の `tools` に MCP サーバ 5 本（`@context7` / `@aws-mcp` / `@aws-pricing` / `@aws-iac` / `@aws-serverless`）が付与された。ただし**全サーバが `disabled: true` で出荷される**ため、**何もしなければ従来どおり workspace-scan フォールバック**。有効化すれば到達できるが、`allowedTools` には入っていないので呼び出しごとに承認が要る |
+| **Kiro CLI** | **2.5.74 で出荷設定が変わった**。Composer の `tools` に MCP サーバ 5 本（`@context7` / `@aws-mcp` / `@aws-pricing` / `@aws-iac` / `@aws-serverless`）が付与された。ただし `.kiro/settings/mcp.json` で**全サーバが `disabled: true`** なので、**何もしなければ従来どおり workspace-scan フォールバック**。有効化すれば到達できるが `allowedTools` には無いため呼び出しごとに承認が要る |
+| **Kiro IDE** | **MCP レジストリは同梱されていない**（`mcp.json` が無く、Composer の `tools` も `fs_read` / `fs_write` / `execute_bash` / `thinking` のまま）。**常に workspace-scan フォールバック** |
 
 CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `aidlc/spaces/<space>/codekb/`（Reverse Engineering 成果のローカル store）とは別物。
 
@@ -105,7 +106,11 @@ CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `ai
 
 - 既定: セッションの全ツール + MCP を継承
 - 唯一の出荷制限: **`Task` はエージェント禁止**（サブエージェント spawn は Conductor のみ）
-- MCP はプロジェクト `.mcp.json` 等で共有（per-agent 付与なし）
+- MCP はプロジェクト `.mcp.json` 等で共有（per-agent 付与なし）——
+  **ただし Kiro CLI だけは 2.5.74 で例外になった**。`.kiro/settings/mcp.json` のレジストリを持ち、
+  14 ペルソナの `tools` に `@server` が個別付与される（既定は全サーバ `disabled: true`）。
+  `@server` はどのペルソナの `allowedTools` にも入っていないため、有効化しても呼び出しごとに承認が要る。
+  他 6 ハーネス（Kiro IDE を含む）のエージェント定義に `@server` は 1 件も無い
 
 ---
 
