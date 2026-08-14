@@ -35,6 +35,7 @@
 | `docs/guide/` | User Guide |
 | `docs/harness-engineering/` | ハーネス拡張ガイド |
 | `docs/reference/` | 開発者リファレンス |
+| `docs/rfcs/` | 設計 RFC・実装計画（2.6.1 のステージ分解と設計出力再編の根拠。本ノートは**未精読**） |
 | `core/` | 手書き正本 |
 | `dist/` | 生成配布物 |
 | `CHANGELOG.md` | 2.x 変更履歴 |

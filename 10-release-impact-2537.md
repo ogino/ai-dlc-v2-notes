@@ -5,6 +5,11 @@
 
 本章は、01〜09 が対象とした **2.5.11** から **2.5.37** までの 12 リリースの差分と、その過程でソースを読んで確認した挙動をまとめる。行番号は 2.5.37 時点のもの。
 
+> **本章は 2.5.37 時点の測定記録であり、上流の最新の姿ではない。**
+> 本章の数値・行番号・ステージ名は「その時点でこう測れた」という記録として保存してあり、
+> 現在値に書き換えていない。**以降の変化は第11章（2.5.37 → 2.5.62）と第12章（2.5.62 → 2.6.2）を参照すること。**
+> → [11-release-impact-2562.md](./11-release-impact-2562.md) ／ [12-release-impact-2602.md](./12-release-impact-2602.md)
+
 > 本ノートの他章と同じく非公式の二次整理である。実装の正は常に上流のソースを参照すること。
 
 ---
@@ -24,8 +29,16 @@
 | 監査イベント種別 | 74 | `docs/guide/10-state-and-audit.md` |
 | スコープ別ステージ数 | enterprise 32 / feature 32 / mvp 22 / poc 8 / bugfix 7 / refactor 8 / infra 13 / security-patch 10 / workshop 25 | 全ステージの `scopes:` を集計 |
 
-> **本表は 2.5.37 時点。監査イベント種別は 2.5.62 で 82（21 分類）に増えている。**
-> → [11-release-impact-2562.md](./11-release-impact-2562.md)
+> **本表は 2.5.37 時点の測定であり、値は当時のまま保存してある。その後 5 項目が動いた。**
+> - 監査イベント種別: **74 → 82（19 → 21 分類）**（2.5.62）
+> - センサー: **5 → 6**（2.5.71 で `traceability` 追加）
+> - ステージ: **32 → 33**（2.6.1。内訳も inception が **8 → 9**）
+> - スコープ別ステージ数: **分母が全行 32 → 33**。分子は enterprise 33 / feature 33 / **mvp 23** / poc 8 / bugfix 7 / refactor 8 / infra 13 / security-patch 10 / **workshop 26**
+> - 実行モード集計: **inline 28 → 29**（subagent 2 / pipeline 1 / mob 1 は不変）
+>
+> **フェーズ 5・エージェント 14・スコープ 9 は 2.6.2 でも不変。**
+> → [11-release-impact-2562.md](./11-release-impact-2562.md)（2.5.37 → 2.5.62）
+> ／ [12-release-impact-2602.md](./12-release-impact-2602.md)（2.5.62 → 2.6.2）
 
 変わったのは次の 2 つ。
 
@@ -33,6 +46,12 @@
 |------|--------|--------|
 | hooks | 13 | **14**（2.5.33 で `aidlc-dispatch-rules.ts` 追加） |
 | tools | 32 | **35**（2.5.36 で workspace 系 3 本追加。うち `aidlc-*.ts` が 34 本＋ディスパッチャ `aidlc.ts`） |
+
+> 上表も 2.5.37 時点。その後 hooks は **17**（2.5.62 以降 2.6.2 まで不変）、tools は **38**
+> （`aidlc-*.ts` 37 ＋ ディスパッチャ `aidlc.ts`）になっている。
+> あわせて注意: 2.5.37 の時点では上流 README のツリー図も「34 aidlc-\*.ts engine tools」と表記しており実測と一致していたが、
+> **2.5.58（`8c60e1ab`）で README 側が 34 → 25 に差し戻され、表記と実数の食い違いが復活している**
+> （HEAD の `README.md:365` は「25」、実数は `aidlc-*.ts` **37** 本）。
 
 ---
 
@@ -108,7 +127,7 @@ f) 不正 JSON / pass 欠如             → PASSED (script-error: bad-output)
 
 ### スキップ経路にガードが無い意味
 
-`execution:` の内訳は **ALWAYS 11 / CONDITIONAL 21**。CONDITIONAL の 21 ステージは、導体が `--reason` を付けて単独でスキップ報告できる。エンジンが課す 5 つの制約はいずれも「操作の整合性」を守るものであり、「判定の妥当性」を人間に確認する仕組みではない。
+`execution:` の内訳は **ALWAYS 11 / CONDITIONAL 21**（2.5.37 時点。**2.6.2 では ALWAYS 11 / CONDITIONAL 22 = 33 中 66.7%**。新設の `contract-design` が CONDITIONAL、`application-design` は `domain-design` に改称）。CONDITIONAL の 21 ステージは、導体が `--reason` を付けて単独でスキップ報告できる。エンジンが課す 5 つの制約はいずれも「操作の整合性」を守るものであり、「判定の妥当性」を人間に確認する仕組みではない。
 
 これは欠陥ではなく設計である。CONDITIONAL ステージの条件判定は本来 conductor の職務であり、AI-DLC の「AI が実行を主導し、人間が重要決定を持つ」という前提そのものにあたる。ただし**その判定品質はモデルの能力に直結する**。上流 README が弱いモデルでの利用に注意を促しているのは、この構造と整合する。
 
@@ -119,6 +138,11 @@ f) 不正 JSON / pass 欠如             → PASSED (script-error: bad-output)
 `reviewer:` を宣言したステージは、当該レビュアの新鮮な `REVIEW_COMPLETED` が無いと 4 つの完了経路すべてで拒否される（`verifyReviewerPrecondition()`、`core/tools/aidlc-state.ts:1287`。導入は 2.5.5）。
 
 ただし宣言しているのは **32 中 12 ステージ**で、うち 8 が CONDITIONAL。**回避不能なのは ALWAYS の 4 つ**（intent-capture / requirements-analysis / units-generation / code-generation）である。
+
+> **2.6.2 での再測定**: 宣言ステージは **33 中 13**、うち **9 が CONDITIONAL**（`application-design` が消え、
+> `domain-design` と新設 `contract-design` の 2 本が入った）。**回避不能な ALWAYS の 4 本は同じ顔ぶれのまま**。
+> `verifyReviewerPrecondition()` も健在で、定義は `core/tools/aidlc-state.ts` の 1761 行へ移動している
+> （呼出 4 箇所も同じ）。**結論は変わらないが、回避可能な側が 8 → 9 に増えている。**
 
 ---
 
