@@ -93,10 +93,15 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 | ハーネス | CodeKB MCP |
 |----------|------------|
 | Claude Code / Codex / opencode | 設定すれば Composer が構造推定に利用可能（接続方法は各 harness ガイド） |
-| **Kiro CLI** | **2.5.74 で出荷設定が変わった**。Composer の `tools` に MCP サーバ 5 本（`@context7` / `@aws-mcp` / `@aws-pricing` / `@aws-iac` / `@aws-serverless`）が付与された。ただし `.kiro/settings/mcp.json` で**全サーバが `disabled: true`** なので、**何もしなければ従来どおり workspace-scan フォールバック**。有効化すれば到達できるが `allowedTools` には無いため呼び出しごとに承認が要る |
-| **Kiro IDE** | **MCP レジストリは同梱されていない**（`mcp.json` が無く、Composer の `tools` も `fs_read` / `fs_write` / `execute_bash` / `thinking` のまま）。**常に workspace-scan フォールバック** |
+| **Kiro CLI / Kiro IDE** | 出荷の Composer 設定に **CodeKB は付与されない**。常に **workspace-scan フォールバック** |
 
 CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `aidlc/spaces/<space>/codekb/`（Reverse Engineering 成果のローカル store）とは別物。
+
+> **2.5.74 の MCP レジストリはこの表を変えない。** Kiro CLI に同梱されたのは
+> `@context7` / `@aws-mcp` / `@aws-pricing` / `@aws-iac` / `@aws-serverless` の 5 本で、
+> **CodeKB はこの中に無い**。したがって 5 本の `disabled` を外しても、
+> Composer の構造推定に CodeKB が使えるようにはならない。
+> レジストリ自体の仕組み（Kiro CLI のみ・per-agent 付与・既定無効）は 4.5 を参照。
 
 実行中の reshape は `recompose`（完了済みステージは凍結）。
 
