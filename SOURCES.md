@@ -24,6 +24,9 @@
    - `docs/guide/harnesses/cursor.md`（2026-08-14。2.5.63 で追加された Cursor ハーネス）
    - `core/sensors/aidlc-traceability.md`（2026-08-14。2.5.71 で追加された 6 本目のセンサー）
    - `core/aidlc-common/stages/inception/domain-design.md` / `contract-design.md`（2026-08-14。2.6.1 で `application-design` を置き換え）
+   - `dist/kiro/.kiro/settings/mcp.json` と `dist/kiro/.kiro/agents/*.json`（14 ペルソナ＋指揮役 `aidlc.json`）（2026-08-14。2.5.74 の MCP レジストリ）
+   - `dist/kiro-ide/.kiro/agents/aidlc-composer-agent.json` と `dist/claude/.mcp.json`（2026-08-14。MCP 同梱の有無をハーネス間で突き合わせるため）
+   - 全 7 ハーネスの `dist/*/…/agents/` 配下（2026-08-14。`@server` 付与の有無を機械的に集計）
    - `docs/guide/glossary.md`
    - `core/` ディレクトリ一覧（stages/tools/hooks/scopes/sensors）
 

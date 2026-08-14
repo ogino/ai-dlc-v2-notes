@@ -54,7 +54,7 @@
 | M4 | hub-and-spoke ≠ mode 名（`mode: subagent`） | ✅ 反映済 |
 | M5 | tools 本数の出典差（25 vs 約30） | ✅ 反映済 |
 | M6 | mvp スキップ詳細（Ideation + Operation） | ✅ 反映済 |
-| M7 | CodeKB は Kiro で workspace-scan 固定 | ✅ 反映済 |
+| M7 | CodeKB は Kiro で workspace-scan 固定 | ✅ 反映済（**2.5.74 で状況が変わった**。Kiro CLI は接続可能になり、固定なのは Kiro IDE のみ → [04-agents.md](./04-agents.md) 4.4） |
 | M8 | Codex trust 手順の補足 | ✅ 反映済 |
 | M9 | 1.x 対比の留保強化 | ✅ 反映済 |
 | M10 | Spec PDF は `assets/`、正本優先順位 | ✅ 反映済 |
