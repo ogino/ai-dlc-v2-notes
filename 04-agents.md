@@ -93,14 +93,22 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 | ハーネス | CodeKB MCP |
 |----------|------------|
 | Claude Code / Codex / opencode | 設定すれば Composer が構造推定に利用可能（接続方法は各 harness ガイド） |
-| **Kiro CLI / Kiro IDE** | 出荷の Composer 設定に **CodeKB は付与されない**。常に **workspace-scan フォールバック** |
+| **Kiro CLI** | **2.5.74 で接続可能になった**。出荷 Composer 設定が `includeMcpJson: true` になったため、`.kiro/settings/mcp.json` に CodeKB を `"disabled": true` **なしで**追加し、Composer の `tools` に `@<server>` を足せば使える（**CodeKB 自体は同梱されない**） |
+| **Kiro IDE** | **フォールバック専用のまま**。常に **workspace-scan フォールバック** |
 
 CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `aidlc/spaces/<space>/codekb/`（Reverse Engineering 成果のローカル store）とは別物。
 
-> **2.5.74 の MCP レジストリはこの表を変えない。** Kiro CLI に同梱されたのは
-> `@context7` / `@aws-mcp` / `@aws-pricing` / `@aws-iac` / `@aws-serverless` の 5 本で、
-> **CodeKB はこの中に無い**。したがって 5 本の `disabled` を外しても、
-> Composer の構造推定に CodeKB が使えるようにはならない。
+> **この行は 2.6.2 で変わった。** 上流ガイドの記述自体が書き換わっている（`docs/guide/05-scopes-and-depth.md`）。
+> 2.5.62: *"On Kiro CLI **and Kiro IDE** the shipped composer agent config does not grant MCP tools,
+> so those harnesses **always** use the workspace-scan fallback."*
+> 2.6.2: *"On **Kiro CLI** the shipped composer config sets `includeMcpJson: true`, so connecting CodeKB
+> means adding it to `.kiro/settings/mcp.json` without `"disabled": true` and adding its `@<server>` grant
+> to the composer agent's `tools`; **Kiro IDE remains fallback-only**."*
+> 実ファイルでも Kiro CLI の Composer に `includeMcpJson` が 2.5.62 では無く 2.6.2 で `true` になっている。
+
+> **同梱された 5 本と CodeKB を混同しないこと。** 2.5.74 が Kiro CLI に入れたレジストリは
+> `@context7` / `@aws-mcp` / `@aws-pricing` / `@aws-iac` / `@aws-serverless` の 5 本で、**CodeKB は含まれない**。
+> この 5 本の `disabled` を外しても構造推定は強化されない。CodeKB は自分で追加する必要がある。
 > レジストリ自体の仕組み（Kiro CLI のみ・per-agent 付与・既定無効）は 4.5 を参照。
 
 実行中の reshape は `recompose`（完了済みステージは凍結）。
