@@ -58,8 +58,10 @@ CHANGELOG の実エントリ **12 件**（2.5.63 / 64 / 67 / 68 / 69 / 71 / 72 /
 
 ## 12.2 設計ステージの再編（2.6.1）— 今回の中心
 
-`application-design`（2.6）が **`domain-design`** に改名され、**`contract-design`**（2.8）が新設された。
-`delivery-planning` は 2.8 → 2.9 へ繰り下がる。CHANGELOG は上流自身の言葉でこう書いている。
+`application-design`（**ステージ 2.6**）が **`domain-design`** に改名され、
+**`contract-design`**（**ステージ 2.8**、CONDITIONAL）が新設された。
+`delivery-planning` は**ステージ** 2.8 → 2.9 へ繰り下がる。
+※ ここでの `2.6` / `2.8` / `2.9` は**ステージ番号**であり、上流のバージョン番号ではない。CHANGELOG は上流自身の言葉でこう書いている。
 
 > The framework now ships **33 stages** (was 32).
 
