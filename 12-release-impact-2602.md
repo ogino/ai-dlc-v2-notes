@@ -86,11 +86,17 @@ Functional Design と Infrastructure Design の成果物も置き換わった。
 | infrastructure-design | `deployment-architecture` / `infrastructure-services` / `shared-infrastructure` | `infrastructure-specification`（`shared-infrastructure` は CONDITIONAL セクションに格下げ） |
 | infrastructure-design | `monitoring-design` / `cicd-pipeline` | 独立のまま維持 |
 
-**成果物を読んでいる自作ツールやドキュメントは、合わせて 11 個の旧名を手当てする必要がある。**
-内訳は inception 側 3（`component-methods` / `services` / `component-dependency`）、
-functional-design 側 3（`business-logic-model` / `business-rules` / `domain-entities`）、
-infrastructure-design 側 3（`deployment-architecture` / `infrastructure-services` / `shared-infrastructure`）、
-ステージ名 2（`application-design`、および番号が動いた `delivery-planning` 2.8 → 2.9）で計 11。
+**消える成果物名は 9 個、現れるのは 5 個である**（12.1 のアーティファクト語彙 −9 / +5 と一致する）。
+
+| 消える 9 個 | 現れる 5 個 |
+|---|---|
+| `component-methods` / `services` / `component-dependency` | `contract-summary` |
+| `business-logic-model` / `business-rules` / `domain-entities` | `functional-spec` / `rules` / `entities` |
+| `deployment-architecture` / `infrastructure-services` / `shared-infrastructure` | `infrastructure-specification` |
+
+これとは別に、**ステージ側でも 2 件動く**（`application-design` → `domain-design` の改名と、
+`delivery-planning` のステージ番号 2.8 → 2.9）。成果物名を参照している自作ツールは前者 9 個を、
+ステージ名や番号を参照しているものは後者 2 件を手当てすること。
 `core/` と `dist/` の側に旧名は残っていない（残っているのは CHANGELOG、後述の `docs/rfcs/`、
 移行ガードのエラーメッセージ本文、テストの negative assertion のみ）。
 
