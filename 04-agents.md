@@ -153,7 +153,7 @@ CodeKB は AI-DLC 同梱ではない外部 MCP。紛らわしい名前の store 
 | 誰が作るか | 外部ツール | `aidlc-architect-agent`（ステージ実行） | `tools/aidlc-knowledge.ts`（決定的ツール、**LLM 不介在**） |
 | どう操作するか | ハーネス依存の `@<server>` 登録 | ステージを回す | `/aidlc knowledge onboard` / `sync` / `list` / `show` / `associate` / `rebind` |
 | **生成・取り込み工程**がネットワークに出るか（※モデルとのやり取りは別） | 出る（サーバ次第） | フレームワーク自身は出ない。ただし**生成するのは `aidlc-architect-agent`（LLM）**なので、リモートホストのモデルを使えばソースはモデル提供者に渡る | フレームワーク自身は出ない（`core/tools/aidlc-knowledge.ts` に `fetch(` / `http(s)://` の出現 0 件。抽出は `spawnSync` のみ） |
-| 監査イベント | 対象外 | `PIPELINE_LINK_COMPLETED`（**2.6.49 で新設**。pipeline ステージの各リンク完了を証跡化する。ステージ自体は従来からある） | `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED`（**2.6.15 で新設**） |
+| 監査イベント | 対象外 | `PIPELINE_LINK_COMPLETED`（**2.6.39 で新設**。導入コミット `1718b103`、CHANGELOG 見出し `## [2.6.39]`。pipeline ステージの各リンク完了を証跡化する。ステージ自体は従来からある） | `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED`（**2.6.15 で新設**） |
 
 > **⚠ この行は「フレームワークのコードがネットワーク呼び出しをするか」を問うている。**
 > **「情報が外部に出ないか」ではない。** `codekb/` の 9 成果物も DocumentKB の索引も、

@@ -97,8 +97,8 @@ cd aidlc-workflows && git checkout v2
 
 # 3. 使うハーネスの dist をプロジェクトへコピー
 # 例: Claude Code
-cp -r dist/claude/.claude/ your-project/.claude/
-cp -r dist/claude/aidlc/   your-project/aidlc/
+cp -R dist/claude/.claude/. your-project/.claude/
+cp -R dist/claude/aidlc/.   your-project/aidlc/
 
 # 4. セッション内 — まずヘルスチェック、問題なければワークフロー開始
 /aidlc --doctor
