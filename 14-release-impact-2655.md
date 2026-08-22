@@ -377,7 +377,11 @@ conductor が観察を追記していく日誌である。**既存の概念で�
 > **NEVER probe for `memory.md`, or any other maybe-absent file, with a read tool:
 > reading an absent path is a failed tool call.**
 
-**この結果 `aidlc-orchestrate next` は純粋な読み取りではなくなった。**
+**この結果 `aidlc-orchestrate next` の書き込みが 1 つ増えた。**
+**ただし「これで `next` が初めて書き込むようになった」わけではない。**
+同じ区間の 2.6.51 が、`run-stage` を含むディレクティブ発行のたびに
+`.aidlc-active-directive.json` をアトミックに公開するようになっている（→ [14.2](#142-継続カーソルの全ハーネス化2651-今回の中心)）。
+2.6.55 の時点で `next` は既に書き込む側であり、日誌の作成は**もう 1 つの書き込みの追加**である。
 run-stage 指令を出す際に実際にファイルを作る。
 ただし Stop フックの内部プローブは `AIDLC_STOP_HOOK_PROBE=1` により従来どおり write-free である。
 （プローブが書き込むと「エンジンのほうが人間より新しい」が常に真になり、
