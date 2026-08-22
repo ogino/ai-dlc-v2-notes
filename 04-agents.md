@@ -153,7 +153,7 @@ CodeKB は AI-DLC 同梱ではない外部 MCP。紛らわしい名前の store 
 | 誰が作るか | 外部ツール | `aidlc-architect-agent`（ステージ実行） | `tools/aidlc-knowledge.ts`（決定的ツール、**LLM 不介在**） |
 | どう操作するか | ハーネス依存の `@<server>` 登録 | ステージを回す | `/aidlc knowledge onboard` / `sync` / `list` / `show` / `associate` / `rebind` |
 | ネットワークに出るか | 出る（サーバ次第） | 出ない | **出ない**（`core/tools/aidlc-knowledge.ts` に `fetch(` / `http(s)://` の出現 0 件） |
-| 監査イベント | 対象外 | `PIPELINE_LINK_COMPLETED` | `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED` |
+| 監査イベント | 対象外 | `PIPELINE_LINK_COMPLETED`（**2.6.49 で新設**。pipeline ステージの各リンク完了を証跡化する。ステージ自体は従来からある） | `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED`（**2.6.15 で新設**） |
 
 DocumentKB について、この章の文脈で押さえておく点:
 

@@ -10,7 +10,8 @@ CHANGELOG の実エントリ **24 件**（2.6.8 / 9 / 12 / 13 / 14 / 15 / 16 / 1
 
 **この差分の性質は前回とちょうど逆である。** 2.6.1 は設計ステージの成果物名を作り直し、
 永続化状態のスキーマを上げた「地形の変更」だった。今回は 28 コミット・+140k 行を投じながら、
-**ワークフローの地形を 1 ミリも動かしていない**（→ [13.2](#132-ステージグラフは-scopes-以外完全に同一)）。
+**`stage-graph.json` が表す地形（slug・成果物・依存関係）を 1 ミリも動かしていない**
+（→ [13.2](#132-ステージグラフは-scopes-以外完全に同一)）。**規則の側は広範に動いている。**
 増えたのはスコープの選択肢と、ガードレールと、受領証と、ハーネス適合である。
 
 ただし**宣言された挙動変更が 1 件ある**。2.6.18 で暗黙の既定スコープが
@@ -36,17 +37,26 @@ CHANGELOG の実エントリ **24 件**（2.6.8 / 9 / 12 / 13 / 14 / 15 / 16 / 1
 | **監査カテゴリ** | **21** | **22** | `core/knowledge/aidlc-shared/audit-format.md` の見出し |
 | **プロトコルモジュール** | **4** | **8** | `core/aidlc-common/protocols/*.md` |
 | ハーネス | 7 | 7 | `dist/` 直下 |
-| アーティファクト語彙 | 121 | 121 | `stage-graph.json` の `produces` 異なり数 |
+| `produces` 異なり値（※） | 121 | 121 | `stage-graph.json` の `produces` を集合化して計数 |
+
+> ※ **[12 章](./12-release-impact-2602.md) は同じ行を「122 → 122」と記録している。矛盾ではなく計数基準が違う。**
+> 12 章は当時のアーティファクトレジストリを数え、本章は `stage-graph.json` の `produces` の
+> 異なり数を数えている。本章が言えるのは「**この基準で 2 版が集合として完全一致した**」ことだけで、
+> 12 章の 122 を訂正するものではない。**2 つの数字を直接比較しないこと。**
 
 動いたのは 5 項目だけである。内訳は次のとおり。
 
 - **スコープ +2**: `classic` と `express`。**既存 9 スコープの EXECUTE 数はすべて不変**
   （bugfix 7 / enterprise 33 / feature 33 / infra 13 / mvp 23 / poc 8 / refactor 8 /
   security-patch 10 / workshop 26）。新規は classic 26 / express 10。
+  検証方法は 2 系統: `scope-grid.json` の各スコープの `EXECUTE` 件数と、
+  33 ステージの frontmatter `scopes:` を独立に集計したもの。両者が一致した。
 - **CLI tools +3**: `aidlc-documentkb-schema.ts` / `aidlc-knowledge.ts` / `aidlc-testing-posture.ts`
 - **監査イベント +4**: `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED` /
   `PIPELINE_LINK_COMPLETED`。**削除されたイベントは 1 件も無い**（差分は追加のみ）。
-- **監査カテゴリ +1**: `Documents`（3 イベント）。加えて `Interaction Events` が 7 → 8。
+- **監査カテゴリ +1**: 増えたトップレベルカテゴリは `Documents`（3 イベント）**だけ**である。
+  `Interaction Events` も 7 → 8 になっているが、これは**既存カテゴリの中のイベント数**であって
+  カテゴリの増加ではない（3 + 1 = 追加イベント 4 件）。
 - **プロトコルモジュール +4**: `stage-protocol-construction.md` / `stage-protocol-ensemble.md` /
   `stage-protocol-reviewer.md` / `stage-protocol-swarm.md`
 
@@ -76,11 +86,16 @@ diff <(git show 4569754e:<graph> | 各ステージから scopes を除いてソ�
 `produces` の異なり数は両版とも **121** で集合として完全一致し、
 `docs/reference/16-artifact-vocabulary.md` も `git diff --stat` が無出力（＝ファイル自体が無変更）だった。
 
-**この観測が何を意味するか。** 進行中ワークフローの移行が不要なのは、
+**この観測が何を意味するか。** **永続化状態のスキーマ移行**が不要なのは、
 各版の Upgrade 文が親切だからではなく、**動かす対象が無かったから**である。
-実際 24 版の Upgrade 文はほぼすべてが「`dist/<harness>/` を再コピーせよ」で終わり、
-状態移行を求めるものは 1 件も無い。2.6.1 のときに必要だった
-「`skills/aidlc-application-design/` の手動削除」に相当する作業も今回は発生しない。
+24 版の Upgrade 文のうち、**状態スキーマの移行を求めるものは 1 件も無い**。
+2.6.1 のときに必要だった「`skills/aidlc-application-design/` の手動削除」に
+相当するステージ再編由来の作業も今回は発生しない。
+
+> **⚠ 「移行不要」＝「再コピーだけで済む」ではない。** ここで言っているのは
+> **状態スキーマ**の話に限られる。実際には Codex の trust テーブル再生成、
+> Copilot の進行中会話の作り直し、2.6.36 による旧 `selections` ファイルの再生成など、
+> **`dist/` の再コピーだけでは終わらないハーネスが 5 つある**（→ [13.8](#138-ハーネス別のアップグレード手順)）。
 
 逆に言えば、**この差分を「地形が変わっていないから小さい」と読むのは誤りである。**
 変わったのは地形ではなく、地形の上で何が許され何が拒否されるかの規則であり、
@@ -124,6 +139,9 @@ diff <(git show 4569754e:<graph> | 各ステージから scopes を除いてソ�
 2.6.49 : core/tools/aidlc-lib.ts          export const DEFAULT_SCOPE = "classic";  ← 共有 export
 ```
 
+（本ノートの他の箇所で行番号を添えている場合、それは `4569754e` / `71d9a9e0` 時点のもので、
+整形や後続の変更で容易にずれる。**探すときは行番号ではなく `DEFAULT_SCOPE` という識別子で grep すること。**）
+
 定数の置き場所が orchestrate 内のローカル定数から lib の export に移り、値が変わった。
 CHANGELOG によれば、エンジンのスコープ解決フォールバック・`/aidlc-init`・
 `--scope` 無しの低レベル `intent-create`（**従来は `poc` を返していた**）の 3 経路が、
@@ -140,6 +158,10 @@ CHANGELOG によれば、エンジンのスコープ解決フォールバック�
 つまり、キーワードに当たらない自由記述を投げると、ワークフローが生まれる前に
 **compose offer（適応型コンポーザの提案）が先に提示される**。
 `classic` が静かに使われるのは、compose offer を経由しない低レベル呼び出しに限られる。
+
+（この引用が `Feature` を名指ししているのは、**2.6.18 以前の既定が `feature` だったから**である。
+2.6.49 の文書に載っている現行の文言だが、「黙って始まらない」という主張の対象が
+旧既定の名前で書かれている点に注意。）
 
 **したがって「既定が classic になった」は正しいが、「対話中に黙って classic が始まる」は誤りである。**
 
@@ -171,7 +193,9 @@ Claude では `.claude/settings.json` の `env` ブロックを書き換える�
 | **`none`** | **（存在しない）** | **express** |
 
 2.6.2 の時点で `review_cap` という仕組み自体は存在したが、値は未宣言と `advisory` の 2 通りだけで、
-**reviewer を完全に無効化するスコープは無かった**。`none` は 2.6.49 で初めて登場した値である。
+**reviewer を完全に無効化するスコープは無かった**。`none` は **2.6.18 で導入された**値である
+（`git log -S'review_cap: none' -- core/scopes/` が返す唯一のコミット `fbb1460c` は
+`express` を新設したコミットそのもので、CHANGELOG 見出しは `## [2.6.18]`）。
 
 > **⚠ 静的グリッドの membership と実行時の挙動は別物。**
 > `express` はグリッド上、reviewer 宣言を持つステージを 2 本（Requirements Analysis と
@@ -234,7 +258,9 @@ Claude では `.claude/settings.json` の `env` ブロックを書き換える�
 ## 13.5 レビュアーの 60 ターン上限（2.6.8）— ハーネスで強制力がまるで違う
 
 `maxTurns: 60` が `aidlc-architecture-reviewer-agent` と `aidlc-product-lead-agent` に付いた。
-**14 ペルソナ中この 2 つだけ**である。
+**`core/agents/*.md` の 14 エージェント定義のうち、この 2 つだけ**である
+（13.1 の表で「エージェント 14」と数えているのと同じ母集合。
+ハーネスへ投影された配布物側のファイル数とは別なので注意）。
 
 **ここが今回いちばん誤読されやすい。** 上流 CHANGELOG の一文が正典なので、それに従って書く。
 
@@ -372,8 +398,9 @@ DocumentKB は**ローカル完結**である。`fetch(` および `http(s)://` 
 ### Testing Posture（2.6.16 / 2.6.38）
 
 チームが表明したテスト方針が、Code Generation の実行契約として固定されるようになった。
-org / team / project の 3 層から TDD / BDD / ATDD / test-after / custom を一意に解決し、
-**project > team > org > フォールバック（test-after）** の優先順で 1 つを選ぶ。
+org / team / project の 3 層から TDD / BDD / ATDD / test-after / custom を一意に解決する。
+**`core/tools/aidlc-testing-posture.ts` の実装では** project > team > org >
+フォールバック（test-after）の優先順で 1 つを選ぶ。
 team と project が非互換な場合は例外を投げて拒否する
 （「strict-additive memory does not permit runtime override」）。
 
@@ -440,6 +467,9 @@ git ネイティブの一時 index ハッシュで、tracked / staged / unstaged
 ## 13.8 ハーネス別のアップグレード手順
 
 **今回は `dist/` の再コピーだけで済まないハーネスが 5 つある。**
+
+凡例: **○** = `dist/` の再コピーだけで完了 / **✗** = 再コピーに加えて必ず追加操作が要る /
+**△** = 素の利用なら再コピーのみで済むが、**プラグインを使っている場合に限り**追加操作が要る。
 
 | ハーネス | 再コピーのみ | 追加操作 |
 |---|---|---|
@@ -518,12 +548,16 @@ basename の異なり数で比べると差は縮む（claude 116/78・copilot 13
 
 ---
 
-## 13.10 版番号の同定について — 今回は上流の運用が改善していた
+## 13.10 版番号の同定について — 今回の区間ではズレが無かった
 
 [12.10](./12-release-impact-2602.md) で、コミット subject に書かれた `(2.5.x)` が
 CHANGELOG の見出しと食い違う例が **12 件中 3 件**あったことを報告した。
 
 **今回、28 コミットを機械的に照合した結果、食い違いは 1 件も無かった。**
+
+ただし**これを「上流の運用が改善した」と読むのは早い**。比較できているのは 2 区間だけで、
+前回 3/12・今回 0/28 という 2 点から傾向は言えない。言えるのは
+**この区間ではズレが無かった**ということだけである。
 
 ただし運用は完全ではない。CHANGELOG 見出しを追加した 24 コミットのうち、
 **3 件は subject に版番号を書いていない**（`30d65cb0` → 2.6.48、`e229a606` → 2.6.41、

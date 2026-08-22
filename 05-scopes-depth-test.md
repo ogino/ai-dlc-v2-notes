@@ -28,7 +28,7 @@
 
 （この節を含む 2.6.2 → 2.6.49 の差分全体は [13-release-impact-2649.md](./13-release-impact-2649.md) を参照）
 
-**2.6.18 でスコープが 9 → 11 になった**（出典: `core/scopes/*.md` の件数 / `scope-grid.json` の `scopes` キー数）。追加は `classic` と `express` の 2 つで、**既存 9 スコープの EXECUTE 数はすべて不変**である（`scope-grid.json` と 33 ステージの frontmatter `scopes:` を独立集計した 2 系統で一致）。ステージ 33 / フェーズ 5 / エージェント 14 / センサー 6 / ハーネス 7 も不変で、変わったのは「各ステージがどのスコープに属するか」だけである。
+**2.6.18 でスコープが 9 → 11 になった**（出典: `core/scopes/*.md` の件数 / `scope-grid.json` の `scopes` キー数）。追加は `classic` と `express` の 2 つで、**既存 9 スコープの EXECUTE 数はすべて不変**である（`scope-grid.json` と 33 ステージの frontmatter `scopes:` を独立集計した 2 系統で一致）。ステージ 33 / フェーズ 5 / エージェント 14 / センサー 6 / ハーネス 7 も不変である。**`stage-graph.json` 上で変わったのは「各ステージがどのスコープに属するか」だけ**だが、スコープ体系そのものは別で、既定スコープ（5.2.1）・`AWS_AIDLC_DEFAULT_SCOPE` の出荷値（5.2.2）・`review_cap`（5.7）・専用ランナーの有無が動いている。
 
 **分母が 33 になった理由**: 2.6.1 で Inception に `contract-design`（2.8）が新設され、全体が 32 → 33 ステージになった。同ステージの `scopes:` は **`enterprise` / `feature` / `mvp` / `workshop` の 4 つのみ**なので、分子が +1 されるのはこの 4 行だけである（`poc` / `bugfix` / `refactor` / `infra` / `security-patch` は分子据え置きで分母のみ 32 → 33）。
 
@@ -247,7 +247,7 @@ scope frontmatter の `review_cap` が、そのスコープでレビュアーを
 
 出典: `core/scopes/aidlc-*.md` の frontmatter。
 
-**`review_cap: none` は 2.6.49 時点で初めて登場した値である。** 2.6.2 では未宣言と `advisory` の 2 通りしかなく、**レビュアーを丸ごと無効化するスコープは存在しなかった**。
+**`review_cap: none` は 2.6.18 で導入された値である**（導入コミット `fbb1460c`、CHANGELOG 見出し `## [2.6.18]`。`express` の新設と同一コミット）。2.6.2 では未宣言と `advisory` の 2 通りしかなく、**レビュアーを丸ごと無効化するスコープは存在しなかった**。
 
 ### ⚠ 静的グリッドの membership と実行時の dispatch は別物
 
