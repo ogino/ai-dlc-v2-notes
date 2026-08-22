@@ -380,7 +380,7 @@ do not mint」** というテスト名がそのまま存在する。
 | 対象 | 既存コードの構造推定（call graph 等） | 既存コードの解析結果 | PDF / Word / Markdown / プレーンテキスト |
 | 生成者 | 外部ツール | `aidlc-architect-agent` | `tools/aidlc-knowledge.ts`（決定的ツール、LLM 不介在） |
 | 操作 | ハーネス依存の `@<server>` 登録 | ステージ実行 | `/aidlc knowledge onboard` / `sync` / `list` / `show` / `associate` / `rebind` |
-| ネットワーク | 有（サーバ次第） | 無 | **無** |
+| **生成・取り込み工程**がネットワークに出るか（※モデルとのやり取りは別） | 出る（サーバ次第） | フレームワーク自身は出ない。ただし**生成するのは `aidlc-architect-agent`（LLM）** | フレームワーク自身は出ない（`fetch(` / `http(s)://` の出現 0 件） |
 
 **索引と抽出の工程はローカル完結である。** `fetch(` および `http(s)://` の出現は
 `aidlc-knowledge.ts` 内に **0 件**で、抽出は `spawnSync` でローカル実行ファイル
@@ -511,6 +511,8 @@ copilot は進行中ワークフローがある場合）。
 - **2.6.46（verb interceptor）は Kiro CLI のみ。** Kiro IDE の `dist/` に同ファイルの変更は無い。
 - **2.6.47（プラグイン compose 配線）は両方が影響を受けるが、対処が違う。**
   旧 `hooks/aidlc-plugin-compose.kiro.hook` は**双方の projection から削除された**。
+  **ただし `cp -R` は削除を反映しないので、既存インストールでは旧フックが残る。手で消すこと**
+  （`find your-project -name "aidlc-plugin-compose.kiro.hook"`）。
   CLI は hook 登録を出さなくなったので明示実行が要る。IDE は新しい JSON 登録が自動で効く。
   **このファイル名に依存したスクリプトがあれば外すこと。**
 
