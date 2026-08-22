@@ -277,7 +277,9 @@ reviewer 宣言（frontmatter の `reviewer:`）を持つステージは**両版
 
 **`express` は静的グリッド上は reviewer 宣言付きステージを 2 本（Requirements Analysis と Code Generation、いずれも ALWAYS）含むが、`review_cap: none` によって reviewer dispatch 自体が無効化される。** 上流 `core/scopes/aidlc-express.md` も「without a design pass or reviewer dispatch. Reviewers are disabled by `review_cap: none`」と書いている。**片方だけ書くと逆の印象になるので、membership と `review_cap` は必ずセットで読むこと。**
 
-含意として、2.6.2 まではレビュアーを避ける手段が「reviewer 付きステージごとスキップする」しか無かったのに対し、2.6.49 では **`express` を選べばステージを実行したままレビュアーを止められる**経路が 1 本増えた。ただし `express` は 10/33 の最小構成であり、**「フル構成のままレビュアーだけ外す」ことができるようになったわけではない**。
+含意として、**スコープ選択によってレビュアーを避ける経路**は、2.6.2 まで「reviewer 付きステージごとスキップする」1 通りだったのに対し、2.6.49 では `express` を選べば**ステージを実行したまま止められる**経路が加わって 2 通りになった。
+
+ただし次の 2 点で過大に読まないこと。**(1)** スコープ以外の経路としてランタイムの `/aidlc --review none` が 2.5.54 から存在し、これは 2.6.2 でも使えた。**(2)** `express` は 10/33 の最小構成なので、**「フル構成のままレビュアーだけ外す」ことができるようになったわけではない**。
 
 ---
 
