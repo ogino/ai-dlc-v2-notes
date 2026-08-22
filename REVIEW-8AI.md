@@ -70,6 +70,10 @@ LOW は対応任意（未対応）。
 > センサー 6 種、監査 82 イベント種別（21 分類）、mode 集計 29 inline / 2 subagent / 1 pipeline / 1 mob。**
 > 変化の経緯は [11-release-impact-2562.md](./11-release-impact-2562.md) と
 > [12-release-impact-2602.md](./12-release-impact-2602.md) を参照。
+>
+> **時点限定（追記 2026-08-22）**: 上記も 2.6.2 時点の記録。**上流実測（HEAD `71d9a9e0` / 実装 2.6.49）**
+> ではスコープが **11**、監査イベントが **86 種（22 分類）**に変わっている。5 フェーズ / 33 ステージ /
+> 14 agents / センサー 6 / TypeScript フック 17 / 7 harnesses は不変。→ [13-release-impact-2649.md](./13-release-impact-2649.md)
 
 - 5 フェーズ / 32 ステージ / 14 agents / 9 scopes / 5 harnesses
 - バージョン 2.5.11、GA 表記、MIT-0（上流実装）
