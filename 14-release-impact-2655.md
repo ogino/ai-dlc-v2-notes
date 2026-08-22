@@ -46,10 +46,13 @@ diff <(git show '71d9a9e0:<scope-grid.json>')  <(git show '840ba653:<scope-grid.
 
 | 領域 | ファイル数 | 内容 |
 |---|---:|---|
-| `tests/` | 36 | unit 26 / integration 10 |
 | `dist/` | 119 | **7 ハーネス × 17 ファイルで完全に均等**（共有コアの機械的投影） |
+| `tests/` | 40 | |
 | `core/` | 16 | conductor / プロトコル 2 / ステージ 2 / フック 3 / 監査書式 / tools 6 ほか |
-| `docs/` | 10 | reference 5 / guide 5 |
+| `docs/` | 11 | |
+| `harness/` | 7 | 各ハーネスの `skills/aidlc/SKILL.md`（**7 ハーネス × 1**） |
+| ルート | 2 | `CHANGELOG.md` / `README.md` |
+| **合計** | **195** | |
 
 `dist/` が 7 で割り切れることが、今回の変更が**ハーネス固有ではなく共有コア由来**であることを示している。
 
@@ -67,7 +70,8 @@ diff <(git show '71d9a9e0:<scope-grid.json>')  <(git show '840ba653:<scope-grid.
 2.6.51 はそれを 7 ハーネスに一般化し、**2.6.12 が意図的に残した抜け穴**
 （sessionless 経路での同一トークン再生、上流 issue #762）を塞いだ。
 CHANGELOG も「closing the sessionless same-token replay carve-out **accepted in PR #749**」と書く。
-PR #749 は 2.6.12 の導入 PR である。
+PR #749 は 2.6.12 の導入 PR である（`git log --grep='#749'` が返す `d5b40846` の subject が
+「stabilize Copilot Stop continuation and Resume waits (2.6.12) (#749)」）。
 
 Copilot に残るのはセッション所有権と delivery evidence による**マーカーの enrichment だけ**になった。
 上流ガイドの書き換え後の一文:
@@ -123,8 +127,13 @@ aidlc/spaces/<space>/intents/<record>/.aidlc-active-directive.json
 
 **含意は 2 つある。**
 
-1. **リポジトリをネットワーク共有や同期フォルダに置いている利用者は、2.6.51 で新規に影響を受ける。**
-   従来は fail-open で動いていた構成が、**作業ディレクティブを 1 つも出さない**状態になりうる。
+1. **記録ディレクトリの置き場所が、初めて可用性の条件になった。**
+   上流が要求するのは「アトミックな同一 FS 内 rename・排他ディレクトリ作成・
+   プロセス間の一貫した可視性」であり、**これらを満たさない**ファイルシステムを unsupported としている。
+   ネットワーク共有や同期フォルダが常にそうだとは上流も本ノートも言っていない
+   （実装や構成によって満たす場合もある）。**言えるのは「満たさない構成では
+   従来 fail-open で動いていたものが、作業ディレクティブを 1 つも出さない状態になりうる」**ことである。
+   自分の構成が該当するかは実際に確認する必要がある。
    これはハーネス固有ではなく**環境固有**の問題なので、ハーネス別の表には現れない。
 2. **保証されるのは「プロセス間で勝者が 1 つ」であって「電源断耐性」ではない。**
    `fsync` していないと上流自身が書いている。
@@ -142,7 +151,7 @@ CHANGELOG の Upgrade 文は今回いちばん長い。分解すると次のと�
 | `replace the whole dist/<harness>/ shell in one quiescent swap (no AI-DLC command or hook running)` | AI-DLC のコマンドが 1 つも走っておらず、フックも発火していない瞬間にコピーを完了させる |
 | `mixed old/new tool files are unsupported` | **AI-DLC コマンドが全部落ちる。** 旧 orchestrate は削除済みシンボルを named import するため、モジュールのロードに失敗する。「挙動が混ざる」のではなく「起動しない」 |
 | `then run a fresh next` | ステージ進捗は巻き戻らない。失うのは**ステージ規則の分割配信の途中位置**だけ |
-| `a matching in-flight token instead migrates atomically` | project / intent / state / トークンダイジェストの **4 点すべてが一致**したときのみ移行する。1 つでもズレたら stale |
+| `a matching in-flight token instead migrates atomically` | project / intent / state / トークンダイジェストの **4 点すべてが一致**したときのみ移行する。1 つでもズレたら stale（**CHANGELOG の一文ではなく、`docs/reference/06-hooks-and-tools.md` の「Atomic continuation cursor」節が列挙するカーソル同一性の構成要素からの読み取り**） |
 | `Rolling back to an older release restores its sessionless replay behavior until re-upgraded` | **ダウングレードはセキュリティ後退である。** #762 の再生の抜け穴が復活する。壊れはしないが弱くなる |
 
 > **⚠ この制約は既存の「○ / ✗ / △」分類では表せない。**
@@ -173,7 +182,7 @@ approvalInput === "Approve" ||
 | 承認 | `Approve` |
 | 改訂 3 回後のエスケープハッチ | `Accept as-is`（**`Revision Count >= 3` のときのみ**） |
 | 却下 | `Request Changes` |
-| 要約確認 | `Looks correct` / `Request changes`（これは 2.6.50 より前から完全一致だった） |
+| 要約確認 | `Looks correct` / `Request changes`（**2.6.50 より前から完全一致**。`aidlc-log.ts` の `"Looks correct"` の出現数が 2.6.49 と 2.6.55 で同数であることを実測） |
 
 `OK` / `いいね` / `approve` / `Approved` / `Looks good` はいずれも拒否される。
 
@@ -284,11 +293,17 @@ conductor は配車記録と受領証を 2 コマンドで連続発行でき、
 
 ### フィンガープリントは 3 点照合になった
 
-| 項目 | 導入版 |
-|---|---|
-| `Artifact Fingerprint`（`REVIEW_COMPLETED` 側） | 2.5.39 |
-| `Source Fingerprint` | 2.6.37 |
-| **`Artifact Fingerprint`（`REVIEW_REQUESTED` 側）** | **2.6.52（新規）** |
+| 項目 | 導入版 | 導入コミット |
+|---|---|---|
+| `Artifact Fingerprint`（`REVIEW_COMPLETED` 側） | 2.5.39 | `ebfa3cee` |
+| `Source Fingerprint` | 2.6.37 | `244b52ba`（→ [13 章](./13-release-impact-2649.md)で既述） |
+| **`Artifact Fingerprint`（`REVIEW_REQUESTED` 側）** | **2.6.52（新規）** | `a6f5e66c` |
+
+> **⚠ 版を調べるときに `git log -S ... --all` を使ってはいけない。**
+> `Source Fingerprint` を `--all` 付きで検索すると、**未マージブランチ**の `15d68f91`
+> （subject に `(2.5.6)`）が返る。これは `v2` の祖先ではなく
+> （`git merge-base --is-ancestor` が偽）、出荷版は `244b52ba` / 2.6.37 である。
+> [14.8](#148-版番号の同定について) の `(2.6.19)` と同じ罠である。
 
 旧実装は「記録時のフィンガープリント」と「現在のバイト」しか比べておらず、
 **配車後・verdict 記録前の書き換えを検出できなかった**。2.6.52 がこの穴を塞いだ。
@@ -305,15 +320,25 @@ conductor は配車記録と受領証を 2 コマンドで連続発行でき、
 
 | 期間 | ゲート条件 | 何が漏れるか |
 |---|---|---|
-| v2-unified 〜 **2.6.19** | 監査シャードが在るか（`existsSync(auditFile)`） | 一度でも AI-DLC を動かしたプロジェクトなら、**AI-DLC と無関係なセッション中でも書く** |
-| **2.6.20** | 状態ファイルが在るか（`existsSync(stateFilePath)`） | 完了後も状態ファイルは残るため、**完了後・無関係セッション中も書く** |
+| v2-unified 〜 **2.6.18** | 監査シャードが在るか（`existsSync(auditFile)`） | 一度でも AI-DLC を動かしたプロジェクトなら、**AI-DLC と無関係なセッション中でも書く** |
+| **2.6.20 〜 2.6.53** | 状態ファイルが在るか（`existsSync(stateFilePath)`） | 完了後も状態ファイルは残るため、**完了後・無関係セッション中も書く** |
 | **2.6.54** | `Status: Running` | — |
 
-上流 CHANGELOG 自身がこの 2 段階を示唆している。
+この 3 段階は `git log -S` で確認した。
+
+```
+git log -S'existsSync(auditFile)' -- core/hooks/aidlc-log-subagent.ts
+  868f0256  2.6.54  ← 削除（Status: Running に置換）
+  85a9443c  2.6.20  ← 状態ファイル存在チェックに置換
+  7b824b34  v2-unified  ← 導入
+```
+
+上流 CHANGELOG の書き方もこれと整合する。
 
 > instead of writing whenever **a state file or audit shard** remains from an earlier workflow
 
-「state file **or** audit shard」という並記が、旧ゲートが 2 種類あったことの反映である。
+「state file **or** audit shard」と 2 つ並記しているのは、旧ゲートが時期によって 2 種類あったためである。
+（ただしこの一文だけでは「2 つが順に置き換わった」とまでは言えない。順序は上の `git log -S` で確定させた。）
 
 **このフックは常時発火する。** `SubagentStop` は matcher が空（= always）で
 プロジェクト全体に登録されるため、**AI-DLC と無関係な Task ツール呼び出しでも起動する**。
@@ -359,7 +384,8 @@ transcript を持たないハーネスの会話ターン判定が壊れるため
 > 上流 issue #695 自身が「テストハーネス外では不可視」「回復済み失敗を監査する仕組みが無い」と明言している。
 > **Kiro IDE での実測は無い**（Kiro CLI とは別物）。
 
-per-Unit Construction の指令には 28 KiB のトランスポート上限があり、
+per-Unit Construction の指令には 28 KiB のトランスポート上限があり
+（`core/tools/aidlc-orchestrate.ts` の `const DIRECTIVE_MAX_BYTES = 28 * 1024`）、
 **指令に実際に載った Unit の日誌だけ**が作られる。
 上限で載らなかった Unit の日誌は、後続の指令がそれを運ぶまで未作成のままである。
 
