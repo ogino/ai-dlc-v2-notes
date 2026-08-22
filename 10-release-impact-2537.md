@@ -2,6 +2,7 @@
 
 対象: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) v2 ブランチ
 調査日: 2026-08-05（HEAD = 2.5.37 / CHANGELOG 最新エントリ 2026-08-03）
+次回: [11-release-impact-2562.md](./11-release-impact-2562.md)（2.5.37 → 2.5.62）
 
 本章は、01〜09 が対象とした **2.5.11** から **2.5.37** までの 12 リリースの差分と、その過程でソースを読んで確認した挙動をまとめる。行番号は 2.5.37 時点のもの。
 
@@ -39,6 +40,11 @@
 > **フェーズ 5・エージェント 14・スコープ 9 は 2.6.2 でも不変。**
 > → [11-release-impact-2562.md](./11-release-impact-2562.md)（2.5.37 → 2.5.62）
 > ／ [12-release-impact-2602.md](./12-release-impact-2602.md)（2.5.62 → 2.6.2）
+>
+> **時点限定**: 直上の「スコープ 9 は 2.6.2 でも不変」は 2.6.2 時点の記録。2.6.49 では
+> スコープが **11**（`classic` / `express` 追加）、監査イベントが **86 種（22 分類）**に変わっている。
+> フェーズ 5・エージェント 14・センサー 6・フック 17・ハーネス 7 は 2.6.49 でも不変。
+> → [13-release-impact-2649.md](./13-release-impact-2649.md)（2.6.2 → 2.6.49）
 
 変わったのは次の 2 つ。
 
@@ -52,6 +58,10 @@
 > あわせて注意: 2.5.37 の時点では上流 README のツリー図も「34 aidlc-\*.ts engine tools」と表記しており実測と一致していたが、
 > **2.5.58（`8c60e1ab`）で README 側が 34 → 25 に差し戻され、表記と実数の食い違いが復活している**
 > （HEAD の `README.md:365` は「25」、実数は `aidlc-*.ts` **37** 本）。
+>
+> **時点限定**: 直上の「tools は 38」は 2.6.2 時点の記録。2.6.49 では CLI tools が **41**
+> （`aidlc-documentkb-schema.ts` / `aidlc-knowledge.ts` / `aidlc-testing-posture.ts` の 3 本追加）に
+> 変わっている。→ [13-release-impact-2649.md](./13-release-impact-2649.md)（2.6.2 → 2.6.49）
 
 ---
 

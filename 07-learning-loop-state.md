@@ -131,10 +131,26 @@ org → team → project → phase → (stage: 将来)
 - Construction Autonomy Mode
 - セッション再開情報
 
-### Audit（82 イベント種別・21 分類）
+### Audit（86 イベント種別・22 分類※）
+
+※ 正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準（22 分類）。
+`docs/reference/12-state-machine.md` 基準では 19 分類。上流自身が「グルーピングは表示上の分類であり、
+イベント集合そのものが不変条件」と注記しており、出典によって分類数が違うのはこのため。
+どちらの数字を引用するかは出典を明記すること。
 
 - `audit/` 配下のシャードをタイムスタンプマージ
-- 例: STAGE_*, QUESTION_ANSWERED, REVIEW_*, SENSOR_*, RULE_LEARNED, RECOMPOSED, PLUGIN_SELECTION_CHANGED, ...
+- 例: STAGE_*, QUESTION_ANSWERED, REVIEW_*, SENSOR_*, RULE_LEARNED, RECOMPOSED, PLUGIN_SELECTION_CHANGED,
+  DOCUMENT_INDEXED, DOCUMENT_UPDATED, DOCUMENT_REMOVED, PIPELINE_LINK_COMPLETED, ...
+
+**新カテゴリ `Documents`（3 イベント）**: `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED` の 3 つ。
+DocumentKB（[07.6](#76-knowledge-の-2-層) の派生カタログ）に対応する。この 3 イベントは
+**フレームワーク中で唯一の「audit-last」例外**である。通常は audit-first（先に監査へ記録してから実処理に入る）
+だが、DocumentKB のカタログはローカル文書から**再構築可能な派生物**であるため、意図的に順序を逆転している。
+
+**Timestamp 重複除去（2.6.14）と後方互換**: `park` / `unpark` / `practices-promote` の失敗パス 3 つで、
+呼び出し側が渡した `Timestamp` / `Event` フィールドが監査ブロック描画時にスキップされ、重複行が出なくなった。
+**読み取り側（`findAllEvents`）は無改修**でブロック内最初の `Timestamp` 行を拾う実装のままのため、
+重複行が残る旧シャードもそのまま正しく読める。
 
 ### Session resume
 

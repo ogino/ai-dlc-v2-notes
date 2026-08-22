@@ -133,6 +133,22 @@ cp dist/codex/AGENTS.md   your-project/AGENTS.md
 
 詳細は公式 `docs/guide/harnesses/codex-cli.md`。
 
+> **trust テーブルは「初回だけ」ではない（2.6.44）。** 上の手順は初回導入時のものだが、
+> 2.6.44 で `request_user_input` を拾う新しい PostToolUse 登録が
+> **`.codex/hooks.json` の PostToolUse 配列の先頭に挿入された**。
+> trust エントリは `post_tool_use:N` という**位置インデックス**で hook を指すため、
+> 先頭挿入によって**既存エントリのインデックスが全部 1 つずつズレる**。
+> `dist/codex/` を再コピーしただけでは、古い trust テーブルが別の hook を指したままになる。
+> アップグレード時は次を行うこと:
+>
+> ```bash
+> bun scripts/package.ts codex trust --project "<プロジェクトの絶対パス>"
+> # 出力の TOML で $CODEX_HOME/config.toml の既存 AI-DLC trust エントリを「差し替える」
+> # （追記ではない。同一 hook path の古いエントリは消す）
+> ```
+>
+> そのうえで**新しい Codex セッションを開始する**。
+
 ### Cursor（2.5.63 で追加）
 
 **他ハーネスと違い、`cp` ではない。同梱インストーラを bun で実行する。**
@@ -184,7 +200,63 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 
 ---
 
-## 6.4 よく使うコマンド
+## 6.4 アップグレードでハーネスごとにすること（2.6.2 → 2.6.49）
+
+**「`dist/` を再コピーすれば済む」ハーネスと、追加の手作業が要るハーネスがある。**
+
+| ハーネス | `dist/` 再コピーだけで済むか | 追加で必要な操作 |
+|----------|------------------------------|------------------|
+| **Claude Code** | ○ | なし |
+| **Cursor** | ○ | なし（`bun dist/cursor/install.ts <project>` の再実行が「再コピー」に相当。**2.6.48 は対象外** — 元から具体パスを出荷していた） |
+| **Codex CLI** | ✗ | **2.6.44**: `bun scripts/package.ts codex trust --project "<絶対パス>"` を再実行し、既存 trust テーブルを**差し替え**、**新セッションを開始**（§6.3 の囲み参照） |
+| **GitHub Copilot** | ✗ | **2.6.12**: 進行中ワークフローがあれば**新しい会話を開始**（下記）。**2.6.48**: 再コピーでプレースホルダ持ちペルソナを差し替え |
+| **opencode** | ✗ | **2.6.48**: 再コピーでプレースホルダ持ちペルソナを差し替え |
+| **Kiro CLI** | △ | **2.6.46**: 再コピーで verb interceptor 修正が入る（**CLI のみ**）。**2.6.47**: プラグイン利用時は projection を再ビルド／再コピーしたうえで `aidlc plugin sync` か `hooks/compose.ts` を**明示実行** |
+| **Kiro IDE** | △ | **2.6.47**: プラグイン利用時は projection を再ビルド／再コピー。新規 `.kiro/hooks/aidlc-<plugin>-compose.json`（SessionStart 登録）が自動で効くので**明示実行は不要**（CLI と対処が違う） |
+
+### Kiro CLI と Kiro IDE は分けて読むこと
+
+同じ「Kiro」でも今回の 2 件は影響範囲が違う。
+
+- **2.6.46 の verb interceptor 修正は Kiro CLI のみ。** 生の `/aidlc --status` / `space` / `space-create` / `intent` 等が silent no-op になっていた不具合の修正で、**Kiro IDE の dist には同ファイルの変更が無い**。
+- **2.6.47 のプラグイン compose 配線は両方が影響を受けるが、対処が違う。**
+  旧 `hooks/aidlc-plugin-compose.kiro.hook` は **CLI / IDE 双方の projection から削除された**。
+  - **CLI**: hook 登録をもう出さない。フォルダを置いたあと `aidlc plugin sync` か `hooks/compose.ts` を**自分で実行**する。
+  - **IDE**: 代わりに `.kiro/hooks/aidlc-<plugin>-compose.json`（v2 `SessionStart` 登録）が出る。ワークスペースルートから Bun ランチャを起動するので、**明示実行は要らない**。
+- **旧ファイル名に依存したスクリプトがあれば外すこと。** `aidlc-plugin-compose.kiro.hook` はもう出荷されない。
+
+### ペルソナ記憶パスの固定（2.6.48）
+
+opencode と GitHub Copilot の出荷ペルソナは、記憶参照を `aidlc/spaces/<active-space>/memory/...` という**可変プレースホルダ**で持っていた。2.6.48 でこれが `aidlc/spaces/default/memory/...` という**具体パスの default-space シード**に変わり、`/aidlc space default` が出荷ファイルを書き換えなくなった（byte-identical のまま）。`/aidlc space <name>` で別 Space に切り替えれば、従来どおり全ペルソナが張り替えられる。
+
+**Cursor は元からこの形だったので対象外。** 影響を受けるのは opencode と Copilot の 2 つだけで、対処は `dist/<harness>/` の再コピー（プレースホルダ持ちの古いペルソナを置き換える）。
+
+### 学習 selections ファイルの非互換（2.6.36）
+
+`aidlc-learnings.ts persist` の冪等キーが positional candidate id（`c1`）から**学習内容自体の SHA-256** に変わり、`surface()` の出力スキーマに `space` / `intent` が追加された。このため:
+
+- **アップグレード前に生成した selections ファイルは失敗する。** エラーは `selections-json is malformed: missing or non-string space`。
+- **対処は該当ステージの `surface` を再実行して selections を作り直すこと。** `persist` を単純にリトライしても直らない（ファイル自体に新フィールドが無いため）。
+
+### `dist/` の変更ファイル数を「開発量」と読まないこと
+
+2.6.2 → 2.6.49 で `dist/` の変更ファイル数はハーネス間でほぼ同数になる。
+
+| ハーネス | 変更ファイル数 |
+|----------|----------------|
+| opencode | 139 |
+| copilot | 139 |
+| codex | 123 |
+| claude | 116 |
+| kiro | 115 |
+| kiro-ide | 114 |
+| cursor | 114 |
+
+**これは「全ハーネスに等量の固有開発があった」という意味ではない。** 共有コア（`aidlc-lib.ts`・`aidlc-state.ts`・プロトコル・14 ペルソナ・stage-runner の SKILL.md 等）が機械的に全ハーネスへ投影される構造の効果である。opencode と copilot が突出するのも固有開発量ではなく、**同一内容を中立エンジン木（`.aidlc/`）とネイティブ殻（`.opencode/` / `.github/`）の 2 箇所に投影する**ためで、basename のユニーク数で比べると差は縮む（claude 116/78・copilot 139/87・cursor 114/76・kiro-ide 114/76）。ハーネス固有の実質差分は数ファイル単位で、上の 6.4 の表（CHANGELOG の Upgrade 文が名指しした版）と一致する。
+
+---
+
+## 6.5 よく使うコマンド
 
 | コマンド | 意味 |
 |----------|------|
@@ -217,7 +289,7 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 
 ---
 
-## 6.5 トラブルシュート（頻出）
+## 6.6 トラブルシュート（頻出）
 
 | 症状 | 対処 |
 |------|------|
@@ -225,13 +297,24 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 | Codex doctor が version 不足 | ≥ 0.145.0 |
 | Bedrock AccessDenied（Claude/Codex 出荷設定） | モデル有効化 + 資格情報 + region |
 | Codex hooks が動かない | §6.3 の trust（TUI または config.toml へ TOML 反映） |
+| Codex: アップグレード後に hooks が誤動作／効かない | **trust テーブルの再生成**（2.6.44 で PostToolUse 配列の先頭に新フックが入りインデックスがズレる。§6.3 の囲み） |
 | 新 dist をコピーしたが反映されない | **新セッション**起動 |
+| Copilot: アップグレード後に進行中ワークフローが進まない／古い挙動をする | **新しい会話を開始**（2.6.12。下記） |
+| Kiro CLI で `/aidlc --status` 等が無反応（silent no-op） | 2.6.46 の verb interceptor 修正。`dist/kiro/` を再コピー（**Kiro CLI のみの修正**） |
+| Kiro: プラグインの compose がアップグレード後に走らない | 2.6.47。projection を再ビルド／再コピーし、**CLI は** `aidlc plugin sync` か `hooks/compose.ts` を明示実行（**IDE は不要**）。§6.4 |
 | Kiro IDE hooks 無反応 | v2 schema hooks の正しい中身コピー（2.5.10） |
 | Cursor IDE で全ツール呼び出しがブロックされる | 2.5.63〜2.5.68 の既知不具合（allow JSON 未出力 × `failClosed`）。**2.5.69 以降**へ更新し `bun dist/cursor/install.ts <project>` を再実行 |
+| 学習 persist が `selections-json is malformed: missing or non-string space` で落ちる | 2.6.36 の非互換。該当ステージの **`surface` を再実行**して selections を作り直す（`persist` のリトライでは直らない）。§6.4 |
+
+### GitHub Copilot: アップグレード後は進行中ワークフローを新しい会話で継続する（2.6.12）
+
+2.6.12 で Copilot は、直近に配信した AI-DLC ディレクティブを **Copilot 所有のアトミックなエンジンカーソル**で保持し、Stop からの継続とリプレイ拒否をそこで判定する設計になった。カーソルは提示トークンのダイジェストを丸ごと比較してから後続トークンを公開する仕組みで、**アップグレード前の転送マーカーは形式が合わず再利用できない**（欠落・不正・v1・陳腐化したコンテキストは従来のステートレス経路に落ちる）。
+
+そのため、**進行中のワークフローを抱えたまま `dist/copilot/` を更新した場合は、新しい Copilot の会話を開始してから続きを進めること。** 同じ会話を続けると、アップグレード前のマーカーを引きずった状態で再開しようとすることになる。
 
 ---
 
-## 6.6 ソースの確認方法
+## 6.7 ソースの確認方法
 
 ```bash
 git clone --depth 1 --branch v2 https://github.com/awslabs/aidlc-workflows.git
@@ -247,3 +330,7 @@ ls assets/   # AI-DLC-Workflows-2.0-Specification.pdf（ハイフン区切りの
 > `assets/AI-DLC-Workflows-2.0-Specification.pdf`（ハイフン区切り）と
 > `dist/AI-DLC Workflows 2.0 Specification.pdf`（空白区切り）。**リンク・引用は `assets/` を正とする。**
 > なお PDF の内容が 33 ステージ構成に更新されているかは**未確認**。
+
+---
+
+> **上流 2.6.2 → 2.6.49 の差分**: [13-release-impact-2649.md](./13-release-impact-2649.md)

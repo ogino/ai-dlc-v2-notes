@@ -11,11 +11,12 @@
 - [ ] `docs/reference/*` 精読後のエンジン内部メモ追加
 - [ ] `docs/guide/agents/*.md`・`workshop-mode.md` が 2.5.11 時点で既に存在したか（新規追加か索引漏れか）の切り分け
 
-## 上流追従（2.6.2 まで同期済み）
+## 上流追従（2.6.49 まで同期済み）
 
 - [x] 上流 2.5.11 → 2.5.37 の差分反映（2026-08-05）
 - [x] 上流 2.5.37 → 2.5.62 の差分反映（2026-08-11）→ [11-release-impact-2562.md](../11-release-impact-2562.md)
 - [x] 上流 2.5.62 → 2.6.2 の差分反映（2026-08-14。HEAD `4569754e`）→ [12-release-impact-2602.md](../12-release-impact-2602.md)
+- [x] 上流 2.6.2 → 2.6.49 の差分反映（2026-08-22。HEAD `71d9a9e0`）→ [13-release-impact-2649.md](../13-release-impact-2649.md)
 - [ ] **追従フローの定例化** — 上流には in-place upgrade も版数比較の仕組みも無い（`docs/roadmap.md` #535 未実装）ため、追従は運用で担保するしかない。担当者と頻度を決める
   - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
 - [ ] **2.6.1 の破壊的変更を読者向け移行手順として点検する** — 永続 state が v8 に上がり、`/aidlc next` / `/aidlc report` / `/aidlc --doctor` が pre-v8 state を拒否する。アップグレード時は `skills/aidlc-application-design/` の**手動削除**が要る（`cp -R` マージでは残る）。実機での再現は未実施
@@ -29,6 +30,17 @@
 - [ ] `11-release-impact-2562.md:8` の「変更ファイル 1,425 件」— 2.5.37 → 2.5.62 区間の再計測は未実施
 - [ ] Cursor ハーネス: `bun scripts/package.ts cursor --check` による dist ドリフト検証、および上流テストの実行（調査環境に `bun` が無い）
 - [ ] 2.5.63 が core の `aidlc-review-freeze.ts` に入れたシェルラッパ剥がし強化（`sudo` / `env` / `xargs` / `timeout` 等）が、**既存ハーネスで false positive を生むか**未検証
+
+## 2.6.49 調査で残った未確認事項
+
+- [ ] プロトコルモジュール分割（4 → 8）による固定コンテキスト削減の定量値 — 上流が数値化していない
+- [ ] `tests/integration/t304` / `t307` のループバックテストが「3 回」の数値上限自体をアサートしているか — ファイル存在のみ確認
+- [ ] DocumentKB の後続段階（「S2」相当）の正式名称・時期 — 上流 issue #714 として予告されるのみ
+- [ ] `core/tools/aidlc-swarm.ts` 本体が Testing Contract を検証する具体的コード位置
+- [ ] `bun scripts/package.ts codex trust` の内部ハッシュ生成ロジックが 2.6.44 で変わったか
+- [ ] Kiro IDE の新 `.kiro/hooks/*.json` が実機 Kiro IDE 1.x で実際に SessionStart 発火するか — 実機未検証
+- [ ] `<active-space>` プレースホルダが claude / codex / cursor / kiro / kiro-ide の現行 dist に残っていないかの横断 grep — 該当コミットの変更ファイル範囲でのみ確認
+- [ ] 上流ドキュメントの stale 3 箇所（`docs/guide/05-scopes-and-depth.md` のキーワード表 fallback 行、`docs/reference/03-orchestrator.md`、`core/scopes/aidlc-feature.md` 本文）が意図的な緩さか単なる更新漏れか — 上流 Issue / PR 未参照
 
 ## 運用
 

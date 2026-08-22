@@ -7,8 +7,8 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-08-14  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.2**。CHANGELOG 日付 2026-08-13 / 取得日 2026-08-14）
+最終同期日: 2026-08-22  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.49**。上流 HEAD `71d9a9e0` / 取得日 2026-08-22）
 
 > 上流はマイナーリリースが頻繁である。本ノートは特定時点のスナップショットであり、
 > 数値・仕様は参照時に、**上流リポジトリ**（`awslabs/aidlc-workflows` v2 のローカル clone）の `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。本ノートのリポジトリには `core/` は存在しない。
@@ -45,7 +45,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [02-architecture.md](./02-architecture.md) | リポジトリ構成・Engine/Conductor・平面モデル |
 | [03-phases-and-stages.md](./03-phases-and-stages.md) | 5 フェーズ / 33 ステージの全体像 |
 | [04-agents.md](./04-agents.md) | 14 エージェント体制 |
-| [05-scopes-depth-test.md](./05-scopes-depth-test.md) | 9 スコープ・深度・テスト戦略・Composer |
+| [05-scopes-depth-test.md](./05-scopes-depth-test.md) | 11 スコープ・深度・テスト戦略・Composer |
 | [06-harnesses-install.md](./06-harnesses-install.md) | 対応ハーネスと導入手順の要点 |
 | [07-learning-loop-state.md](./07-learning-loop-state.md) | Space/Intent・Rules・Sensors・監査 |
 | [08-v1-vs-v2.md](./08-v1-vs-v2.md) | 1.x 系と 2.0 の差分 |
@@ -53,6 +53,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [10-release-impact-2537.md](./10-release-impact-2537.md) | 2.5.11 → 2.5.37 の差分／ソース読解で分かった挙動 |
 | [11-release-impact-2562.md](./11-release-impact-2562.md) | 2.5.37 → 2.5.62 の差分。**監査 74→82**、フック 7 本改名、GitHub Copilot ハーネス追加 |
 | [12-release-impact-2602.md](./12-release-impact-2602.md) | 2.5.62 → 2.6.2 の差分。**ステージ 32→33**、`application-design` 廃止と `domain-design` / `contract-design`、成果物名の作り直し、state スキーマ v8、Cursor ハーネス追加 |
+| [13-release-impact-2649.md](./13-release-impact-2649.md) | 2.6.2 → 2.6.49 のリリース差分 |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
 ### メンテナ向け（作業記録）
@@ -72,13 +73,15 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | フェーズ | 5（Initialization / Ideation / Inception / Construction / Operation） |
 | ステージ | 33 |
 | エージェント | 14（ドメイン 11 + レビュア 2 + Composer 1） |
-| スコープ | 9 + 自動検出 + カスタム compose |
+| スコープ | 11 + 自動検出 + カスタム compose |
 | 深度 / テスト戦略 | 各 3 段階（独立） |
-| 監査イベント種別 | **82**（21 分類） |
+| 監査イベント種別 | **86**（22 分類）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
-| 実装バージョン | **2.6.2**（2026-08-13 時点 CHANGELOG。取得は 2026-08-14） |
+| 実装バージョン | **2.6.49**（上流 HEAD `71d9a9e0`。取得日 2026-08-22） |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
+
+※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準（22）。`docs/reference/12-state-machine.md` 基準では 19 分類（イベント種別の集合自体は両出典で同一）。
 
 ---
 

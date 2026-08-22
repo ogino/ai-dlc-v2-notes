@@ -64,6 +64,27 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 
 **チェックリストの所在（2.5.33 以降）**: レビュアの `knowledge/<agent>/reviewing.md` は、パッケージング時に**レビュア agent 本体へ埋め込まれる**。実行時に知識 glob を読みに行く設計から、ビルド時埋め込みへ変わった。Kiro のレビュア JSON からは冗長な per-agent 知識 glob が削除されている。
 
+### レビュアの 60 ターン上限（2.6.8）— ハーネスで強制力がまったく違う
+
+`maxTurns: 60` は**出荷 14 ペルソナのうち 2 つ**（`aidlc-architecture-reviewer-agent` / `aidlc-product-lead-agent`）にだけ付く。正典は `core/agents/aidlc-*-agent.md` の frontmatter 1 箇所で、そこから各ハーネスへ投影される。
+
+**ただし「投影された」ことと「強制される」ことは別**である。上流 CHANGELOG 2.6.8 が自ら列挙している:
+
+| ハーネス | 強制力 | 上限に達したときの挙動 |
+|----------|--------|------------------------|
+| **Claude Code** | **ネイティブ強制**（`maxTurns` をそのまま読む） | 上限でサブエージェントを停止。**final-message ターンも無い**。呼び出し側は出力を受け取らず、書かれていないレビューは丸ごと失われる |
+| **opencode** | **ネイティブ強制**（emit が `steps: 60` に改名） | 最後に**テキストのみ 1 ターン**を許す。要約は返せるが**ツール呼び出しができないのでレビュー本体は書けない** |
+| **Codex CLI** | **散文のみ** | TOML ペルソナに frontmatter が無いため、emit がペルソナ本文側の引用文を書き換える形になる |
+| **Cursor** | **散文のみ** | per-agent cap キーが無い。寛容な `.md` 面には**無効な `maxTurns: 60` が出荷され続ける** |
+| **GitHub Copilot** | **散文のみ** | 同上 |
+| **Kiro CLI / Kiro IDE** | **散文のみ** | ネイティブ agent JSON は未知フィールドで fail-closed するためキーは入らず、`.md` 面の inert なキーと `## Turn Budget` 散文だけが届く |
+
+→ **「レビュアは 60 ターンで必ず止まる」と言えるのは Claude Code と opencode だけ。** 残り 5 ハーネスは「エージェントが自分で守る」ことに依存し、決定的な保証は無い。しかも強制される 2 つでも挙動が違う（Claude Code は最終ターン無し / opencode はテキストのみ 1 ターン）。
+
+**incomplete-attempt guard 自体も決定的ではない。** レビュー受領証は「ちょうど 1 つの現行 `## Review` 節 + ちょうど 1 つの正規 verdict」でのみ有効で、欠落・複数・verdict 無しは INCOMPLETE として `--retry-pending` で 1 回だけ無消費リトライし、2 回目の不完全でも `NOT-READY` を確定受領証として記録する（デッドロックはしない）。しかし **verdict のパースは導体（LLM）のプロトコル遵守に依存**しており、ツール側の強制は無い。上流テスト `tests/unit/t279-reviewer-turn-budget.test.ts` の冒頭コメント自身が *"Mechanism: none. Pure content checks over authored + shipped bytes"* と書いている（＝このテストは散文が全ハーネスへ正しく配布されたかしか見ていない）。
+
+そのため**ペルソナ本文の側で最悪ケースを前提にさせる**設計になっている。実際の出荷本文は「上限に達すると、最悪の場合は警告も final-message ターンも無く停止する。書かれなかったレビューは単に失われる。毎回その最悪ケースを想定し、上限より十分手前でレビューを書け（最終ターンに書くな）」と指示している。運用上は、**レビュアが長考して黙って消えることを利用者側も想定しておく**必要がある。
+
 ---
 
 ## 4.4 Composer（1）
@@ -96,7 +117,7 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 | **Kiro CLI** | **2.5.74 で接続可能になった**。出荷 Composer 設定が `includeMcpJson: true` になったため、`.kiro/settings/mcp.json` に CodeKB を `"disabled": true` **なしで**追加し、Composer の `tools` に `@<server>` を足せば使える（**CodeKB 自体は同梱されない**）。**追加しても `allowedTools` には入らないため、呼び出しごとに承認が要る** |
 | **Kiro IDE** | **フォールバック専用のまま**。常に **workspace-scan フォールバック** |
 
-CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `aidlc/spaces/<space>/codekb/`（Reverse Engineering 成果のローカル store）とは別物。
+CodeKB は AI-DLC 同梱ではない外部 MCP。紛らわしい名前の store が**ほかに 2 つ**あるので、この節末の三者比較表を必ず参照すること。
 
 > **この行は 2.6.2 で変わった。** 上流ガイドの記述自体が書き換わっている（`docs/guide/05-scopes-and-depth.md`）。
 > 2.5.62: *"On Kiro CLI **and Kiro IDE** the shipped composer agent config does not grant MCP tools,
@@ -120,6 +141,26 @@ CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `ai
 > CodeKB を常用するなら、アップグレード手順に再付与を組み込んでおくこと。
 
 実行中の reshape は `recompose`（完了済みステージは凍結）。
+
+### CodeKB MCP / `codekb/` / DocumentKB — 三者の違い
+
+2.6.15 で **DocumentKB**（`aidlc/spaces/<space>/knowledge/documentkb/`）が加わり、「知識の置き場」に見えるものが 3 つになった。**この 3 つはまったく別物**である。
+
+| 問い | **CodeKB MCP**（外部） | **`aidlc/spaces/<space>/codekb/`** | **`.../knowledge/documentkb/`**（2.6.15 新設） |
+|------|------------------------|------------------------------------|-----------------------------------------------|
+| 実体は何か | AI-DLC 非同梱の外部 MCP サーバ | Reverse Engineering (2.1) の出力先。9 成果物 | ユーザー文書の索引（`index.json` + `<id>/metadata.json` + `<id>/content.md`） |
+| 何を対象にするか | 既存コードの構造推定（call graph 等） | 既存コードの解析結果 | PDF / Word / Markdown / プレーンテキスト |
+| 誰が作るか | 外部ツール | `aidlc-architect-agent`（ステージ実行） | `tools/aidlc-knowledge.ts`（決定的ツール、**LLM 不介在**） |
+| どう操作するか | ハーネス依存の `@<server>` 登録 | ステージを回す | `/aidlc knowledge onboard` / `sync` / `list` / `show` / `associate` / `rebind` |
+| ネットワークに出るか | 出る（サーバ次第） | 出ない | **出ない**（`core/tools/aidlc-knowledge.ts` に `fetch(` / `http(s)://` の出現 0 件） |
+| 監査イベント | 対象外 | `PIPELINE_LINK_COMPLETED` | `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED` |
+
+DocumentKB について、この章の文脈で押さえておく点:
+
+- **完全にローカル**。テキスト抽出は `node:child_process.spawnSync` でローカル実行ファイル（既定は PATH 上の `pdftotext`）を呼ぶだけで、ネットワークには出ない。
+- **決定的ツールで、LLM が介在しない**。Composer や 14 ペルソナが構造推定に使う CodeKB とは、そもそも役割が違う。
+- **破壊的操作（`remove`）は意図的に未実装**。文書を外したいときは**原本を消してから `sync`** する運用になる。
+- 「S1」は**第一スライス**という意味。後続は上流 issue #714 で予告されているが、**「S2」という名称は上流文書のどこにも無い**（本ノートでも使わない）。
 
 ---
 
@@ -147,3 +188,7 @@ CodeKB は AI-DLC 同梱ではない外部 MCP。フレームワーク内の `ai
 ※1 レビュア 2 体はチェックリストがビルド時に本体へ埋め込まれるため（4.3 参照）、`knowledge/<reviewer-agent>/` への配置がドメインエージェントと同じ経路で効くかは要確認。
 
 ※2 ルールは 2.5.33 以降、導体がパスを読むかどうかに依存せず、エンジンが `run-stage` 前に `load-steering` ディレクティブとして**内容を確定配信**する（7.2 参照）。知識ファイルは引き続きパス参照（path-loaded）。
+
+---
+
+> **上流 2.6.2 → 2.6.49 の差分**: [13-release-impact-2649.md](./13-release-impact-2649.md)

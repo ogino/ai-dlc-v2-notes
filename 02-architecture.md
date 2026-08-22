@@ -89,7 +89,7 @@ core/
 │   └── protocols/            # stage-protocol 等
 ├── tools/            # TypeScript CLI（エンジン本体）。出典により本数が揺れる → 下表注記
 ├── hooks/            # session-start, stop, sensors, reviewer-scope 等
-├── scopes/           # 9 スコープ定義
+├── scopes/           # 11 スコープ定義
 ├── sensors/          # claim-sources, required-sections, upstream-coverage, linter, type-check, traceability（2.5.71 追加）
 ├── knowledge/        # 方法論ナレッジ（エージェント別）
 ├── memory/           # フレームワーク既定の method ツリー
@@ -97,8 +97,7 @@ core/
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数（2.6.2 実測）**: `core/tools/aidlc-*.ts` は **37 本**、ディスパッチャ `aidlc.ts` を含む `.ts` 全体では **38 本**（`aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない）。2.5.62 時点は 36 本＋ディスパッチャで計 37 だった（増えた 1 本は `aidlc-sensor-traceability.ts` で、**追加は 2.5.71**）。一方、**公式 README のツリー図は `25 aidlc-*.ts engine tools` と表記しており、実数と 12 本ずれている**
-（行番号は版で動くので `grep 'engine tools' README.md` で確認すること）。
+**tools 本数（2.6.49 実測）**: `core/tools/aidlc-*.ts` は **40 本**、ディスパッチャ `aidlc.ts` を含む `.ts` 全体では **41 本**（`aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない）。2.6.2 時点は 37 本＋ディスパッチャで計 38 だった（2.6.2 → 2.6.49 で追加された 3 本は `aidlc-documentkb-schema.ts` / `aidlc-knowledge.ts` / `aidlc-testing-posture.ts`）。さらにさかのぼると 2.5.62 時点は 36 本＋ディスパッチャで計 37 だった（増えた 1 本は `aidlc-sensor-traceability.ts` で、**追加は 2.5.71**）。一方、**2.6.2 時点で公式 README のツリー図は `25 aidlc-*.ts engine tools` と表記しており、実数（37 本）と 12 本ずれていた**（README 側の記載が 2.6.49 時点でも同じ「25」かは本ノートでは未確認。参照時は `grep 'engine tools' README.md` で確認すること）。
 
 > **本ノート旧記述の訂正（2.6.2 起因ではない先行誤り）**: 本節は以前「公式 README は *34 aidlc-\*.ts engine tools* と表現し、実数も 34 本で一致する」「2.5.36 で README 側が更新され食い違いは解消した」と書いていたが、これは**誤りだった**。README の「34」は確かに 2.5.36（commit `046a9a6c`）で 25 → 34 に更新されたが、**2.5.58（commit `8c60e1ab`）で 34 → 25 に差し戻されている**。差し戻し時点の実数は 36 本なので、**食い違いは 2.5.58 以降ずっと復活したままで、2.5.62 時点でも既に一致していなかった**。本数はリリースで増減し、README 側の追随も保証されないため、参照時は `ls core/tools/aidlc-*.ts | wc -l` で実測し、README 記載を鵜呑みにしないこと。
 
@@ -201,7 +200,7 @@ your-project/
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.6.2"`（本ノート整理時点。2.5.62 → 2.6.2 の差分は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.6.49"`（本ノート整理時点。上流 HEAD `71d9a9e0` / 取得日 2026-08-22。2.6.2 → 2.6.49 の差分は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|
