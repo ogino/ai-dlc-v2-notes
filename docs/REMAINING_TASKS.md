@@ -11,12 +11,13 @@
 - [ ] `docs/reference/*` 精読後のエンジン内部メモ追加
 - [ ] `docs/guide/agents/*.md`・`workshop-mode.md` が 2.5.11 時点で既に存在したか（新規追加か索引漏れか）の切り分け
 
-## 上流追従（2.6.49 まで同期済み）
+## 上流追従（2.6.55 まで同期済み）
 
 - [x] 上流 2.5.11 → 2.5.37 の差分反映（2026-08-05）
 - [x] 上流 2.5.37 → 2.5.62 の差分反映（2026-08-11）→ [11-release-impact-2562.md](../11-release-impact-2562.md)
 - [x] 上流 2.5.62 → 2.6.2 の差分反映（2026-08-14。HEAD `4569754e`）→ [12-release-impact-2602.md](../12-release-impact-2602.md)
 - [x] 上流 2.6.2 → 2.6.49 の差分反映（2026-08-22。HEAD `71d9a9e0`）→ [13-release-impact-2649.md](../13-release-impact-2649.md)
+- [x] 上流 2.6.49 → 2.6.55 の差分反映（2026-08-22。HEAD `840ba653`）→ [14-release-impact-2655.md](../14-release-impact-2655.md)
 - [ ] **追従フローの定例化** — 上流には in-place upgrade も版数比較の仕組みも無い（`docs/roadmap.md` #535 未実装）ため、追従は運用で担保するしかない。担当者と頻度を決める
   - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
 - [ ] **2.6.1 の破壊的変更を読者向け移行手順として点検する** — 永続 state が v8 に上がり、`/aidlc next` / `/aidlc report` / `/aidlc --doctor` が pre-v8 state を拒否する。アップグレード時は `skills/aidlc-application-design/` の**手動削除**が要る（`cp -R` マージでは残る）。実機での再現は未実施
@@ -41,6 +42,23 @@
 - [ ] Kiro IDE の新 `.kiro/hooks/*.json` が実機 Kiro IDE 1.x で実際に SessionStart 発火するか — 実機未検証
 - [ ] `<active-space>` プレースホルダが claude / codex / cursor / kiro / kiro-ide の現行 dist に残っていないかの横断 grep — 該当コミットの変更ファイル範囲でのみ確認
 - [ ] 上流ドキュメントの stale 3 箇所（`docs/guide/05-scopes-and-depth.md` のキーワード表 fallback 行、`docs/reference/03-orchestrator.md`、`core/scopes/aidlc-feature.md` 本文）が意図的な緩さか単なる更新漏れか — 上流 Issue / PR 未参照
+
+## 2.6.55 調査で残った未確認事項
+
+出典: `scratch/2655/FACTS.md` §9。
+
+- [ ] 2.6.54 より前に生成された**実データ**の監査シャードに、無関係な `SUBAGENT_COMPLETED` が
+      実際に混入しているか — 調査環境にサンプルが無く、コード構造から導かれる可能性のみ
+- [ ] 上流 issue #695 の `Directory not found` fumble が本当に `memory.md` のプローブだったか —
+      `Closes #695` は上流の主張で、差分中に両者を結ぶ記述は無い
+- [ ] read-probe の失敗が Kiro CLI / ACP 以外の 6 ハーネスでも起きていたか — 上流にも実測が無い
+- [ ] 2.6.55 による改善量（削減されたターン数）— 上流も定性的記述にとどまる
+- [ ] 「新旧混在はロードエラー」は ESM の named-import 契約からの**推論**。
+      実際に半々のツリーで実行して確かめていない
+- [ ] ネットワーク FS（NFS / SMB / FUSE / オブジェクト同期フォルダ）上で、
+      実際にどのタイミングでどのエラーが出るか — 上流の unsupported 宣言を確認したのみ
+- [ ] `AIDLC_SKIP_REVIEWER_GATE_GUARD=1` を一般利用者が設定できないようにする機構の有無
+- [ ] 上流テストスイートは未実行（調査環境に `bun` が無い）
 
 ## 運用
 

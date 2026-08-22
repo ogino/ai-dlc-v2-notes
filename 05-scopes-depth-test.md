@@ -26,7 +26,9 @@
 | `workshop` | 26/33 | Standard（**Test=Minimal**） | 研修。Ideation 全スキップ |
 | `express` | 10/33 | Minimal | **2.6.18 追加。** 要件 → コード → テスト → 条件付きデプロイの最短路。設計パス無し・**reviewer 無効**（→ 5.7） |
 
-（この節を含む 2.6.2 → 2.6.49 の差分全体は [13-release-impact-2649.md](./13-release-impact-2649.md) を参照）
+（この節を含む 2.6.2 → 2.6.49 の差分全体は [13-release-impact-2649.md](./13-release-impact-2649.md) を参照。
+**本章の実測値は 2.6.55 でも変わっていない** — 2.6.49 → 2.6.55 でスコープ定義・`scope-grid.json` ともに
+バイト単位で不変である → [14-release-impact-2655.md](./14-release-impact-2655.md)）
 
 **2.6.18 でスコープが 9 → 11 になった**（出典: `core/scopes/*.md` の件数 / `scope-grid.json` の `scopes` キー数）。追加は `classic` と `express` の 2 つで、**既存 9 スコープの EXECUTE 数はすべて不変**である（`scope-grid.json` と 33 ステージの frontmatter `scopes:` を独立集計した 2 系統で一致）。ステージ 33 / フェーズ 5 / エージェント 14 / センサー 6 / ハーネス 7 も不変である。**`stage-graph.json` 上で変わったのは「各ステージがどのスコープに属するか」だけ**だが、スコープ体系そのものは別で、既定スコープ（5.2.1）・`AWS_AIDLC_DEFAULT_SCOPE` の出荷値（5.2.2）・`review_cap`（5.7）・専用ランナーの有無が動いている。
 
