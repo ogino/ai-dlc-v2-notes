@@ -209,7 +209,7 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 （Kiro CLI / Kiro IDE はプラグイン利用時、GitHub Copilot は進行中ワークフローがある場合）。
 
 > **2.6.36 の learning selections 非互換は、どのハーネスでも起こりうる。**
-> 進行中ワークフローが 2.6.36 以前の selections ファイルを持っていれば、
+> 進行中ワークフローが 2.6.36 より前に生成された selections ファイルを持っていれば、
 > ○ の行のハーネスでも該当ステージの `surface` 再実行が要る（→ 本節末）。
 
 > **`cp` の書式に注意。** 本ノートのコピー例は `cp -R <src>/. <dst>/` の形（末尾が `/.`）で統一している。
