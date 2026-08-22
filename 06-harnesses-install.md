@@ -65,8 +65,8 @@ cd aidlc-workflows && git checkout v2
 ### Claude Code
 
 ```bash
-cp -r dist/claude/.claude/ your-project/.claude/
-cp -r dist/claude/aidlc/   your-project/aidlc/
+cp -R dist/claude/.claude/. your-project/.claude/
+cp -R dist/claude/aidlc/.   your-project/aidlc/
 cd your-project && claude
 # /aidlc --doctor
 # /aidlc <description>
@@ -112,9 +112,9 @@ cp dist/copilot/AGENTS.md    your-project/AGENTS.md # 既存があればマー�
 ### Codex CLI
 
 ```bash
-cp -r dist/codex/.codex/  your-project/.codex/
-cp -r dist/codex/.agents/ your-project/.agents/
-cp -r dist/codex/aidlc/   your-project/aidlc/
+cp -R dist/codex/.codex/.  your-project/.codex/
+cp -R dist/codex/.agents/. your-project/.agents/
+cp -R dist/codex/aidlc/.   your-project/aidlc/
 cp dist/codex/AGENTS.md   your-project/AGENTS.md
 # プロジェクトは git repo であること（Codex が .codex/hooks.json を発見する条件）
 ```
@@ -189,9 +189,9 @@ bun .cursor/tools/aidlc-utility.ts doctor
 ### opencode
 
 ```bash
-cp -r dist/opencode/.aidlc/    your-project/.aidlc/     # エンジン（.opencode 外）
-cp -r dist/opencode/.opencode/ your-project/.opencode/  # ネイティブ殻
-cp -r dist/opencode/aidlc/     your-project/aidlc/
+cp -R dist/opencode/.aidlc/.    your-project/.aidlc/     # エンジン（.opencode 外）
+cp -R dist/opencode/.opencode/. your-project/.opencode/  # ネイティブ殻
+cp -R dist/opencode/aidlc/.     your-project/aidlc/
 cp dist/opencode/opencode.json your-project/opencode.json
 cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 ```
@@ -212,6 +212,11 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 > 進行中ワークフローが 2.6.36 以前の selections ファイルを持っていれば、
 > ○ の行のハーネスでも該当ステージの `surface` 再実行が要る（→ 本節末）。
 
+> **`cp` の書式に注意。** 本ノートのコピー例は `cp -R <src>/. <dst>/` の形（末尾が `/.`）で統一している。
+> `cp -R <src>/ <dst>/`（末尾がスラッシュのみ）は **GNU cp（Linux）だと `<dst>/<src名>/` に入れ子で置かれ**、
+> 既存のエンジンが更新されないまま残る。macOS の BSD cp は同じ書き方でも中身をマージするため、
+> **手元で動いた手順が Linux で壊れる**。`/.` 形式は両方で「中身をマージ」になる。
+
 | ハーネス | 再コピー以外に**ハーネス固有の**操作が要るか | 追加で必要な操作 |
 |----------|------------------------------|------------------|
 | **Claude Code** | ○ | なし |
@@ -221,6 +226,17 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 | **opencode** | ○ | **2.6.48** の対処は再コピーそのもの（プレースホルダ持ちペルソナが具体パス版に置き換わる）。追加操作は無い |
 | **Kiro CLI** | △ | **2.6.46**: 再コピーで verb interceptor 修正が入る（**CLI のみ**）。**2.6.47**: プラグイン利用時は projection を再ビルド／再コピーしたうえで `aidlc plugin sync` か `hooks/compose.ts` を**明示実行** |
 | **Kiro IDE** | △ | **2.6.47**: プラグイン利用時は projection を再ビルド／再コピー。新規 `.kiro/hooks/aidlc-<plugin>-compose.json`（SessionStart 登録）が自動で効くので**明示実行は不要**（CLI と対処が違う） |
+
+> **⚠ 廃止された旧フックは再コピーでは消えない。** 2.6.47 で
+> `hooks/aidlc-plugin-compose.kiro.hook` は Kiro CLI / Kiro IDE **双方の projection から削除された**が、
+> `cp -R` は削除を反映しない（上書きとコピーのみ）。既存インストールを更新した場合、
+> **旧フックがそのまま残る**ので手で消す。12 章で 2.6.1 の残骸検出をしたのと同じ種類の作業である。
+>
+> ```bash
+> # 残骸の検出（プラグインを使っている場合のみ該当）
+> find your-project -name "aidlc-plugin-compose.kiro.hook"
+> # 見つかったら削除
+> ```
 
 ### Kiro CLI と Kiro IDE は分けて読むこと
 
