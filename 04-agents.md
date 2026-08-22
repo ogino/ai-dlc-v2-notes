@@ -152,8 +152,14 @@ CodeKB は AI-DLC 同梱ではない外部 MCP。紛らわしい名前の store 
 | 何を対象にするか | 既存コードの構造推定（call graph 等） | 既存コードの解析結果 | PDF / Word / Markdown / プレーンテキスト |
 | 誰が作るか | 外部ツール | `aidlc-architect-agent`（ステージ実行） | `tools/aidlc-knowledge.ts`（決定的ツール、**LLM 不介在**） |
 | どう操作するか | ハーネス依存の `@<server>` 登録 | ステージを回す | `/aidlc knowledge onboard` / `sync` / `list` / `show` / `associate` / `rebind` |
-| ネットワークに出るか | 出る（サーバ次第） | 出ない | **出ない**（`core/tools/aidlc-knowledge.ts` に `fetch(` / `http(s)://` の出現 0 件） |
+| **生成・取り込み工程**がネットワークに出るか（※モデルとのやり取りは別） | 出る（サーバ次第） | フレームワーク自身は出ない。ただし**生成するのは `aidlc-architect-agent`（LLM）**なので、リモートホストのモデルを使えばソースはモデル提供者に渡る | フレームワーク自身は出ない（`core/tools/aidlc-knowledge.ts` に `fetch(` / `http(s)://` の出現 0 件。抽出は `spawnSync` のみ） |
 | 監査イベント | 対象外 | `PIPELINE_LINK_COMPLETED`（**2.6.49 で新設**。pipeline ステージの各リンク完了を証跡化する。ステージ自体は従来からある） | `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED`（**2.6.15 で新設**） |
+
+> **⚠ この行は「フレームワークのコードがネットワーク呼び出しをするか」を問うている。**
+> **「情報が外部に出ないか」ではない。** `codekb/` の 9 成果物も DocumentKB の索引も、
+> **エージェントが読んで使うために存在する**。リモートでホストされたモデルを使うハーネスでは、
+> 読まれた時点でその内容はモデルとのやり取りに乗る。
+> 機微なコードや文書を扱う判断は、この行ではなく**利用しているモデルの提供形態**で行うこと。
 
 DocumentKB について、この章の文脈で押さえておく点:
 
