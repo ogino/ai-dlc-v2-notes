@@ -96,7 +96,7 @@ diff <(git show 4569754e:<graph> | 各ステージから scopes を除いてソ�
 > **状態スキーマ**の話に限られる。実際には Codex の trust テーブル再生成、
 > Copilot の進行中会話の作り直し、2.6.36 による旧 `selections` ファイルの再生成など、
 > **`dist/` の再コピーだけでは終わらないハーネスが 4 つある**
-> （codex と copilot は必ず追加操作が要り、kiro と kiro-ide はプラグイン利用時に要る。
+> （codex は必ず追加操作が要る。copilot は進行中ワークフローがある場合、kiro と kiro-ide はプラグイン利用時に要る。
 > → [13.8](#138-ハーネス別のアップグレード手順)）。
 
 逆に言えば、**この差分を「地形が変わっていないから小さい」と読むのは誤りである。**
@@ -384,9 +384,14 @@ do not mint」** というテスト名がそのまま存在する。
 | 操作 | ハーネス依存の `@<server>` 登録 | ステージ実行 | `/aidlc knowledge onboard` / `sync` / `list` / `show` / `associate` / `rebind` |
 | **生成・取り込み工程**がネットワークに出るか（※モデルとのやり取りは別） | 出る（サーバ次第） | フレームワーク自身は出ない。ただし**生成するのは `aidlc-architect-agent`（LLM）** | フレームワーク自身は出ない（`fetch(` / `http(s)://` の出現 0 件） |
 
-**索引と抽出の工程はローカル完結である。** `fetch(` および `http(s)://` の出現は
-`aidlc-knowledge.ts` 内に **0 件**で、抽出は `spawnSync` でローカル実行ファイル
-（既定は PATH 上の `pdftotext`）を呼ぶだけである。
+**AI-DLC 自身のコードは通信しない。** `fetch(` および `http(s)://` の出現は
+`aidlc-knowledge.ts` 内に **0 件**で、抽出は `spawnSync` で外部実行ファイルを呼ぶだけである。
+
+> **ただし「抽出工程がローカル完結する」保証ではない。** 抽出コマンドの argv は
+> **ハーネス設定で差し替えられる**（上流コードのコメント: "The argv for a MIME type:
+> a harness-configured one, else the default"）。既定は PATH 上の `pdftotext` だが、
+> **通信する extractor を指定すれば `spawnSync` はそれを止めない**。
+> 実測が示すのは「AI-DLC 本体に直接の通信が無い」ことだけで、extractor の挙動は別に確認が要る。
 
 > **⚠ ただし「文書が外部に出ない」という意味ではない。** ここで実測したのは
 > **索引を作る工程**にネットワーク呼び出しが無いことだけである。
