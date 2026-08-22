@@ -133,7 +133,7 @@ test strategy は depth から継承して **Standard**（`workshop` と違っ�
 | kiro-ide | **該当ファイルを出荷していない** | 未設定 | 未設定 |
 | opencode | **該当ファイルを出荷していない** | 未設定 | 未設定 |
 
-**この非対称性が実効的な意味を左右する。** 環境変数はハードコード既定より優先されるので、Claude Code 利用者にとっては出荷 `settings.json` が**常にハードコード既定を上書きしている**。したがって Claude 利用者から見た実効的な変化は「ハードコード既定が `feature` → `classic` になったこと」ではなく、**「出荷ショートカット値が `workshop` → `classic` に変わったこと」**である。残り 6 ハーネスの利用者は、自分で環境変数を設定しない限り、ハードコード既定（新: `classic`、旧: `feature`）に到達する。
+**この非対称性が実効的な意味を左右する。** 環境変数はハードコード既定より優先されるので、Claude Code 利用者にとっては出荷 `settings.json` が**常にハードコード既定を上書きしている**。したがって Claude 利用者から見た実効的な変化は「ハードコード既定が `feature` → `classic` になったこと」ではなく、**「出荷ショートカット値が `workshop` → `classic` に変わったこと」**である。残り 6 ハーネスの利用者は出荷設定を持たないが、**それが「常に `classic` で始まる」ことを意味しない**。5.2.1 のとおり、対話的な `/aidlc <説明文>` のコールドスタートは compose offer に入るのでハードコード既定に到達しない。到達するのは `/aidlc-init` や `--scope` 無しの `intent-create` といった低レベル・フォールバック経路で、そこでは環境変数を設定しない限りハードコード既定（新: `classic`、旧: `feature`）になる。
 
 旧来の全ライフサイクル既定に戻したい場合は `AWS_AIDLC_DEFAULT_SCOPE=feature` を設定する（Claude Code なら `.claude/settings.json` の `env` ブロック。上流 CHANGELOG の Upgrade 文がこの手順を明記している）。
 

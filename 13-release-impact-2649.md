@@ -120,7 +120,7 @@ diff <(git show 4569754e:<graph> | 各ステージから scopes を除いてソ�
 | depth | Standard | Minimal |
 | テスト戦略 | Standard | Minimal |
 | `review_cap` | `advisory` | **`none`** |
-| キーワード | **なし**（明示指定のみ） | `express`, `lightweight` |
+| キーワード | **なし**（名指しで選ぶ経路は `--scope classic` だけ。ただし暗黙の既定としては別経路で当たる） | `express`, `lightweight` |
 | 専用スキルランナー | **なし** | あり |
 | スキップ | Ideation 1.1–1.7 の 7 本すべて | Ideation・設計一式・Units Generation・Delivery Planning・CI Pipeline・環境構築・後半 Operation |
 
