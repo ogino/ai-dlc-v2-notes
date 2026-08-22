@@ -210,7 +210,7 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 | **Cursor** | ○ | なし（`bun dist/cursor/install.ts <project>` の再実行が「再コピー」に相当。**2.6.48 は対象外** — 元から具体パスを出荷していた） |
 | **Codex CLI** | ✗ | **2.6.44**: `bun scripts/package.ts codex trust --project "<絶対パス>"` を再実行し、既存 trust テーブルを**差し替え**、**新セッションを開始**（§6.3 の囲み参照） |
 | **GitHub Copilot** | ✗ | **2.6.12**: 進行中ワークフローがあれば**新しい会話を開始**（下記）。**2.6.48**: 再コピーでプレースホルダ持ちペルソナを差し替え |
-| **opencode** | ✗ | **2.6.48**: 再コピーでプレースホルダ持ちペルソナを差し替え |
+| **opencode** | ○ | **2.6.48** の対処は再コピーそのもの（プレースホルダ持ちペルソナが具体パス版に置き換わる）。追加操作は無い |
 | **Kiro CLI** | △ | **2.6.46**: 再コピーで verb interceptor 修正が入る（**CLI のみ**）。**2.6.47**: プラグイン利用時は projection を再ビルド／再コピーしたうえで `aidlc plugin sync` か `hooks/compose.ts` を**明示実行** |
 | **Kiro IDE** | △ | **2.6.47**: プラグイン利用時は projection を再ビルド／再コピー。新規 `.kiro/hooks/aidlc-<plugin>-compose.json`（SessionStart 登録）が自動で効くので**明示実行は不要**（CLI と対処が違う） |
 

@@ -30,7 +30,7 @@
 
 **2.6.18 でスコープが 9 → 11 になった**（出典: `core/scopes/*.md` の件数 / `scope-grid.json` の `scopes` キー数）。追加は `classic` と `express` の 2 つで、**既存 9 スコープの EXECUTE 数はすべて不変**である（`scope-grid.json` と 33 ステージの frontmatter `scopes:` を独立集計した 2 系統で一致）。ステージ 33 / フェーズ 5 / エージェント 14 / センサー 6 / ハーネス 7 も不変である。**`stage-graph.json` 上で変わったのは「各ステージがどのスコープに属するか」だけ**だが、スコープ体系そのものは別で、既定スコープ（5.2.1）・`AWS_AIDLC_DEFAULT_SCOPE` の出荷値（5.2.2）・`review_cap`（5.7）・専用ランナーの有無が動いている。
 
-**分母が 33 になった理由**: 2.6.1 で Inception に `contract-design`（2.8）が新設され、全体が 32 → 33 ステージになった。同ステージの `scopes:` は **`enterprise` / `feature` / `mvp` / `workshop` の 4 つのみ**なので、分子が +1 されるのはこの 4 行だけである（`poc` / `bugfix` / `refactor` / `infra` / `security-patch` は分子据え置きで分母のみ 32 → 33）。
+**分母が 33 になった理由**: 2.6.1 で Inception に `contract-design`（2.8）が新設され、全体が 32 → 33 ステージになった。同ステージの `scopes:` は 2.6.1 当時 **`enterprise` / `feature` / `mvp` / `workshop` の 4 つのみ**で、分子が +1 されたのはこの 4 行だけだった（**2.6.18 で `classic` が加わり、2.6.49 時点では 5 つ**）（`poc` / `bugfix` / `refactor` / `infra` / `security-patch` は分子据え置きで分母のみ 32 → 33）。
 
 ### `classic` のスキップ内訳（2.6.18 追加）
 
@@ -38,7 +38,13 @@
 
 `core/scopes/aidlc-classic.md` は「AI-DLC v1 had no Ideation phase, so `classic` skips all seven Ideation stages and keeps every stage from Inception onward in the plan」と説明している。無条件（ALWAYS）なのは Initialization 3 本 + Requirements Analysis / Units Generation / Delivery Planning / Code Generation / Build and Test の計 8 本で、残る Inception 設計群と Operation 末尾は CONDITIONAL として文脈から自己選択する。
 
-test strategy は depth から継承して **Standard**（`workshop` と違って Minimal 上書きを持たない）。「26/33」という分子は `workshop` と同じだが、**同じステージ集合ではない**点に注意（`workshop` は Ideation を落として Test=Minimal、`classic` は Ideation を落として Test=Standard）。
+test strategy は depth から継承して **Standard**（`workshop` と違って Minimal 上書きを持たない）。
+
+> **`classic` と `workshop` のステージ集合は完全に同一である。** 実測すると両者とも 26 本で、
+> 差集合は双方向とも空だった（`stage-graph.json` の `scopes` を集計）。
+> 違うのは**ステージの並びではなく、テスト戦略・キーワード・専用ランナーの有無**である。
+> `workshop` は Test=Minimal を上書き宣言し `workshop` / `lab` / `training` のキーワードを持つ。
+> `classic` は Test=Standard を継承し、キーワードを持たない。
 
 ### `express` のスキップ内訳（2.6.18 追加）
 
