@@ -1,9 +1,10 @@
 # 01. 概要 — AI-DLC とは何か
 
-> 本章の数値は実装バージョン **2.6.55**（上流 HEAD `840ba653` / 取得日 2026-08-22）時点。
+> 本章の数値は実装バージョン **2.6.123**（上流 HEAD `2fbee12f` / 取得日 2026-08-23）時点。
 > 2.6.2 → 2.6.49 の差分は [13-release-impact-2649.md](./13-release-impact-2649.md)、
-> 2.6.49 → 2.6.55 の差分は [14-release-impact-2655.md](./14-release-impact-2655.md) を参照
-> （2.6.49 → 2.6.55 で本章の数値はいずれも変わっていない）。
+> 2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、
+> 2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md) を参照。
+> 本章では **Bolt の定義**が 2.6.86 の上流グロッサリ改訂に合わせて変わっている（→ 1.8.1）。
 
 ## 1.1 背景：なぜ「新しい SDLC」が必要か
 
@@ -84,7 +85,7 @@ AI: 計画を作る
 | Initialization（0.1–0.3） | 承認ゲートなし（決定論・自動） |
 | Verification Gate（フェーズ境界） | トレース検査は **自動**。問題時に続行／戻るを人が判断 |
 | 通常ステージの承認ゲート | **人が最終判断**（レビュアは READY/NOT-READY のみ。拒否権なし） |
-| Construction autonomous | Walking skeleton 後の ladder で選択。残 Bolt のゲートを省略可。**失敗時は halt-and-ask** |
+| Construction autonomous | Walking skeleton 後の ladder で選択。以降の Construction 反復（＝ Bolt）のゲートを省略可。**失敗時は halt-and-ask**（Bolt の語義は 2.6.86 で再定義された → 1.8.1） |
 
 GA は v2 README の *Announcing 2.0 (GA)* に根拠がある。同所 NOTE どおり、継続改善されるため **既知良版の pin** と生成物レビューを推奨する。
 
@@ -144,9 +145,25 @@ AWS ブログが挙げる便益:
 | 方法論（原典） | 2.0 実装 |
 |----------------|----------|
 | Inception / Construction / Operations | Initialization + Ideation + Inception + Construction + Operation |
-| Bolt | Construction での Unit 単位の 3.1–3.5 一巡 |
+| Bolt | **Construction の「スプリント様の反復」**。Delivery Planning（2.9）が意図したグルーピングを `bolt-plan.md` に記録する。**既定の stage-major ランタイムはこの反復をインターリーブし、`bolt-plan.md` をグルーピング／順序の境界として消費しない**（→ 1.8.1） |
 | Unit of Work | ステージ 2.7 で分解される実装単位 |
 | Mob Elaboration / Construction | `mode: mob` / `mode: subagent`（hub-and-spoke 形状）/ `mode: pipeline` などのトポロジ |
 | 1.x 時代のルール／ステアリング配布（コミュニティ対比） | TypeScript エンジン + skills/agents/hooks のネイティブ実装（[08](./08-v1-vs-v2.md) は要一次確認） |
 
 詳細な 1.x との差分は [08-v1-vs-v2.md](./08-v1-vs-v2.md)。
+
+### 1.8.1 Bolt の定義は 2.6.86 で上流が書き換えた
+
+**本ノートの旧記述が誤っていたのではなく、上流グロッサリの定義そのものが変わった。**
+
+| | 旧（2.6.55 まで） | 新（2.6.86 以降） |
+|---|---|---|
+| Bolt とは | 「**Construction 実行の単位** — 1 つの Unit に対する 3.1–3.5 の一巡」 | 「**スプリント様の Construction 反復**。Delivery Planning (2.9) が意図したグルーピングを記録する」 |
+| `bolt-plan.md` の役割 | 実行の境界 | **計画上の記録**。既定の stage-major ランタイムは**グルーピング／順序の境界として消費しない** |
+| ランタイムのバッチ | Bolt から | `unit-of-work-dependency.md`（2.7）から**再計算**される |
+| `BOLT_STARTED` / `BOLT_COMPLETED` | Construction 一般 | **swarm / worktree 経路の Unit 単位イベント**。通常のゲート付き実行では**記録されない** |
+
+**挙動は変わっていない。** 2.6.86 が触った 69 ファイルはドキュメントとプロトコル散文の整合のみで、
+ツール・フック・ステージグラフの変更はゼロである。
+用語の位置づけが「実行単位」から「計画上のスライス」へ移った、という文書上の再定義である。
+→ [15-release-impact-26123.md](./15-release-impact-26123.md)

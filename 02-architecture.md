@@ -87,8 +87,8 @@ core/
 │   │   ├── construction/     # 3.1–3.7
 │   │   └── operation/        # 4.1–4.7
 │   └── protocols/            # stage-protocol 等
-├── tools/            # TypeScript CLI（エンジン本体）。出典により本数が揺れる → 下表注記
-├── hooks/            # session-start, stop, sensors, reviewer-scope 等
+├── tools/            # TypeScript（エンジン本体）。全部が CLI ではない → 下の注記
+├── hooks/            # session-start, stop, sensors, reviewer-scope 等（18 本）
 ├── scopes/           # 11 スコープ定義
 ├── sensors/          # claim-sources, required-sections, upstream-coverage, linter, type-check, traceability（2.5.71 追加）
 ├── knowledge/        # 方法論ナレッジ（エージェント別）
@@ -97,7 +97,26 @@ core/
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数（2.6.55 実測。本数は 2.6.49 から不変）**: `core/tools/aidlc-*.ts` は **40 本**、ディスパッチャ `aidlc.ts` を含む `.ts` 全体では **41 本**（`aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない）。2.6.2 時点は 37 本＋ディスパッチャで計 38 だった（2.6.2 → 2.6.49 で追加された 3 本は `aidlc-documentkb-schema.ts` / `aidlc-knowledge.ts` / `aidlc-testing-posture.ts`）。さらにさかのぼると 2.5.62 時点は 36 本＋ディスパッチャで計 37 だった（増えた 1 本は `aidlc-sensor-traceability.ts` で、**追加は 2.5.71**）。一方、**2.6.2 時点で公式 README のツリー図は `25 aidlc-*.ts engine tools` と表記しており、実数（37 本）と 12 本ずれていた**（README 側の記載が 2.6.55 時点でも同じ「25」かは本ノートでは未確認。参照時は `grep 'engine tools' README.md` で確認すること）。
+**tools 本数（2.6.123 実測）**: `core/tools/*.ts` は **51 本**（2.6.55 時点は 41 本）。
+
+**⚠ 51 は「CLI の本数」ではない。** `core/tools/*.ts` はファイル数であって、
+そのうち実際に単体起動できる CLI（`import.meta.main` を持つもの）は **32 本**、
+残る **19 本は他ツールから import されるライブラリモジュール**である。
+2.6.55 時点は 41 本＝ CLI 26 本 + ライブラリ 15 本だった。
+
+| | 2.6.55 | 2.6.123 |
+|---|---:|---:|
+| `core/tools/*.ts` ファイル数 | 41 | **51** |
+| うち `import.meta.main` を持つ実際の CLI | 26 | **32** |
+| ライブラリモジュール | 15 | **19** |
+
+本ノート群は 13 章以前でこの数を「CLI tools」と呼んでいるが、
+**正しくは「`core/tools/*.ts` のファイル数」である**（過去章の数値自体は誤っていない）。
+新規 10 本の内訳と導入版は [15-release-impact-26123.md](./15-release-impact-26123.md) を参照。
+
+**TypeScript フックは `core/hooks/*.ts` が 18 本**（2.6.55 時点は 17 本）。
+
+**2.6.55 以前の推移（当時の実測）**: 2.6.55 時点の `core/tools/aidlc-*.ts` は **40 本**、ディスパッチャ `aidlc.ts` を含む `.ts` 全体では **41 本**（`aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない）。2.6.2 時点は 37 本＋ディスパッチャで計 38 だった（2.6.2 → 2.6.49 で追加された 3 本は `aidlc-documentkb-schema.ts` / `aidlc-knowledge.ts` / `aidlc-testing-posture.ts`）。さらにさかのぼると 2.5.62 時点は 36 本＋ディスパッチャで計 37 だった（増えた 1 本は `aidlc-sensor-traceability.ts` で、**追加は 2.5.71**）。一方、**2.6.2 時点で公式 README のツリー図は `25 aidlc-*.ts engine tools` と表記しており、実数（37 本）と 12 本ずれていた**（README 側の記載が 2.6.55 時点でも同じ「25」かは本ノートでは未確認。参照時は `grep 'engine tools' README.md` で確認すること）。
 
 > **本ノート旧記述の訂正（2.6.2 起因ではない先行誤り）**: 本節は以前「公式 README は *34 aidlc-\*.ts engine tools* と表現し、実数も 34 本で一致する」「2.5.36 で README 側が更新され食い違いは解消した」と書いていたが、これは**誤りだった**。README の「34」は確かに 2.5.36（commit `046a9a6c`）で 25 → 34 に更新されたが、**2.5.58（commit `8c60e1ab`）で 34 → 25 に差し戻されている**。差し戻し時点の実数は 36 本なので、**食い違いは 2.5.58 以降ずっと復活したままで、2.5.62 時点でも既に一致していなかった**。本数はリリースで増減し、README 側の追随も保証されないため、参照時は `ls core/tools/aidlc-*.ts | wc -l` で実測し、README 記載を鵜呑みにしないこと。
 
@@ -186,7 +205,9 @@ your-project/
 | Rules | org.md / team.md / project.md / phases/*.md |
 | Sensors | claim-sources, required-sections, upstream-coverage, linter, type-check, traceability |
 
-センサーは現状 **advisory**（監査に記録するがゲートを自動ブロックしない）ものが中心。  
+**出荷 6 センサーは全て `default_severity: advisory`**（監査に記録するがゲートを自動ブロックしない）。
+2.6.72 で `blocking` severity と `fire_on: gate` が使えるようになったが、
+出荷構成でゲートを塞ぐセンサーは 1 本も無い（→ [07.4](./07-learning-loop-state.md)）。  
 レビュア（Product Lead / Architecture Reviewer）は敵対的レビュー契約で READY/NOT-READY を付与。
 
 ---
@@ -200,7 +221,7 @@ your-project/
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.6.55"`（本ノート整理時点。上流 HEAD `840ba653` / 取得日 2026-08-22。2.6.49 → 2.6.55 の差分は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.6.123"`（本ノート整理時点。上流 HEAD `2fbee12f` / 取得日 2026-08-23。2.6.55 → 2.6.123 の差分は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|

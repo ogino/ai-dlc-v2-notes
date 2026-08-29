@@ -10,8 +10,8 @@ INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (
                                                       │ Verification Gate 2（自動検査）
                                                       ▼
                                               CONSTRUCTION
-                                                3.1–3.5 = Bolt 単位
-                                                3.6–3.7 = 全 Bolt 完了後に 1 回
+                                                3.1–3.5 = Unit 単位（→ 3.5.1）
+                                                3.6–3.7 = Construction の全 Unit 完了後に 1 回
                                                       │ Verification Gate 3（自動検査）
                                                       ▼
                                                 OPERATION (4.1–4.7)
@@ -79,34 +79,51 @@ INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (
 
 ## 3.5 Phase 3: Construction（構築）
 
-### なぜ Bolt か
+### なぜ反復（Bolt）か
 
 - 旧: ステージ毎 × Unit 毎ゲート → 「子守（babysitting）」
 - 一括生成: 一度に巨大 diff → レビュー不能
-- **現在: Bolt 単位**（中間）
+- **現在: 反復単位**（中間）
 
-### Bolt モデル
+### 実行モデル
 
-1. **Bolt 1 = Walking Skeleton**（常にゲート付き・対話）  
+1. **最初のスライス = Walking Skeleton**（常にゲート付き・対話）  
    最小の端到端スライスでアーキを証明
 2. **Ladder prompt（1 回だけ）**  
-   以降を autonomous にするか、毎 Bolt ゲートにするか
-3. 残り Bolt を実行（依存が揃えば **parallel batch**）
+   以降を autonomous にするか、反復ごとにゲートを置くか
+3. 残りを実行（依存が揃えば **parallel batch**）
 4. **3.6 Build and Test** を全体で 1 回
 5. **3.7 CI Pipeline**（条件付き）を 1 回
 
 | # | ステージ | Lead | 実行単位 | 条件 |
 |---|----------|------|----------|------|
-| 3.1 | Functional Design | architect | Per Bolt | **CONDITIONAL**（実行計画による） |
-| 3.2 | NFR Requirements | architect | Per Bolt | **CONDITIONAL** |
-| 3.3 | NFR Design | architect | Per Bolt | **CONDITIONAL** |
-| 3.4 | Infrastructure Design | aws-platform | Per Bolt | **CONDITIONAL** |
-| 3.5 | Code Generation | developer | Per Bolt | **ALWAYS**（Bolt 内の各 Unit） |
-| 3.6 | Build and Test | quality | 全 Bolt 後に **1 回** | ALWAYS |
-| 3.7 | CI Pipeline | pipeline-deploy | 全 Bolt 後に **1 回** | CONDITIONAL |
+| 3.1 | Functional Design | architect | Per Unit | **CONDITIONAL**（実行計画による） |
+| 3.2 | NFR Requirements | architect | Per Unit | **CONDITIONAL** |
+| 3.3 | NFR Design | architect | Per Unit | **CONDITIONAL** |
+| 3.4 | Infrastructure Design | aws-platform | Per Unit | **CONDITIONAL** |
+| 3.5 | Code Generation | developer | Per Unit | **ALWAYS** |
+| 3.6 | Build and Test | quality | 全 Unit 後に **1 回** | ALWAYS |
+| 3.7 | CI Pipeline | pipeline-deploy | 全 Unit 後に **1 回** | CONDITIONAL |
 
 失敗時: autonomous でも **halt-and-ask**（retry / skip / abort）。  
-Bolt に入っても 3.1–3.4 が常に全部走るわけではない。
+反復に入っても 3.1–3.4 が常に全部走るわけではない。
+
+### 3.5.1 「Bolt」の語義は 2.6.86 で上流が再定義した
+
+**本ノートの旧記述が間違っていたのではなく、上流グロッサリの定義が変わった。**
+本節はかつて「3.1–3.5 = Bolt 単位」「実行単位 = Per Bolt」と書いていたが、
+2.6.86 で Bolt は**実行の単位ではなくなった**。
+
+| | 旧（2.6.55 まで） | 新（2.6.86 以降） |
+|---|---|---|
+| Bolt | 「**Construction 実行の単位** — 1 Unit に対する 3.1–3.5 の一巡」 | 「**スプリント様の Construction 反復**。Delivery Planning (2.9) が意図したグルーピングを記録する」 |
+| `bolt-plan.md` | 実行の境界 | **計画上の記録**。既定の stage-major ランタイムは**グルーピング／順序の境界として消費しない** |
+| 実行のバッチ | Bolt から | `unit-of-work-dependency.md`（2.7）から**再計算**される |
+| `BOLT_STARTED` / `BOLT_COMPLETED` | Construction 一般 | **swarm / worktree 経路の Unit 単位イベント**。通常のゲート付き実行では**記録されない** |
+
+**挙動は変わっていない。** 2.6.86 が触った 69 ファイルはドキュメントとプロトコル散文の整合のみで、
+ツール・フック・ステージグラフの変更はゼロである。
+→ [01.8.1](./01-overview.md) / [15-release-impact-26123.md](./15-release-impact-26123.md)
 
 ---
 

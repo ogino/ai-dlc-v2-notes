@@ -109,9 +109,27 @@ org → team → project → phase → (stage: 将来)
 `traceability` センサーの manifest は `matches: "**/traceability.json"` / `default_severity: advisory` /
 `command: bun {{HARNESS_DIR}}/tools/aidlc-sensor-traceability.ts`（CLI tools も 37 → 38 本になった要因）。
 
-- Write/Edit 時に hook で発火
-- 結果は監査行（**現行の受理値は `advisory` のみ**。マニフェストのフィールド名は `severity` ではなく `default_severity`。`blocking` は将来の "v0.10.0 ralph driver" 向けに予約）
+- 発火タイミングは manifest の `fire_on` で決まる（既定 `write` = Write/Edit 時に hook で発火。2.6.72 で `gate` が追加 → 下記）
+- 結果は監査行（マニフェストのフィールド名は `severity` ではなく `default_severity`。**受理値は 2.6.72 で `advisory` / `blocking` の 2 つになった** → 下記）
 - 独自センサーを manifest で追加可能
+
+**`fire_on` と `blocking` severity（2.6.72、導入コミット `d62e4695`）**
+
+2.6.72 でセンサー manifest に `fire_on: write|gate`（既定 `write`）と
+`default_severity: advisory|blocking` が入った。それ以前は受理値が `advisory` のみで、
+`blocking` は将来の "v0.10.0 ralph driver" 向けの予約語だった。**2.6.72 で実装された。**
+
+**ただし出荷構成では何も塞がらない。** 過大に読まないための実測:
+
+| 事実 | 内容 |
+|---|---|
+| 出荷 6 センサーの `default_severity` | **全 6 本が `advisory` のまま**。`blocking` はカスタム／プラグイン sensor が使える**能力**として追加されただけ |
+| `fire_on: gate` に移行したセンサー | `claim-sources` / `required-sections` / `upstream-coverage` の **3 本** |
+| `fire_on: write` での `blocking` | 上流散文が「`fire_on: write` runs during matching writes and **remains advisory in this release, even when the manifest declares `blocking`**」と明記。**効くのは `fire_on: gate` のみ** |
+| blocking gate sensor の上書き | 人間裏付けの `Override blocking sensors` で上書き可能。ただし **autonomous モードでは提示も受理もされない** |
+
+**センサーの本数は 6 で不変**（数は動いていない。動いたのは `fire_on` と受理される severity 値である）。
+2.6.119 は §14「Sensor Imports」への説明集約を行っただけで、`blocking` の実装版ではない。
 
 **堅牢化（2.5.31 / 2.5.32）**
 
@@ -131,7 +149,7 @@ org → team → project → phase → (stage: 将来)
 - Construction Autonomy Mode
 - セッション再開情報
 
-### Audit（86 イベント種別・22 分類※）
+### Audit（91 イベント種別・22 分類※）
 
 ※ 正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準（22 分類）。
 `docs/reference/12-state-machine.md` 基準では 19 分類。上流自身が「グルーピングは表示上の分類であり、
@@ -141,6 +159,24 @@ org → team → project → phase → (stage: 将来)
 - `audit/` 配下のシャードをタイムスタンプマージ
 - 例: STAGE_*, QUESTION_ANSWERED, REVIEW_*, SENSOR_*, RULE_LEARNED, RECOMPOSED, PLUGIN_SELECTION_CHANGED,
   DOCUMENT_INDEXED, DOCUMENT_UPDATED, DOCUMENT_REMOVED, PIPELINE_LINK_COMPLETED, ...
+
+**86 → 91 の内訳（+5）**
+
+| イベント | 導入版 |
+|---|---|
+| `SWARM_SOURCE_MERGED` | 2.6.69 |
+| `UNIT_OWNERSHIP_SET` | 2.6.107 |
+| `UNIT_GATE_RHYTHM_SET` | 2.6.107 |
+| `UNIT_MERGED` | 2.6.107 |
+| `PLAN_APPROVAL_RECORDED` | 2.6.118 |
+
+**分類は 22 のまま不変である。** 新規カテゴリは作られず、既存 2 カテゴリの**改名**で吸収された
+（「Unit Lifecycle Events」→「Unit Configuration and Lifecycle Events」、
+「Plan Approval Events」→「Plan Approval Enforcement Events」）。
+
+**⚠ `PLAN_APPROVAL_RECORDED` は権限ではない。** 上流 `audit-format.md` が
+この Markdown 行について「**not authorization evidence**」と明記している。
+実際の承認権限は保護された非公開の challenge/response レシートが持つ。
 
 **新カテゴリ `Documents`（3 イベント）**: `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED` の 3 つ。
 DocumentKB（[07.6](#76-knowledge-の-2-層) の派生カタログ）に対応する。この 3 イベントは
