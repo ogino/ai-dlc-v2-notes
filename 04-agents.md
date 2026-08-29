@@ -87,7 +87,11 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 > `validateReviewAppendix()` で追記部分を決定的に検査するようになった。要求されるのは
 > **先頭が厳密に `## Review` 見出しであること**、以降に H1/H2 が現れない終端節であること、
 > **`--verdict` と一致する canonical verdict 行がちょうど 1 本**、
-> Reviewer 行・Iteration 行・Request Challenge 行がそれぞれ要求と一致してちょうど 1 本、
+> Reviewer 行・Iteration 行がそれぞれ要求と一致してちょうど 1 本、
+> **請求時に既存のレビュー節があった場合に限り** Request Challenge 行が要求と一致してちょうど 1 本
+> （**初回レビューでは challenge は発行されず、書くと逆に拒否される**。
+> `aidlc-log.ts` は `priorAppendixLength > 0` のときだけ challenge を鋳造し、
+> `validateReviewAppendix()` は challenge が無い請求に対して Request Challenge 行の**不在**を要求する）、
 > かつ**請求前から存在した節をそのまま残す経路は digest 比較で拒否**される。
 > つまり「散文が `--verdict` と食い違っていても通る」状態ではなくなった。
 >

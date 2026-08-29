@@ -122,8 +122,11 @@ Deployment Execution が missing-artifact recovery に落ちず既存のワー�
 
 - **請求時点に存在しなかった、終端の `## Review` 節が review_artifact に追記されていること**
 - その節に Verdict / Reviewer / Iteration が**各 1 個ずつ**であること
-- 既存の `## Review` 節があった場合は、request が発行した
-  per-request の乱数 **`Review Challenge`** が完全一致すること
+- **既存の `## Review` 節があった場合に限り**、request が発行した
+  per-request の乱数 **`Review Challenge`** が完全一致すること。
+  **初回レビュー（既存節が無い）では challenge は発行されず、書くと逆に拒否される** ——
+  `aidlc-log.ts` は `priorAppendixLength > 0` のときだけ `review:<32 hex>` を鋳造し、
+  `validateReviewAppendix()` は challenge の無い請求に対して当該行の**不在**を要求する
 
 請求前から存在した節をそのまま残す経路も、1 バイト書き換える経路も、明示的に拒否される。
 
