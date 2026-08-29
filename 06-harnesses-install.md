@@ -226,6 +226,21 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 
 ## 6.4 アップグレードでハーネスごとにすること（2.6.2 → 2.6.55）
 
+> **⚠ 2.6.55 → 2.6.123 では、再コピーだけでは済まない作業が過去最多になった。**
+> 本節の表は **2.6.55 までの手順**である。2.6.123 へ上げるときは、下の 5 点を追加で行うこと
+> （根拠と詳細は [15-release-impact-26123.md](./15-release-impact-26123.md)）。
+>
+> | # | 版 | 追加で要る作業 | 対象 |
+> |:-:|---|---|---|
+> | 1 | **2.6.64** | **古いファイルの手動削除**（上流「An overlay copy cannot delete retired files.」）<br>`rm -f <proj>/.kiro/agents/aidlc.json`<br>`rm -f <proj>/.kiro/agents/aidlc-*-agent.json`<br>`rm -f <proj>/.kiro/settings/cli.json` | **Kiro IDE** |
+> | 2 | **2.6.110** | `dist/` 上書きでプラグイン合成が黙って消える。**`/aidlc plugin sync` を実行**（`--doctor` の `Composed plugin surface` が exit 1 で検出）。Claude / Codex / Cursor / Kiro IDE は次セッションで自己修復するが **Kiro CLI は明示実行が必須** | プラグイン利用者 |
+> | 3 | **2.6.71** | 非英語で使う場合、**`aidlc/spaces/<space>/memory/org.md` を手編集**して新規セッションを開始する。既存ワークスペースの `org.md` は再コピーで上書きされない | 日本語利用者 |
+> | 4 | **2.6.82** | Claude プロジェクトフックを `/hooks` で承認し、**Claude Code を完全に再起動**する | Claude Code |
+> | 5 | **2.6.91** | CodeKB scope fingerprint の修正。**空木ハッシュで保存されたタイムスタンプは再採番が要る** | CodeKB 利用者 |
+>
+> 2.6.64 は 13 章で扱った 2.6.47 と**同種の作業**である（→ [15.8](./15-release-impact-26123.md#158-その他の主題)）。
+
+
 **「`dist/` を再コピーすれば済む」ハーネスと、追加の手作業が要るハーネスがある。**
 ただし **2.6.51 以降は「再コピー」そのものに全ハーネス共通の作法が付いた**ので、
 ハーネス別の表を読む前に次を満たすこと。
