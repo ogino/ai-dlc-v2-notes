@@ -235,8 +235,10 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 > | 1 | **2.6.64** | **古いファイルの手動削除**（上流「An overlay copy cannot delete retired files.」）<br>`rm -f <proj>/.kiro/agents/aidlc.json`<br>`rm -f <proj>/.kiro/agents/aidlc-*-agent.json`<br>`rm -f <proj>/.kiro/settings/cli.json` | **Kiro IDE** |
 > | 2 | **2.6.110** | `dist/` 上書きでプラグイン合成が黙って消える。**`/aidlc plugin sync` を実行**（`--doctor` の `Composed plugin surface` が exit 1 で検出）。Claude / Codex / Cursor / Kiro IDE は次セッションで自己修復するが **Kiro CLI は明示実行が必須** | プラグイン利用者 |
 > | 3 | **2.6.71** | 非英語で使う場合、**`aidlc/spaces/<space>/memory/org.md` を手編集**して新規セッションを開始する。既存ワークスペースの `org.md` は再コピーで上書きされない | 日本語利用者 |
-> | 4 | **2.6.82** | Claude プロジェクトフックを `/hooks` で承認し、**Claude Code を完全に再起動**する | Claude Code |
-> | 5 | **2.6.91** | CodeKB scope fingerprint の修正。**空木ハッシュで保存されたタイムスタンプは再採番が要る** | CodeKB 利用者 |
+> | 4 | **2.6.93** | Claude プロジェクトフックを `/hooks` で承認し、**Claude Code を完全に再起動**する | Claude Code |
+> | 5 | **2.6.91** | 空木ハッシュ `4b825dc642cb6eb9a060e54bf8d69288fbee4904` で保存された CodeKB scope タイムスタンプの**再採番**（または Reverse Engineering の再実行） | CodeKB 利用者 |
+> | 6 | **2.6.80** | `bun scripts/package.ts codex trust --project <絶対パス>` の**再実行**（新しい Bash セッション束縛フックが trust テーブルに項目を足すため） | **Codex のみ** |
+> | 7 | **2.6.122** | 進行中の `workspace_requires` レビューは、**完了前にもう一度レビューし直す**（source identity の形式が変わったため） | 進行中レビューがある場合 |
 >
 > 2.6.64 は 13 章で扱った 2.6.47 と**同種の作業**である（→ [15.8](./15-release-impact-26123.md#158-その他の主題)）。
 
