@@ -131,7 +131,13 @@ INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (
 
 ## 3.6 Phase 4: Operation（運用）
 
-全 7 ステージが CONDITIONAL。`mvp` / `poc` / `bugfix` / `refactor` 等では Operation が丸ごと省略され得る。  
+全 7 ステージが CONDITIONAL。`mvp` / `poc` では Operation が丸ごと省略される。  
+
+> **⚠ `bugfix` / `refactor` は 2.6.70 から Operation が丸ごと省略ではない。**
+> 両スコープは **4.1 Deployment Pipeline と 4.3 Deployment Execution を実行する**（残る 5 段が SKIP）。
+> 上流のスコープ定義が「it retains deployment-pipeline and deployment-execution so the verified
+> fix can ship」と書いている。これにより **bugfix 7 → 9 段 / refactor 8 → 10 段**になった
+> （→ [15.2](./15-release-impact-26123.md#152-bugfix--refactor-がデプロイ段まで走るようになった2670)）。  
 （`mvp` はさらに Ideation の Market Research / Team Formation / Approval & Handoff もスキップ → 合計 10 SKIP / 23 EXECUTE。詳細は [05](./05-scopes-depth-test.md)。）
 
 | # | ステージ | Lead |
