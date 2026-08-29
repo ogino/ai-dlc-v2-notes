@@ -236,7 +236,7 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 >
 > | 版 | 追加で要ること |
 > |---|---|
-> | **2.6.121** | **`reviewer:` を宣言する自作・プラグインステージすべてに `review_artifact:` を追加**し、`produces[]` の必須 Markdown を 1 つ選ぶ。per-Unit ステージでは関連する全 Unit 種別に適用。**未移行のステージはコンポーズとグラフコンパイルが拒否する**（＝上げた瞬間に動かなくなる） |
+> | **2.6.121** | **`reviewer:` を宣言する自作・プラグインステージすべてに `review_artifact:` を追加**し、`produces[]` の必須 Markdown を 1 つ選ぶ。per-Unit ステージでは関連する全 Unit 種別に適用。**未移行のステージはコンポーズとグラフコンパイルが拒否する**（発火点は compose / compile。既存のコンパイル済みグラフを再コンパイルしないなら動き続けるが、**プラグイン利用者は復旧の `plugin sync` で compose が走るため上げた時点で踏む**） |
 > | **2.6.65** | 同じ成果物を `produces` / `optional_produces` に重複宣言していると**コンパイルが通らない**。片方を改名するか consumer を直す |
 > | **2.6.94** | composer proposal を読む統合は `birthDescription` → **`creationDescription`** に改名。改名された内部ヘルパを import しているカスタムツールは import を更新 |
 >
@@ -277,15 +277,20 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 > | **2.6.84** | コンパイル済みバイナリで入れている場合は**実行ファイルと隣接する `runtime/` ディレクトリを置換**する（ソース導入なら通常の `dist/` 再コピーでよい） | バイナリ導入 |
 > | **2.6.96** | センサーキャッシュに対する**利用者側の回避用 ignore ルールを削除**する | 回避策を入れていた場合 |
 >
-> **移行しないと止まるのは 2.6.121 と 2.6.65 の 2 つ。ただし止まる瞬間は「上げた瞬間」ではない。**
-> どちらも **composition / graph compilation の時点**で拒否する
-> （2.6.121: "Composition and graph compilation reject reviewer stages that are not migrated."／
-> 2.6.65: authored `.md` を読む `aidlc-graph compile` が `throw` する）。
-> **既にコンパイル済みのグラフを持っていて再コンパイルしないなら、そのまま動き続ける。**
+> **移行しないと止まるのは 3 つ —— 2.6.121・2.6.65・2.6.94 である。止まる契機はそれぞれ違う。**
+>
+> | 版 | いつ止まるか |
+> |---|---|
+> | **2.6.121** | **compose / graph compile を走らせたとき**（上流: "Composition and graph compilation reject reviewer stages that are not migrated."） |
+> | **2.6.65** | **graph compile を走らせたとき**（authored `.md` を読む `aidlc-graph compile` が `throw`） |
+> | **2.6.94** | **改名された内部ヘルパを import しているカスタムツールを起動したとき**（import が解決しない） |
+>
+> **2.6.121 と 2.6.65 は「上げた瞬間」ではない。** 既にコンパイル済みのグラフを持っていて
+> 再コンパイルしないなら、そのまま動き続ける（2.6.95 の doctor チェックは既存グラフ向けだが
+> **advisory で exit code を変えない**）。
 > ——ただし**プラグイン利用者は上げた時点で踏む**。`dist/` の入れ替えでコンパイル済みグラフが
 > 素に戻り（2.6.110）、復旧に要る `/aidlc plugin sync` が compose を走らせるためである。
-> **2.6.94 も破壊的**で、改名された内部ヘルパを import しているカスタムツールは import を直すまで動かない。
-> 残りは「やらないと不便・危険」だが動きはする。
+> 残り 17 版は「やらないと不便・危険」だが動きはする。
 > なお 2.6.102（lifecycle フィールド追加）は「file 単位のドリフト診断が欲しい場合のみ」と
 > 上流が明記しているので、必須作業には数えていない。
 
