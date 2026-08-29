@@ -84,7 +84,7 @@
 - [ ] 上流 `10-authoring-a-plugin.md` が「neither an AIDLC project nor a framework checkout」と書く一方、
       `aidlc-plugin-test.ts` は `--install <project-root>` が必須 — 誤記か意図的か断定できない
 - [ ] 2.6.99 の active-directive ロックが `withAuditLock` と物理的に同一実装か — シンボルレベルまで未追跡
-- [ ] 上流テストスイートは未実行（調査環境に `bun` が無い）
+- [ ] 上流テストスイートは未実行（調査環境に `bun` が無い）— **区間をまたいで継続中の項目**（初出は「2.6.55 調査で残った未確認事項」。本区間でも解消していない）
 
 ## 運用
 
