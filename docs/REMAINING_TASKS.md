@@ -76,7 +76,7 @@
       — 測ったのは Git オブジェクトのバイト数のみ
 - [ ] `audit-format.md` の "Interaction Events (10 events)" と実際の表行数（9 行）の不一致
 - [ ] 2.6.92 の混在セパレータ問題が実データで悪用可能だったか — コード構造上の経路のみ確認
-- [ ] Copilot / OpenCode がエンジン再インストール後に compose フックで自己修復するか
+- [ ] Copilot / opencode がエンジン再インストール後に compose フックで自己修復するか
       — 上流は Claude / Codex / Cursor / Kiro IDE と Kiro CLI しか名指ししていない
 - [ ] `aidlc-plugin-validate.ts` と compose のテストペイロード判定の非対称
       （validate は `tests` / `fixtures` / `*.test.ts` のみ error、compose は `__tests__` / `*.spec.ts` も drop）が
