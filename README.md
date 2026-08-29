@@ -7,8 +7,8 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-08-22  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.55**。上流 HEAD `840ba653` / 取得日 2026-08-22）
+最終同期日: 2026-08-29  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.123**。上流 HEAD `2fbee12f` / 取得日 2026-08-29）
 
 > 上流はマイナーリリースが頻繁である。本ノートは特定時点のスナップショットであり、
 > 数値・仕様は参照時に、**上流リポジトリ**（`awslabs/aidlc-workflows` v2 のローカル clone）の `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。本ノートのリポジトリには `core/` は存在しない。
@@ -29,7 +29,7 @@
 AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI コーディングを、検証可能で自己修正するエンジニアリング・ワークフローに変える**枠組みです。
 
 - **承認ゲートでは人が最終判断**する（レビュアは最終拒否権を持たない）
-  - 例外: Initialization はゲートなし／フェーズ境界の Verification Gate は自動／Construction で ladder 後に **autonomous** を選ぶと残 Bolt のゲートは省略可（失敗時は halt-and-ask）
+  - 例外: Initialization はゲートなし／フェーズ境界の Verification Gate は自動／Construction で ladder 後に **autonomous** を選ぶと以降の Construction ステージの承認ゲートは省略可（失敗時は halt-and-ask）。**「Bolt」は 2.6.86 で上流が「計画上のスプリント様スライス」へ再定義した** → [01.8.1](./01-overview.md#181-bolt-の定義は-2686-で上流が書き換えた)
 - 決定論的エンジンがルーティングし、LLM 導体（conductor）が実行品質を担う
 - 1 つの `core/` から Claude Code / Kiro IDE / Kiro CLI / Codex / **Cursor** / opencode / **GitHub Copilot** 向け配布物を生成する
 
@@ -55,6 +55,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [12-release-impact-2602.md](./12-release-impact-2602.md) | 2.5.62 → 2.6.2 の差分。**ステージ 32→33**、`application-design` 廃止と `domain-design` / `contract-design`、成果物名の作り直し、state スキーマ v8、Cursor ハーネス追加 |
 | [13-release-impact-2649.md](./13-release-impact-2649.md) | 2.6.2 → 2.6.49 のリリース差分 |
 | [14-release-impact-2655.md](./14-release-impact-2655.md) | 2.6.49 → 2.6.55 のリリース差分。**中核メトリクスは全項目不変**で、変わったのは実行時のガード・継続トークン・監査の発火条件 |
+| [15-release-impact-26123.md](./15-release-impact-26123.md) | 2.6.55 → 2.6.123 のリリース差分。**フック 17→18 / `core/tools/*.ts` 41→51 / 監査 86→91 / `bugfix` 7→9・`refactor` 8→10**、プラグイン作成ツールチェーン、Bolt 用語の再定義 |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
 ### メンテナ向け（作業記録）
@@ -76,9 +77,9 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | エージェント | 14（ドメイン 11 + レビュア 2 + Composer 1） |
 | スコープ | 11 + 自動検出 + カスタム compose |
 | 深度 / テスト戦略 | 各 3 段階（独立） |
-| 監査イベント種別 | **86**（22 分類）※ |
+| 監査イベント種別 | **91**（22 分類）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
-| 実装バージョン | **2.6.55**（上流 HEAD `840ba653`。取得日 2026-08-22） |
+| 実装バージョン | **2.6.123**（上流 HEAD `2fbee12f`。取得日 2026-08-29） |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 

@@ -226,9 +226,76 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 
 ## 6.4 アップグレードでハーネスごとにすること（2.6.2 → 2.6.55）
 
-**「`dist/` を再コピーすれば済む」ハーネスと、追加の手作業が要るハーネスがある。**
-ただし **2.6.51 以降は「再コピー」そのものに全ハーネス共通の作法が付いた**ので、
-ハーネス別の表を読む前に次を満たすこと。
+> **⚠ 2.6.55 → 2.6.123 では、再コピーだけでは済まない作業が過去最多になった。**
+> 本節の表は **2.6.55 までの手順**である。2.6.123 へ上げるときは、**全 62 版の Upgrade 文を精査した結果、
+> 下の 20 版について追加作業が要る**（根拠と詳細は
+> [15-release-impact-26123.md](./15-release-impact-26123.md)）。
+> 自分の構成に該当する行だけ拾えばよい。
+>
+> **(a) 自作ステージ／プラグインを持っている場合**
+>
+> | 版 | 追加で要ること |
+> |---|---|
+> | **2.6.121** | **`reviewer:` を宣言する自作・プラグインステージすべてに `review_artifact:` を追加**し、`produces[]` の必須 Markdown を 1 つ選ぶ。per-Unit ステージでは関連する全 Unit 種別に適用。**未移行のステージはコンポーズとグラフコンパイルが拒否する**（発火点は compose / compile。既存のコンパイル済みグラフを再コンパイルしないなら動き続けるが、**プラグイン利用者は復旧の `plugin sync` で compose が走るため上げた時点で踏む**） |
+> | **2.6.65** | 同じ成果物を `produces` / `optional_produces` に重複宣言していると**コンパイルが通らない**。片方を改名するか consumer を直す |
+> | **2.6.94** | composer proposal を読む統合は `birthDescription` → **`creationDescription`** に改名。改名された内部ヘルパを import しているカスタムツールは import を更新 |
+>
+> **(b) プラグインを使っている場合**
+>
+> | 版 | 追加で要ること |
+> |---|---|
+> | **2.6.110** | `dist/` 上書きでプラグイン合成が黙って消える。**`/aidlc plugin sync` を実行**（`--doctor` の `Composed plugin surface` が exit 1 で検出）。Claude / Codex / Cursor / Kiro IDE は次セッションで自己修復するが **Kiro CLI は明示実行が必須** |
+> | **2.6.111** | 各プラグインの projection も refresh して **re-compose**。新しい advisory が名指しするインストール済みファイルを**削除**してから compose し直す |
+> | **2.6.61** | 各プラグインの `dist/plugins/<name>/<harness>/` projection を refresh・re-compose して doctor スクリプトを導入する |
+> | **2.6.78** | プラグインルートが設定済みで使える compose フックが 1 つも無いと `plugin sync` が **exit 1** になる。**自動化を「不完全なプラグイン導入」として扱うよう修正**（CI が落ちるようになる） |
+>
+> **(c) Kiro を使っている場合**
+>
+> | 版 | 追加で要ること |
+> |---|---|
+> | **2.6.64** | **手動削除**（`rm -f <proj>/.kiro/agents/aidlc.json` / `.kiro/agents/aidlc-*-agent.json` / `.kiro/settings/cli.json`）。上流「An overlay copy cannot delete retired files.」 |
+> | **2.6.85** | **Kiro IDE の overlay インストールに新しい `aidlc-terminal-command*` フック登録を含める** |
+> | **2.6.60** | インストール済み Kiro プラグインの **compose を再実行**。doctor が「composed 済みの非対応値」を報告したら、プラグインソースを直し、名指しされたペルソナを削除して compose し直す |
+>
+> **(d) 進行中のワークフロー／レビューがある場合**
+>
+> | 版 | 追加で要ること |
+> |---|---|
+> | **2.6.122** | 進行中の `workspace_requires` レビューは、**完了前にもう一度レビューし直す**（source identity の形式が変わったため） |
+> | **2.6.114** | 本版より前に打刻された **no-DAG の stage-level レビュー請求**は、Bolt がマージされると経路が変わって一致しなくなりうる。verdict を記録する前に `--retry-pending` で**同じ pending 序数を再配車**する |
+> | **2.6.69** | per-unit の workspace レビュー請求のたびに妥当な **`source-manifest.json` を書く**。verdict 前にソースが変わったら `--retry-pending` で再配車 |
+>
+> **(e) その他（該当者のみ）**
+>
+> | 版 | 追加で要ること | 対象 |
+> |---|---|---|
+> | **2.6.93** | `/hooks` で Claude プロジェクトフックを承認し、**Claude Code を完全に再起動** | Claude Code |
+> | **2.6.108** | **人が居ないまま prompt を投げるプロセスに `AIDLC_UNATTENDED=1` を設定**（→ [15.4](./15-release-impact-26123.md#154-人間の関与--無人ドライバの抑止は-opt-in26108)） | cron / CI / 夜間ランナー |
+> | **2.6.71** | **`aidlc/spaces/<space>/memory/org.md` を手編集**して新規セッションを開始（既存ワークスペースの `org.md` は再コピーで上書きされない） | 非英語で使う場合 |
+> | **2.6.80** | `bun scripts/package.ts codex trust --project <絶対パス>` の**再実行** | Codex |
+> | **2.6.91** | 空木ハッシュ `4b825dc642cb6eb9a060e54bf8d69288fbee4904` で保存された CodeKB scope タイムスタンプの**再採番**（または Reverse Engineering の再実行） | CodeKB 利用者 |
+> | **2.6.84** | コンパイル済みバイナリで入れている場合は**実行ファイルと隣接する `runtime/` ディレクトリを置換**する（ソース導入なら通常の `dist/` 再コピーでよい） | バイナリ導入 |
+> | **2.6.96** | センサーキャッシュに対する**利用者側の回避用 ignore ルールを削除**する | 回避策を入れていた場合 |
+>
+> **移行しないと止まるのは 4 つ —— 2.6.121・2.6.65・2.6.94・2.6.78 である。止まる契機はそれぞれ違う。**
+>
+> | 版 | いつ止まるか |
+> |---|---|
+> | **2.6.121** | **compose / graph compile を走らせたとき**（上流: "Composition and graph compilation reject reviewer stages that are not migrated."） |
+> | **2.6.65** | **graph compile を走らせたとき**（authored `.md` を読む `aidlc-graph compile` が `throw`） |
+> | **2.6.94** | **改名された内部ヘルパを import しているカスタムツールを起動したとき**（import が解決しない） |
+> | **2.6.78** | **CI から `plugin sync` を呼んでいて、設定済みのプラグインルートに使える compose フックが 1 つも無いとき**（exit 0 → **exit 1**。パイプラインが落ちる） |
+>
+> **2.6.121 と 2.6.65 は「上げた瞬間」ではない。** 既にコンパイル済みのグラフを持っていて
+> 再コンパイルしないなら、そのまま動き続ける（2.6.95 の doctor チェックは既存グラフ向けだが
+> **advisory で exit code を変えない**）。
+> ——ただし**該当条件を持つプラグイン**（未移行の `reviewer:` ステージ、または重複プロデューサ）を
+> 使っている場合は**上げた時点で踏む**。`dist/` の入れ替えでコンパイル済みグラフが素に戻り（2.6.110）、
+> 復旧に要る `/aidlc plugin sync` が compose を走らせるためである。
+> **どちらの条件も持たないプラグインは普通に compose される。**
+> 残り 16 版は**ワークフローの実行そのものは止めない**（不便・危険ではある）。
+> なお 2.6.102（lifecycle フィールド追加）は「file 単位のドリフト診断が欲しい場合のみ」と
+> 上流が明記しているので、必須作業には数えていない。
 
 ### 全ハーネス共通のスワップ手順（2.6.51 以降の前提）
 

@@ -11,7 +11,7 @@
 3. 同 clone 内（精読・突合済み）:
    - `README.md`（GA、ハーネス、バージョン要件）
    - `CHANGELOG.md`（**2.5.x を中心**に参照。2.4 / 2.3 も一部）
-   - `core/tools/aidlc-version.ts` → `2.6.55`（2026-08-22 再取得。branch `v2` HEAD `840ba653`。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`））
+   - `core/tools/aidlc-version.ts` → `2.6.123`（2026-08-29 再取得。branch `v2` HEAD `2fbee12f`。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`））
    - `docs/guide/00-introduction.md`
    - `docs/guide/03-spaces-and-intents.md`
    - `docs/guide/04-phases-and-stages.md`
@@ -27,8 +27,14 @@
    - `dist/kiro/.kiro/settings/mcp.json` と `dist/kiro/.kiro/agents/*.json`（14 ペルソナ＋指揮役 `aidlc.json`）（2026-08-14。2.5.74 の MCP レジストリ）
    - `dist/kiro-ide/.kiro/agents/aidlc-composer-agent.json` と `dist/claude/.mcp.json`（2026-08-14。MCP 同梱の有無をハーネス間で突き合わせるため）
    - 全 7 ハーネスの `dist/*/…/agents/` 配下（2026-08-14。`@server` 付与の有無を機械的に集計）
-   - `docs/guide/glossary.md`
+   - `docs/guide/glossary.md`（2026-08-29 に再読。**2.6.86 で Bolt の定義が書き換わっている**）
    - `core/` ディレクトリ一覧（stages/tools/hooks/scopes/sensors）
+   - 2.6.55 → 2.6.123 区間（2026-08-29 実測。HEAD `2fbee12f`）:
+     `core/tools/*.ts`（`import.meta.main` の有無で CLI とライブラリを判別）/
+     `core/hooks/*.ts` / `core/scopes/*.md` と `scope-grid.json` /
+     `core/sensors/*.md`（`fire_on` と `default_severity`）/
+     `core/tools/aidlc-audit.ts` の `VALID_EVENT_TYPES` — 詳細は
+     [15-release-impact-26123.md](./15-release-impact-26123.md)
 
 ## 二次情報（裏取りに使用）
 

@@ -11,13 +11,14 @@
 - [ ] `docs/reference/*` 精読後のエンジン内部メモ追加
 - [ ] `docs/guide/agents/*.md`・`workshop-mode.md` が 2.5.11 時点で既に存在したか（新規追加か索引漏れか）の切り分け
 
-## 上流追従（2.6.55 まで同期済み）
+## 上流追従（2.6.123 まで同期済み）
 
 - [x] 上流 2.5.11 → 2.5.37 の差分反映（2026-08-05）
 - [x] 上流 2.5.37 → 2.5.62 の差分反映（2026-08-11）→ [11-release-impact-2562.md](../11-release-impact-2562.md)
 - [x] 上流 2.5.62 → 2.6.2 の差分反映（2026-08-14。HEAD `4569754e`）→ [12-release-impact-2602.md](../12-release-impact-2602.md)
 - [x] 上流 2.6.2 → 2.6.49 の差分反映（2026-08-22。HEAD `71d9a9e0`）→ [13-release-impact-2649.md](../13-release-impact-2649.md)
 - [x] 上流 2.6.49 → 2.6.55 の差分反映（2026-08-22。HEAD `840ba653`）→ [14-release-impact-2655.md](../14-release-impact-2655.md)
+- [x] 上流 2.6.55 → 2.6.123 の差分反映（2026-08-29。HEAD `2fbee12f`）→ [15-release-impact-26123.md](../15-release-impact-26123.md)
 - [ ] **追従フローの定例化** — 上流には in-place upgrade も版数比較の仕組みも無い（`docs/roadmap.md` #535 未実装）ため、追従は運用で担保するしかない。担当者と頻度を決める
   - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
 - [ ] **2.6.1 の破壊的変更を読者向け移行手順として点検する** — 永続 state が v8 に上がり、`/aidlc next` / `/aidlc report` / `/aidlc --doctor` が pre-v8 state を拒否する。アップグレード時は `skills/aidlc-application-design/` の**手動削除**が要る（`cp -R` マージでは残る）。実機での再現は未実施
@@ -59,6 +60,31 @@
       実際にどのタイミングでどのエラーが出るか — 上流の unsupported 宣言を確認したのみ
 - [ ] `AIDLC_SKIP_REVIEWER_GATE_GUARD=1` を一般利用者が設定できないようにする機構の有無
 - [ ] 上流テストスイートは未実行（調査環境に `bun` が無い）
+
+## 2.6.123 調査で残った未確認事項
+
+（`scratch/` は Git 管理外の作業ディレクトリなので、根拠は本リポジトリには残らない。判断の経緯は [15-release-impact-26123.md](../15-release-impact-26123.md) を参照）
+
+- [ ] `bugfix` / `refactor` の**旧**承認ゲート数の絶対値 — 新値 6 / 7 は CHANGELOG が明示しているが、
+      旧 `bugfix` 4 は旧ドキュメントの例から読めるだけで、旧 `refactor` は算術推定にとどまる
+- [ ] 2.6.121 の `incompleteFallback` が advisory ステージで実際にゲートを開けるか — コード読解による推論
+- [ ] `Review Challenge` を conductor が自作して受領証を通せる具体的攻撃経路 — 同上
+- [ ] 2.6.74（品質目標）の実効性 — エージェントが実際に閾値の緩和を拒否するか
+- [ ] 2.6.116 / 2.6.112 の効果 — 散文ルールのみでガードが無いため、動作としては未検証
+- [ ] 2.6.71 の localization が各ハーネスでどこまで日本語化されるか
+- [ ] 2.6.119 / 2.6.117 の文脈削減が実トークン消費・コスト・レイテンシをどれだけ下げるか
+      — 測ったのは Git オブジェクトのバイト数のみ
+- [ ] `audit-format.md` の "Interaction Events (10 events)" と実際の表行数（9 行）の不一致
+- [ ] 2.6.92 の混在セパレータ問題が実データで悪用可能だったか — コード構造上の経路のみ確認
+- [ ] Copilot / opencode がエンジン再インストール後に compose フックで自己修復するか
+      — 上流は Claude / Codex / Cursor / Kiro IDE と Kiro CLI しか名指ししていない
+- [ ] `aidlc-plugin-validate.ts` と compose のテストペイロード判定の非対称
+      （validate は `tests` / `fixtures` / `*.test.ts` のみ error、compose は `__tests__` / `*.spec.ts` も drop）が
+      意図的か検証漏れか
+- [ ] 上流 `10-authoring-a-plugin.md` が「neither an AIDLC project nor a framework checkout」と書く一方、
+      `aidlc-plugin-test.ts` は `--install <project-root>` が必須 — 誤記か意図的か断定できない
+- [ ] 2.6.99 の active-directive ロックが `withAuditLock` と物理的に同一実装か — シンボルレベルまで未追跡
+- [ ] （継続）上流テストスイートは未実行 → 「2.6.55 調査で残った未確認事項」の同項目を参照。本区間でも解消していない
 
 ## 運用
 

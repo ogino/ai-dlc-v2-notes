@@ -19,20 +19,46 @@
 | `classic` | 26/33 | Standard | **2.6.18 追加。暗黙の既定スコープ。** AI-DLC v1 相当のライフサイクル（Ideation 全 7 本をスキップ） |
 | `mvp` | 23/33 | Standard | グリーンフィールド MVP（下表のスキップ） |
 | `poc` | 8/33 | Minimal | 実現可能性の迅速検証 |
-| `bugfix` | 7/33 | Minimal | 特定バグ修正 |
-| `refactor` | 8/33 | Minimal | 振る舞いを変えない整理 |
+| `bugfix` | 9/33 | Minimal | 特定バグ修正。**2.6.70 で 7/33 → 9/33**（→ 5.1.1） |
+| `refactor` | 10/33 | Minimal | 振る舞いを変えない整理。**2.6.70 で 8/33 → 10/33**（→ 5.1.1） |
 | `infra` | 13/33 | Standard | インフラ・環境・IaC |
 | `security-patch` | 10/33 | Minimal | CVE 等の迅速対応 |
 | `workshop` | 26/33 | Standard（**Test=Minimal**） | 研修。Ideation 全スキップ |
 | `express` | 10/33 | Minimal | **2.6.18 追加。** 要件 → コード → テスト → 条件付きデプロイの最短路。設計パス無し・**reviewer 無効**（→ 5.7） |
 
 （この節を含む 2.6.2 → 2.6.49 の差分全体は [13-release-impact-2649.md](./13-release-impact-2649.md) を参照。
-**本章の実測値は 2.6.55 でも変わっていない** — 2.6.49 → 2.6.55 でスコープ定義・`scope-grid.json` ともに
-バイト単位で不変である → [14-release-impact-2655.md](./14-release-impact-2655.md)）
+2.6.49 → 2.6.55 ではスコープ定義・`scope-grid.json` ともにバイト単位で不変だった
+→ [14-release-impact-2655.md](./14-release-impact-2655.md)。
+**その後 2.6.70 で `bugfix` / `refactor` の 2 スコープだけが動いた** → 5.1.1 /
+[15-release-impact-26123.md](./15-release-impact-26123.md)）
 
 **2.6.18 でスコープが 9 → 11 になった**（出典: `core/scopes/*.md` の件数 / `scope-grid.json` の `scopes` キー数）。追加は `classic` と `express` の 2 つで、**既存 9 スコープの EXECUTE 数はすべて不変**である（`scope-grid.json` と 33 ステージの frontmatter `scopes:` を独立集計した 2 系統で一致）。ステージ 33 / フェーズ 5 / エージェント 14 / センサー 6 / ハーネス 7 も不変である。**`stage-graph.json` 上で変わったのは「各ステージがどのスコープに属するか」だけ**だが、スコープ体系そのものは別で、既定スコープ（5.2.1）・`AWS_AIDLC_DEFAULT_SCOPE` の出荷値（5.2.2）・`review_cap`（5.7）・専用ランナーの有無が動いている。
 
 **分母が 33 になった理由**: 2.6.1 で Inception に `contract-design`（2.8）が新設され、全体が 32 → 33 ステージになった。同ステージの `scopes:` は 2.6.1 当時 **`enterprise` / `feature` / `mvp` / `workshop` の 4 つのみ**で、分子が +1 されたのはこの 4 行だけだった（**2.6.18 で `classic` が加わり、2.6.49 時点では 5 つ**）（`poc` / `bugfix` / `refactor` / `infra` / `security-patch` は分子据え置きで分母のみ 32 → 33）。
+**これは 2.6.1 時点の話である。** `bugfix` / `refactor` の分子はその後 2.6.70 で動いた（→ 5.1.1）。
+
+### 5.1.1 `bugfix` / `refactor` にデプロイ段が入った（2.6.70）
+
+2.6.70（`5e153e02`）で **`bugfix` が 7/33 → 9/33、`refactor` が 8/33 → 10/33** になった。
+`scope-grid.json` の差分は **4 行だけ**で、両スコープの `deployment-pipeline` と
+`deployment-execution` が `SKIP` → `EXECUTE` に変わったものである。
+
+| スコープ | 2.6.55 | 2.6.123 | 承認ゲート（2.6.123） |
+|---|---:|---:|---:|
+| `bugfix` | 7/33 | **9/33** | **6** |
+| `refactor` | 8/33 | **10/33** | **7** |
+
+CHANGELOG の原文は「Bugfix now runs **9 of 33 stages with 6 approval gates**;
+Refactor runs **10 of 33 stages with 7 approval gates**.」。
+これで両者は **`security-patch` と同じデプロイ tail** に揃った。
+Environment Provisioning と残りの Operation は引き続き SKIP である。
+
+**他 9 スコープの EXECUTE 数はすべて不変**（`classic` 26 / `enterprise` 33 / `express` 10 /
+`feature` 33 / `infra` 13 / `mvp` 23 / `poc` 8 / `security-patch` 10 / `workshop` 26）。
+**ステージ総数 33 とスコープ総数 11 が不変であることとは矛盾しない。別の指標である。**
+
+なお、旧値（`bugfix` 7 / `refactor` 8）の承認ゲート数は CHANGELOG に明示が無い。
+新値 6 / 7 のみが上流の明示値である。
 
 ### `classic` のスキップ内訳（2.6.18 追加）
 

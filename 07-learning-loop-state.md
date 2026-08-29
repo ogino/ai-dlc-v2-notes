@@ -109,9 +109,27 @@ org → team → project → phase → (stage: 将来)
 `traceability` センサーの manifest は `matches: "**/traceability.json"` / `default_severity: advisory` /
 `command: bun {{HARNESS_DIR}}/tools/aidlc-sensor-traceability.ts`（CLI tools も 37 → 38 本になった要因）。
 
-- Write/Edit 時に hook で発火
-- 結果は監査行（**現行の受理値は `advisory` のみ**。マニフェストのフィールド名は `severity` ではなく `default_severity`。`blocking` は将来の "v0.10.0 ralph driver" 向けに予約）
+- 発火タイミングは manifest の `fire_on` で決まる（既定 `write` = Write/Edit 時に hook で発火。2.6.72 で `gate` が追加 → 下記）
+- 結果は監査行（マニフェストのフィールド名は `severity` ではなく `default_severity`。**受理値は 2.6.72 で `advisory` / `blocking` の 2 つになった** → 下記）
 - 独自センサーを manifest で追加可能
+
+**`fire_on` と `blocking` severity（2.6.72、導入コミット `d62e4695`）**
+
+2.6.72 でセンサー manifest に `fire_on: write|gate`（既定 `write`）と
+`default_severity: advisory|blocking` が入った。それ以前は受理値が `advisory` のみで、
+`blocking` は将来の "v0.10.0 ralph driver" 向けの予約語だった。**2.6.72 で実装された。**
+
+**ただし出荷構成では何も塞がらない。** 過大に読まないための実測:
+
+| 事実 | 内容 |
+|---|---|
+| 出荷 6 センサーの `default_severity` | **全 6 本が `advisory` のまま**。`blocking` はカスタム／プラグイン sensor が使える**能力**として追加されただけ |
+| `fire_on: gate` に移行したセンサー | `claim-sources` / `required-sections` / `upstream-coverage` の **3 本** |
+| `fire_on: write` での `blocking` | 上流散文が「`fire_on: write` runs during matching writes and **remains advisory in this release, even when the manifest declares `blocking`**」と明記。**効くのは `fire_on: gate` のみ** |
+| blocking gate sensor の上書き | 人間裏付けの `Override blocking sensors` で上書き可能。ただし **autonomous モードでは提示も受理もされない** |
+
+**センサーの本数は 6 で不変**（数は動いていない。動いたのは `fire_on` と受理される severity 値である）。
+2.6.119 は §14「Sensor Imports」への説明集約を行っただけで、`blocking` の実装版ではない。
 
 **堅牢化（2.5.31 / 2.5.32）**
 
@@ -119,6 +137,17 @@ org → team → project → phase → (stage: 将来)
 - 2.5.32: プラグインの `sensors/` マニフェストが命名規約（`sensors/` 直下の `aidlc-<id>.md`）を満たさず発見不能な場合、compose 時に degraded drop として記録され `/aidlc --doctor` に表示される。**ただしこの検証は Plugin 経由のみ**で、`sensors/` へ直接置いたセンサーは依然として命名不一致が黙って無視される
 
 > **fail-open 設計に注意**: センサーの判定で FAILED になるのは「終了コード 0 かつ JSON の `pass === false`」の 1 経路のみ。ツール未インストール（exit 127）、spawn 失敗、異常終了、不正 JSON、`pass` フィールド欠如は**いずれも PASSED として記録される**（`Note:` に理由が残る）。監査証跡上の PASSED は「チェックが通った」ことを必ずしも意味しない。
+>
+> **2.6.72 以降、この fail-open が当てはまるのは `fire_on: write`（PostToolUse 経路）である。**
+> 書き込み経路のフック `aidlc-run-sensors.ts` は最後に必ず `return 0` する（コメントに
+> `exit 0 (advisory always per G5)` と書かれている）ので、上の記述はこの経路では今も正確である。
+> **`fire_on: gate` かつ `default_severity: blocking` の束縛は逆で、fail closed する。**
+> 監査行は依然 `SENSOR_PASSED` として書かれるが、**`tool-unavailable` / `script-error` の
+> `Note:` が付いた PASSED 行はゲートを開けない**。findings・dispatcher の exit / spawn / timeout 失敗・
+> 不正な verdict・identity 不一致・`SENSOR_BUDGET_OVERRIDE` も同様に `gate-start` / `revise` /
+> 承認時の復帰再入を止める（→ [15.5](./15-release-impact-26123.md#155-センサーに-gate-発火と-blocking-が入った2672)）。
+> **つまり「監査行が PASSED か」と「ゲートが開くか」は別の判定になった。**
+> ただし出荷 6 センサーは全て `advisory` なので、**出荷構成では上の fail-open がそのまま効く。**
 
 ---
 
@@ -131,7 +160,7 @@ org → team → project → phase → (stage: 将来)
 - Construction Autonomy Mode
 - セッション再開情報
 
-### Audit（86 イベント種別・22 分類※）
+### Audit（91 イベント種別・22 分類※）
 
 ※ 正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準（22 分類）。
 `docs/reference/12-state-machine.md` 基準では 19 分類。上流自身が「グルーピングは表示上の分類であり、
@@ -142,7 +171,25 @@ org → team → project → phase → (stage: 将来)
 - 例: STAGE_*, QUESTION_ANSWERED, REVIEW_*, SENSOR_*, RULE_LEARNED, RECOMPOSED, PLUGIN_SELECTION_CHANGED,
   DOCUMENT_INDEXED, DOCUMENT_UPDATED, DOCUMENT_REMOVED, PIPELINE_LINK_COMPLETED, ...
 
-**新カテゴリ `Documents`（3 イベント）**: `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED` の 3 つ。
+**86 → 91 の内訳（+5）**
+
+| イベント | 導入版 |
+|---|---|
+| `SWARM_SOURCE_MERGED` | 2.6.69 |
+| `UNIT_OWNERSHIP_SET` | 2.6.107 |
+| `UNIT_GATE_RHYTHM_SET` | 2.6.107 |
+| `UNIT_MERGED` | 2.6.107 |
+| `PLAN_APPROVAL_RECORDED` | 2.6.118 |
+
+**分類は 22 のまま不変である。** 新規カテゴリは作られず、既存 2 カテゴリの**改名**で吸収された
+（「Unit Lifecycle Events」→「Unit Configuration and Lifecycle Events」、
+「Plan Approval Events」→「Plan Approval Enforcement Events」）。
+
+**⚠ `PLAN_APPROVAL_RECORDED` は権限ではない。** 上流 `audit-format.md` が
+この Markdown 行について「**not authorization evidence**」と明記している。
+実際の承認権限は保護された非公開の challenge/response レシートが持つ。
+
+**`Documents` カテゴリ（3 イベント、2.6.15 で追加）**: `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED` の 3 つ。
 DocumentKB（[07.6](#76-knowledge-の-2-層) の派生カタログ）に対応する。この 3 イベントは
 **フレームワーク中で唯一の「audit-last」例外**である。通常は audit-first（先に監査へ記録してから実処理に入る）
 だが、DocumentKB のカタログはローカル文書から**再構築可能な派生物**であるため、意図的に順序を逆転している。
