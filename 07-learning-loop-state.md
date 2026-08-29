@@ -137,6 +137,17 @@ org → team → project → phase → (stage: 将来)
 - 2.5.32: プラグインの `sensors/` マニフェストが命名規約（`sensors/` 直下の `aidlc-<id>.md`）を満たさず発見不能な場合、compose 時に degraded drop として記録され `/aidlc --doctor` に表示される。**ただしこの検証は Plugin 経由のみ**で、`sensors/` へ直接置いたセンサーは依然として命名不一致が黙って無視される
 
 > **fail-open 設計に注意**: センサーの判定で FAILED になるのは「終了コード 0 かつ JSON の `pass === false`」の 1 経路のみ。ツール未インストール（exit 127）、spawn 失敗、異常終了、不正 JSON、`pass` フィールド欠如は**いずれも PASSED として記録される**（`Note:` に理由が残る）。監査証跡上の PASSED は「チェックが通った」ことを必ずしも意味しない。
+>
+> **2.6.72 以降、この fail-open が当てはまるのは `fire_on: write`（PostToolUse 経路）である。**
+> 書き込み経路のフック `aidlc-run-sensors.ts` は最後に必ず `return 0` する（コメントに
+> `exit 0 (advisory always per G5)` と書かれている）ので、上の記述はこの経路では今も正確である。
+> **`fire_on: gate` かつ `default_severity: blocking` の束縛は逆で、fail closed する。**
+> 監査行は依然 `SENSOR_PASSED` として書かれるが、**`tool-unavailable` / `script-error` の
+> `Note:` が付いた PASSED 行はゲートを開けない**。findings・dispatcher の exit / spawn / timeout 失敗・
+> 不正な verdict・identity 不一致・`SENSOR_BUDGET_OVERRIDE` も同様に `gate-start` / `revise` /
+> 承認時の復帰再入を止める（→ [15.5](./15-release-impact-26123.md#155-センサーに-gate-発火と-blocking-が入った2672)）。
+> **つまり「監査行が PASSED か」と「ゲートが開くか」は別の判定になった。**
+> ただし出荷 6 センサーは全て `advisory` なので、**出荷構成では上の fail-open がそのまま効く。**
 
 ---
 
@@ -178,7 +189,7 @@ org → team → project → phase → (stage: 将来)
 この Markdown 行について「**not authorization evidence**」と明記している。
 実際の承認権限は保護された非公開の challenge/response レシートが持つ。
 
-**新カテゴリ `Documents`（3 イベント）**: `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED` の 3 つ。
+**`Documents` カテゴリ（3 イベント、2.6.15 で追加）**: `DOCUMENT_INDEXED` / `DOCUMENT_UPDATED` / `DOCUMENT_REMOVED` の 3 つ。
 DocumentKB（[07.6](#76-knowledge-の-2-層) の派生カタログ）に対応する。この 3 イベントは
 **フレームワーク中で唯一の「audit-last」例外**である。通常は audit-first（先に監査へ記録してから実処理に入る）
 だが、DocumentKB のカタログはローカル文書から**再構築可能な派生物**であるため、意図的に順序を逆転している。

@@ -29,7 +29,7 @@
 AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI コーディングを、検証可能で自己修正するエンジニアリング・ワークフローに変える**枠組みです。
 
 - **承認ゲートでは人が最終判断**する（レビュアは最終拒否権を持たない）
-  - 例外: Initialization はゲートなし／フェーズ境界の Verification Gate は自動／Construction で ladder 後に **autonomous** を選ぶと以降の Construction 反復のゲートは省略可（失敗時は halt-and-ask）。**「Bolt」は 2.6.86 で上流が「計画上のスプリント様スライス」へ再定義した** → [01.8.1](./01-overview.md#181-bolt-の定義は-2686-で上流が書き換えた)
+  - 例外: Initialization はゲートなし／フェーズ境界の Verification Gate は自動／Construction で ladder 後に **autonomous** を選ぶと以降の Construction ステージの承認ゲートは省略可（失敗時は halt-and-ask）。**「Bolt」は 2.6.86 で上流が「計画上のスプリント様スライス」へ再定義した** → [01.8.1](./01-overview.md#181-bolt-の定義は-2686-で上流が書き換えた)
 - 決定論的エンジンがルーティングし、LLM 導体（conductor）が実行品質を担う
 - 1 つの `core/` から Claude Code / Kiro IDE / Kiro CLI / Codex / **Cursor** / opencode / **GitHub Copilot** 向け配布物を生成する
 

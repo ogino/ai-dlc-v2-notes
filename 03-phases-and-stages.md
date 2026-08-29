@@ -90,7 +90,7 @@ INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (
 1. **最初のスライス = Walking Skeleton**（常にゲート付き・対話）  
    最小の端到端スライスでアーキを証明
 2. **Ladder prompt（1 回だけ）**  
-   以降を autonomous にするか、反復ごとにゲートを置くか
+   以降を autonomous にするか、以降の Construction ステージごとに承認ゲートを置くか（**Bolt はランタイムの境界ではない** → 3.5.1）
 3. 残りを実行（依存が揃えば **parallel batch**）
 4. **3.6 Build and Test** を全体で 1 回
 5. **3.7 CI Pipeline**（条件付き）を 1 回
