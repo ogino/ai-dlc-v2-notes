@@ -7,8 +7,8 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-08-23  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.123**。上流 HEAD `2fbee12f` / 取得日 2026-08-23）
+最終同期日: 2026-08-29  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.123**。上流 HEAD `2fbee12f` / 取得日 2026-08-29）
 
 > 上流はマイナーリリースが頻繁である。本ノートは特定時点のスナップショットであり、
 > 数値・仕様は参照時に、**上流リポジトリ**（`awslabs/aidlc-workflows` v2 のローカル clone）の `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。本ノートのリポジトリには `core/` は存在しない。
@@ -29,7 +29,7 @@
 AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI コーディングを、検証可能で自己修正するエンジニアリング・ワークフローに変える**枠組みです。
 
 - **承認ゲートでは人が最終判断**する（レビュアは最終拒否権を持たない）
-  - 例外: Initialization はゲートなし／フェーズ境界の Verification Gate は自動／Construction で ladder 後に **autonomous** を選ぶと以降の Construction 反復のゲートは省略可（失敗時は halt-and-ask）。**「Bolt」は 2.6.86 で上流が「計画上のスプリント様スライス」へ再定義した** → [01.8.1](./01-overview.md)
+  - 例外: Initialization はゲートなし／フェーズ境界の Verification Gate は自動／Construction で ladder 後に **autonomous** を選ぶと以降の Construction 反復のゲートは省略可（失敗時は halt-and-ask）。**「Bolt」は 2.6.86 で上流が「計画上のスプリント様スライス」へ再定義した** → [01.8.1](./01-overview.md#181-bolt-の定義は-2686-で上流が書き換えた)
 - 決定論的エンジンがルーティングし、LLM 導体（conductor）が実行品質を担う
 - 1 つの `core/` から Claude Code / Kiro IDE / Kiro CLI / Codex / **Cursor** / opencode / **GitHub Copilot** 向け配布物を生成する
 
@@ -79,7 +79,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | 深度 / テスト戦略 | 各 3 段階（独立） |
 | 監査イベント種別 | **91**（22 分類）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
-| 実装バージョン | **2.6.123**（上流 HEAD `2fbee12f`。取得日 2026-08-23） |
+| 実装バージョン | **2.6.123**（上流 HEAD `2fbee12f`。取得日 2026-08-29） |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 

@@ -207,7 +207,7 @@ your-project/
 
 **出荷 6 センサーは全て `default_severity: advisory`**（監査に記録するがゲートを自動ブロックしない）。
 2.6.72 で `blocking` severity と `fire_on: gate` が使えるようになったが、
-出荷構成でゲートを塞ぐセンサーは 1 本も無い（→ [07.4](./07-learning-loop-state.md)）。  
+出荷構成でゲートを塞ぐセンサーは 1 本も無い（→ [07.4](./07-learning-loop-state.md#74-sensorsフィードバック)）。  
 レビュア（Product Lead / Architecture Reviewer）は敵対的レビュー契約で READY/NOT-READY を付与。
 
 ---
@@ -221,7 +221,7 @@ your-project/
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.6.123"`（本ノート整理時点。上流 HEAD `2fbee12f` / 取得日 2026-08-23。2.6.55 → 2.6.123 の差分は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.6.123"`（本ノート整理時点。上流 HEAD `2fbee12f` / 取得日 2026-08-29。2.6.55 → 2.6.123 の差分は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|

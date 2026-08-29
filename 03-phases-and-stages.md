@@ -112,18 +112,20 @@ INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (
 
 **本ノートの旧記述が間違っていたのではなく、上流グロッサリの定義が変わった。**
 本節はかつて「3.1–3.5 = Bolt 単位」「実行単位 = Per Bolt」と書いていたが、
-2.6.86 で Bolt は**実行の単位ではなくなった**。
+2.6.86 で Bolt は**実行の単位ではなくなった**——
+「スプリント様の Construction 反復」を **Delivery Planning（2.9）が記録するもの**であり、
+**既定の stage-major ランタイムは `bolt-plan.md` をグルーピング／順序の境界として消費しない**。
+実行のバッチは `unit-of-work-dependency.md`（2.7）から再計算される。
 
-| | 旧（2.6.55 まで） | 新（2.6.86 以降） |
-|---|---|---|
-| Bolt | 「**Construction 実行の単位** — 1 Unit に対する 3.1–3.5 の一巡」 | 「**スプリント様の Construction 反復**。Delivery Planning (2.9) が意図したグルーピングを記録する」 |
-| `bolt-plan.md` | 実行の境界 | **計画上の記録**。既定の stage-major ランタイムは**グルーピング／順序の境界として消費しない** |
-| 実行のバッチ | Bolt から | `unit-of-work-dependency.md`（2.7）から**再計算**される |
-| `BOLT_STARTED` / `BOLT_COMPLETED` | Construction 一般 | **swarm / worktree 経路の Unit 単位イベント**。通常のゲート付き実行では**記録されない** |
+したがって**本章の 3.1–3.5 は Unit 単位で読む**のが正しい。
+`BOLT_STARTED` / `BOLT_COMPLETED` は swarm / worktree 経路の Unit 単位イベントで、
+通常のゲート付き実行では記録されない。
 
 **挙動は変わっていない。** 2.6.86 が触った 69 ファイルはドキュメントとプロトコル散文の整合のみで、
 ツール・フック・ステージグラフの変更はゼロである。
-→ [01.8.1](./01-overview.md) / [15-release-impact-26123.md](./15-release-impact-26123.md)
+
+新旧定義の対照表は [01.8.1](./01-overview.md#181-bolt-の定義は-2686-で上流が書き換えた) に一本化した
+（→ [15-release-impact-26123.md](./15-release-impact-26123.md)）。
 
 ---
 
