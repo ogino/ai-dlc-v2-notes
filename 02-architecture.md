@@ -97,7 +97,7 @@ core/
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数（2.6.123 実測）**: `core/tools/*.ts` は **51 本**（2.6.55 時点は 41 本）。
+**tools 本数（2.7.0 実測）**: `core/tools/*.ts` は **51 本**（2.6.55 時点は 41 本。2.6.123 から不変）。
 
 **⚠ 51 は「CLI の本数」ではない。** `core/tools/*.ts` はファイル数であって、
 そのうち実際に単体起動できる CLI（`import.meta.main` を持つもの）は **32 本**、
@@ -221,7 +221,7 @@ your-project/
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.6.123"`（本ノート整理時点。上流 HEAD `2fbee12f` / 取得日 2026-08-29。2.6.55 → 2.6.123 の差分は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.7.0"`（本ノート整理時点。上流 `main` HEAD `96b11d39` / 取得日 2026-09-01。2.6.123 → 2.7.0 の差分は [16-release-impact-2700.md](./16-release-impact-2700.md)、2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|

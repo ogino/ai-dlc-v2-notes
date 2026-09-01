@@ -3,24 +3,27 @@
 > **免責（必読）**  
 > - 本リポジトリは **非公式の二次整理** であり、AWS / awslabs / Amazon の公式文書・公式サポートではない  
 > - 生成 AI による要約・再構成を含み、**誤りがあり得る**  
-> - 実装・仕様の正は常に上流 [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows)（v2）のソースと `docs/` を参照すること  
+> - 実装・仕様の正は常に上流 [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows)（`main` ブランチ）のソースと `docs/` を参照すること  
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-08-29  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **v2 ブランチ**（実装バージョン **2.6.123**。上流 HEAD `2fbee12f` / 取得日 2026-08-29）
+最終同期日: 2026-09-01  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **`main` ブランチ**（実装バージョン **2.7.0**。上流 HEAD `96b11d39` / 取得日 2026-09-01）
+
+> **⚠ 上流の `v2` ブランチは 2026-09-01 に削除された。**`main` が 2.x の正本である（旧 1.x は新設の `v1` ブランチへ移動）。
+> 経緯と影響は [16-release-impact-2700.md](./16-release-impact-2700.md) を参照。
 
 > 上流はマイナーリリースが頻繁である。本ノートは特定時点のスナップショットであり、
-> 数値・仕様は参照時に、**上流リポジトリ**（`awslabs/aidlc-workflows` v2 のローカル clone）の `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。本ノートのリポジトリには `core/` は存在しない。
+> 数値・仕様は参照時に、**上流リポジトリ**（`awslabs/aidlc-workflows` `main` のローカル clone）の `core/tools/aidlc-version.ts` と CHANGELOG で必ず照合すること。本ノートのリポジトリには `core/` は存在しない。
 
 ---
 
 ## このノートの目的
 
-インターネット上の公式・解説情報と、`v2` ブランチのソース／ドキュメントを突き合わせ、**AI-DLC（AI-Driven Development Life Cycle）Workflows 2.0** を日本語で俯瞰できるようにしたものです。
+インターネット上の公式・解説情報と、上流のソース／ドキュメントを突き合わせ、**AI-DLC（AI-Driven Development Life Cycle）Workflows 2.0** を日本語で俯瞰できるようにしたものです。
 
 - **方法論（methodology）**: AWS が定義した AI 中心の開発ライフサイクル
-- **実装（implementation）**: `aidlc-workflows` の v2 ブランチが提供する、複数 CLI ハーネス向けのネイティブ実行エンジン
+- **実装（implementation）**: `aidlc-workflows` の `main` ブランチが提供する、複数 CLI ハーネス向けのネイティブ実行エンジン
 
 ---
 
@@ -56,6 +59,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [13-release-impact-2649.md](./13-release-impact-2649.md) | 2.6.2 → 2.6.49 のリリース差分 |
 | [14-release-impact-2655.md](./14-release-impact-2655.md) | 2.6.49 → 2.6.55 のリリース差分。**中核メトリクスは全項目不変**で、変わったのは実行時のガード・継続トークン・監査の発火条件 |
 | [15-release-impact-26123.md](./15-release-impact-26123.md) | 2.6.55 → 2.6.123 のリリース差分。**フック 17→18 / `core/tools/*.ts` 41→51 / 監査 86→91 / `bugfix` 7→9・`refactor` 8→10**、プラグイン作成ツールチェーン、Bolt 用語の再定義 |
+| [16-release-impact-2700.md](./16-release-impact-2700.md) | 2.6.123 → 2.7.0 のリリース差分。**中核メトリクスは全項目不変**。上流の `v2` ブランチ削除と `main` への一本化、2.6.124 の状態ファイル相対パス化、**2.7.0 の CHANGELOG がロールアップ再掲である**こと |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
 ### メンテナ向け（作業記録）
@@ -79,7 +83,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | 深度 / テスト戦略 | 各 3 段階（独立） |
 | 監査イベント種別 | **91**（22 分類）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
-| 実装バージョン | **2.6.123**（上流 HEAD `2fbee12f`。取得日 2026-08-29） |
+| 実装バージョン | **2.7.0**（上流 `main` HEAD `96b11d39`。取得日 2026-09-01） |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 
@@ -94,8 +98,11 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 curl -fsSL https://bun.sh/install | bash
 
 # 2. ソース取得
-git clone https://github.com/awslabs/aidlc-workflows.git
-cd aidlc-workflows && git checkout v2
+#    導入するだけなら上流の案内どおり main（最新を入れる）
+#    本ノートの数値を再現・照合するならタグ固定（下記 6.7 と同じ）
+git clone --branch main https://github.com/awslabs/aidlc-workflows.git   # 最新を導入する場合
+# git clone --branch v2.7.0 https://github.com/awslabs/aidlc-workflows.git  # 本ノートの版に合わせる場合
+cd aidlc-workflows
 
 # 3. 使うハーネスの dist をプロジェクトへコピー
 # 例: Claude Code
@@ -115,6 +122,6 @@ cp -R dist/claude/aidlc/.   your-project/aidlc/
 
 - 生成 AI の出力は誤りを含み得る。公式も **生成物とコストのレビュー**を求めている
 - 推奨モデルは公式 README 時点で **Claude Opus 4.8**（特に Kiro では有料プランが必要な場合あり）
-- 本ノートは **二次整理**である。数値・手順の正本は、精読した **v2 ブランチの `docs/`・ソース・CHANGELOG** を優先する
-- [2.0 Specification PDF](https://github.com/awslabs/aidlc-workflows/blob/v2/assets/AI-DLC-Workflows-2.0-Specification.pdf)（リポジトリ上は主に `assets/`）は公式白書だが、**本ノート作成時は全文未精読**。PDF 固有の細部は PDF 本体を確認すること
+- 本ノートは **二次整理**である。数値・手順の正本は、精読した **`main` ブランチの `docs/`・ソース・CHANGELOG** を優先する
+- [2.0 Specification PDF](https://github.com/awslabs/aidlc-workflows/blob/main/assets/AI-DLC-Workflows-2.0-Specification.pdf)（リポジトリ上は主に `assets/`）は公式白書だが、**本ノート作成時は全文未精読**。PDF 固有の細部は PDF 本体を確認すること
 - 公式 README の NOTE どおり、インタフェースは安定しつつ継続改善されるため、依存する場合は **既知良版の pin** を推奨

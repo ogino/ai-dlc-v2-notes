@@ -5,8 +5,9 @@
 | リソース | URL |
 |----------|-----|
 | リポジトリ | https://github.com/awslabs/aidlc-workflows |
-| v2 ブランチ | https://github.com/awslabs/aidlc-workflows/tree/v2 |
-| Workflows 2.0 Spec PDF（正: `assets/`） | https://github.com/awslabs/aidlc-workflows/blob/v2/assets/AI-DLC-Workflows-2.0-Specification.pdf |
+| `main` ブランチ（2.x の正本） | https://github.com/awslabs/aidlc-workflows/tree/main |
+| `v1` ブランチ（1.x） | https://github.com/awslabs/aidlc-workflows/tree/v1 |
+| Workflows 2.0 Spec PDF（正: `assets/`） | https://github.com/awslabs/aidlc-workflows/blob/main/assets/AI-DLC-Workflows-2.0-Specification.pdf |
 | Roadmap | https://awslabs.github.io/aidlc-workflows/roadmap.html |
 | Method Blog | https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/ |
 | Open-sourcing adaptive workflows | https://aws.amazon.com/blogs/devops/open-sourcing-adaptive-workflows-for-ai-driven-development-life-cycle-ai-dlc/ |
@@ -71,11 +72,18 @@ docs/guide/harnesses/*.md
 
 ## 9.4 本ノートの更新のしかた
 
+**この節だけは意図的に `main`（動くブランチ）を見る。** 目的が「上流がどこまで進んだかを知ること」だからで、
+タグに固定してしまうと差分の検知そのものができない。
+
 ```bash
-git clone --depth 1 --branch v2 https://github.com/awslabs/aidlc-workflows.git
+git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows
 # バージョン確認
 rg 'AIDLC_VERSION' core/tools/aidlc-version.ts
 ```
 
 上流の変更に合わせて、本ノート側の数値・差分表を再同期すること。
+
+**本ノートが記述している版をそのまま再現したいときは、`main` ではなくタグを使う**
+（`--branch v2.7.0`。手順は [6.7](./06-harnesses-install.md#67-ソースの確認方法)）。
+用途が違うので、この 2 つを取り違えないこと。

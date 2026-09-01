@@ -1,6 +1,6 @@
 # 06. ハーネスと導入
 
-## 6.1 対応ハーネス（v2）
+## 6.1 対応ハーネス（2.x）
 
 | Harness | 最低バージョン目安 | 導入元 | 起動 |
 |---------|-------------------|--------|------|
@@ -41,8 +41,8 @@
 
 ```bash
 curl -fsSL https://bun.sh/install | bash
-git clone https://github.com/awslabs/aidlc-workflows.git
-cd aidlc-workflows && git checkout v2
+git clone --branch main https://github.com/awslabs/aidlc-workflows.git
+cd aidlc-workflows
 ```
 
 ### 6.2.1 実行環境の前提: 単一ローカルファイルシステム（2.6.51 以降）
@@ -230,6 +230,16 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 > 本節の表は **2.6.55 までの手順**である。2.6.123 へ上げるときは、**全 62 版の Upgrade 文を精査した結果、
 > 下の 20 版について追加作業が要る**（根拠と詳細は
 > [15-release-impact-26123.md](./15-release-impact-26123.md)）。
+>
+> **2.6.123 から 2.7.0 へ上げるだけなら、下の表の作業は増えない。** 2.6.124 に移行処理は無く、2.7.0 が変えたのは**バージョン定数だけ**でロジックの変更は無い。
+> **ただしプラグインを入れているなら、再コピー後に `/aidlc plugin sync` が要る**
+> （エンジンを入れ替えるとコンパイル済みグラフが素に戻り、合成が失われる）。これは版によらず毎回必要である。
+> ただし **`dist/<harness>/` の取得元が変わった** —— clone は `git clone --branch main` になる（`v2` は削除済み）。
+> また 2.6.124 は**既存の `aidlc-state.md` を書き換えないし、コミット済みの履歴も変えない**。
+> **2.7.0 の CHANGELOG は 2.6.x 全体のロールアップ再掲なので、それを読んだだけでは
+> 下の 20 版の一度きりの作業は済まない**（→ [16.4](./16-release-impact-2700.md#164-270-の-changelog-はロールアップであって新機能一覧ではない)）。
+> エントリが挙げる「2.6.1 より前に作成したワークフローは完了・アーカイブしておくこと」も、
+> **2.7.0 の新制約ではなく 2.6.1 の state スキーマ v8 の再掲**である。
 > 自分の構成に該当する行だけ拾えばよい。
 >
 > **(a) 自作ステージ／プラグインを持っている場合**
@@ -484,8 +494,12 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 ## 6.7 ソースの確認方法
 
 ```bash
-git clone --depth 1 --branch v2 https://github.com/awslabs/aidlc-workflows.git
+# 本ノートが記述している版を確認するなら、タグで固定する
+git clone --depth 1 --branch v2.7.0 https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows
+
+# 上流の現在を追うなら main（動くブランチなので、本ノートの数値と食い違いうる）
+# git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git
 
 ls dist/     # claude  codex  copilot  cursor  kiro  kiro-ide  opencode  plugins
              # ＋ "AI-DLC Workflows 2.0 Specification.pdf"（空白区切りの名前）

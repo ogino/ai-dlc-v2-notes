@@ -5,13 +5,19 @@
 
 ## 一次情報（優先）
 
-1. GitHub `awslabs/aidlc-workflows` tree/v2 README  
-   https://github.com/awslabs/aidlc-workflows/tree/v2
-2. 公式 v2 ブランチのローカル clone（`git clone --depth 1 --branch v2`）
+1. GitHub `awslabs/aidlc-workflows` tree/main README  
+   https://github.com/awslabs/aidlc-workflows/tree/main
+2. 公式 `main` ブランチのローカル clone  
+   `git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git`  
+   （**版を固定して調べるなら `--branch v2.7.0`**。また **`--depth 1` では過去 SHA との差分が取れない** ——
+   `git diff 2fbee12f..origin/main` のような測定には `git fetch --unshallow` が要る）  
+   **2026-09-01 の再編以前は `v2` ブランチだった。`v2` は削除済みで、`main` がその線形な継続である**
+   （11〜15 章の `基準:` 行が記録している HEAD SHA は、いずれも `main` から到達できる。
+   10 章は `対象:` 行にブランチ名のみで SHA を持たない）
 3. 同 clone 内（精読・突合済み）:
    - `README.md`（GA、ハーネス、バージョン要件）
    - `CHANGELOG.md`（**2.5.x を中心**に参照。2.4 / 2.3 も一部）
-   - `core/tools/aidlc-version.ts` → `2.6.123`（2026-08-29 再取得。branch `v2` HEAD `2fbee12f`。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`））
+   - `core/tools/aidlc-version.ts` → `2.7.0`（2026-09-01 再取得。branch `main` HEAD `96b11d39`。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`）→ 2026-08-29 時点 `2.6.123`（branch `v2` HEAD `2fbee12f`））
    - `docs/guide/00-introduction.md`
    - `docs/guide/03-spaces-and-intents.md`
    - `docs/guide/04-phases-and-stages.md`
@@ -35,6 +41,10 @@
      `core/sensors/*.md`（`fire_on` と `default_severity`）/
      `core/tools/aidlc-audit.ts` の `VALID_EVENT_TYPES` — 詳細は
      [15-release-impact-26123.md](./15-release-impact-26123.md)
+   - 2.6.123 → 2.7.0 区間（2026-09-01 実測。branch `main` HEAD `96b11d39`）:
+     上記と同じ測定を再実行し**全項目不変**を確認 / `git diff 2fbee12f..origin/main`（`core/` は 4 ファイル 4 行）/
+     `docs/roadmap.md` / `.github/workflows/` — 詳細は
+     [16-release-impact-2700.md](./16-release-impact-2700.md)
 
 ## 二次情報（裏取りに使用）
 
@@ -90,12 +100,12 @@
 
 ## 正本の優先順位（本ノート内）
 
-1. **精読済み**: v2 の `docs/guide/*`・`README`・`CHANGELOG`・`core/` の実体  
+1. **精読済み**: `main` の `docs/guide/*`・`README`・`CHANGELOG`・`core/` の実体  
 2. **未精読だが公式**: Spec PDF 全文、Method Paper 全文 → 細部は必ず原典を確認  
 3. **二次解説**: 対比・理解の補助のみ。1.x 一般化などは [08](./08-v1-vs-v2.md) の留保に従う  
 
 ## 免責
 
 本ノートは上記の要約・再構成であり、AWS または awslabs の公式文書ではない。  
-**実装・運用の正は常に v2 ブランチのソースと `docs/`（および必要なら Spec PDF）である。**  
+**実装・運用の正は常に `main` ブランチのソースと `docs/`（および必要なら Spec PDF）である。**  
 本ノートが「正とする」と書く箇所も、精読範囲外の細部については原典が優先する。
