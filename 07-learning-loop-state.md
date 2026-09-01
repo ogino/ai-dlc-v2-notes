@@ -159,6 +159,9 @@ org → team → project → phase → (stage: 将来)
 - ステージ進捗チェックボックス（6 状態）
 - Construction Autonomy Mode
 - セッション再開情報
+- `Project Root` / `Worktree Path`（**2.6.124 以降はプロジェクト相対**。
+  それ以前はマシン固有の絶対パスが書かれていた。既存ファイルは移行されず、
+  次にエンジンが書くまで旧値が残る → [16.3](./16-release-impact-2700.md#163-26124--状態ファイルから絶対パスが消えた)）
 
 ### Audit（91 イベント種別・22 分類※）
 

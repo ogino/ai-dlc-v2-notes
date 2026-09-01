@@ -11,7 +11,7 @@
 - [ ] `docs/reference/*` 精読後のエンジン内部メモ追加
 - [ ] `docs/guide/agents/*.md`・`workshop-mode.md` が 2.5.11 時点で既に存在したか（新規追加か索引漏れか）の切り分け
 
-## 上流追従（2.6.123 まで同期済み）
+## 上流追従（2.7.0 まで同期済み）
 
 - [x] 上流 2.5.11 → 2.5.37 の差分反映（2026-08-05）
 - [x] 上流 2.5.37 → 2.5.62 の差分反映（2026-08-11）→ [11-release-impact-2562.md](../11-release-impact-2562.md)
@@ -19,6 +19,7 @@
 - [x] 上流 2.6.2 → 2.6.49 の差分反映（2026-08-22。HEAD `71d9a9e0`）→ [13-release-impact-2649.md](../13-release-impact-2649.md)
 - [x] 上流 2.6.49 → 2.6.55 の差分反映（2026-08-22。HEAD `840ba653`）→ [14-release-impact-2655.md](../14-release-impact-2655.md)
 - [x] 上流 2.6.55 → 2.6.123 の差分反映（2026-08-29。HEAD `2fbee12f`）→ [15-release-impact-26123.md](../15-release-impact-26123.md)
+- [x] 上流 2.6.123 → 2.7.0 の差分反映（2026-09-01。`main` HEAD `96b11d39`。**上流の `v2` ブランチ削除に伴う参照先の一斉更新を含む**）→ [16-release-impact-2700.md](../16-release-impact-2700.md)
 - [ ] **追従フローの定例化** — 上流には in-place upgrade も版数比較の仕組みも無い（`docs/roadmap.md` #535 未実装）ため、追従は運用で担保するしかない。担当者と頻度を決める
   - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
 - [ ] **2.6.1 の破壊的変更を読者向け移行手順として点検する** — 永続 state が v8 に上がり、`/aidlc next` / `/aidlc report` / `/aidlc --doctor` が pre-v8 state を拒否する。アップグレード時は `skills/aidlc-application-design/` の**手動削除**が要る（`cp -R` マージでは残る）。実機での再現は未実施
@@ -85,6 +86,21 @@
       `aidlc-plugin-test.ts` は `--install <project-root>` が必須 — 誤記か意図的か断定できない
 - [ ] 2.6.99 の active-directive ロックが `withAuditLock` と物理的に同一実装か — シンボルレベルまで未追跡
 - [ ] （継続）上流テストスイートは未実行 → 「2.6.55 調査で残った未確認事項」の同項目を参照。本区間でも解消していない
+
+## 2.7.0 調査で残った未確認事項
+
+（判断の経緯は [16-release-impact-2700.md](../16-release-impact-2700.md) を参照）
+
+- [ ] 2.6.124 の「既存の絶対パスは次の書き込みまで無害」— `projectRootFor` の再導出とフォールバック順序を
+      コード読解で判断したもので、旧い `aidlc-state.md` を持つ実プロジェクトでは確認していない
+- [ ] 既存の `aidlc-state.md` に残る絶対パスを**明示的に消す**手段があるか — 上流は移行を提供しないと明言しており、
+      手で書き換えてよいかは不明（`Project Root` は到達しないフォールバック、`Worktree Path` は表示用と読める）
+- [ ] `release.yml` / `release-pr.yml` / `codebuild.yml` の dispatch シムは YAML 読解のみ。実際に起動していない
+- [ ] 上流 `docs/roadmap.md` の「current v2 version is 2.6.124」が単なる追随漏れか、
+      2.7.0 を roadmap 上の版として数えない意図かは判断できない
+- [ ] #968（Devin CLI / Desktop ハーネス）がマージされた場合のハーネス 8 種目の扱い — PR 段階のため未追跡
+- [ ] `v2_backup`（`d898b74e`）が何のために残されているか — 旧 `v2` HEAD ではないことのみ確認済み
+- [ ] （継続）上流テストスイートは未実行
 
 ## 運用
 
