@@ -72,8 +72,10 @@ docs/guide/harnesses/*.md
 
 ## 9.4 本ノートの更新のしかた
 
+**この節だけは意図的に `main`（動くブランチ）を見る。** 目的が「上流がどこまで進んだかを知ること」だからで、
+タグに固定してしまうと差分の検知そのものができない。
+
 ```bash
-# 本ノートの版に固定して確認する場合は --branch v2.7.0
 git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows
 # バージョン確認
@@ -81,3 +83,7 @@ rg 'AIDLC_VERSION' core/tools/aidlc-version.ts
 ```
 
 上流の変更に合わせて、本ノート側の数値・差分表を再同期すること。
+
+**本ノートが記述している版をそのまま再現したいときは、`main` ではなくタグを使う**
+（`--branch v2.7.0`。手順は [6.7](./06-harnesses-install.md#67-ソースの確認方法)）。
+用途が違うので、この 2 つを取り違えないこと。
