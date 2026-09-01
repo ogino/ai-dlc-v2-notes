@@ -73,6 +73,7 @@ docs/guide/harnesses/*.md
 ## 9.4 本ノートの更新のしかた
 
 ```bash
+# 本ノートの版に固定して確認する場合は --branch v2.7.0
 git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows
 # バージョン確認

@@ -494,8 +494,12 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 ## 6.7 ソースの確認方法
 
 ```bash
-git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git
+# 本ノートが記述している版を確認するなら、タグで固定する
+git clone --depth 1 --branch v2.7.0 https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows
+
+# 上流の現在を追うなら main（動くブランチなので、本ノートの数値と食い違いうる）
+# git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git
 
 ls dist/     # claude  codex  copilot  cursor  kiro  kiro-ide  opencode  plugins
              # ＋ "AI-DLC Workflows 2.0 Specification.pdf"（空白区切りの名前）

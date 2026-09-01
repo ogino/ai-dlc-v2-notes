@@ -97,8 +97,9 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 # 1. 全ハーネス共通: bun を PATH に（非対話シェルからも見えること）
 curl -fsSL https://bun.sh/install | bash
 
-# 2. ソース取得
+# 2. ソース取得（上流の案内は main。ただし main は動くブランチである）
 git clone --branch main https://github.com/awslabs/aidlc-workflows.git
+# 本ノートが記述している版に固定するなら: --branch v2.7.0
 cd aidlc-workflows
 
 # 3. 使うハーネスの dist をプロジェクトへコピー
