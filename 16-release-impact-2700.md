@@ -124,7 +124,11 @@ security-patch 10 / refactor 10 / express 10 / bugfix 9 / poc 8）。
 `git diff --stat 2fbee12f..origin/main -- core/` の結果:
 
 > **⚠ `--depth 1` の shallow clone では再現できない。** `2fbee12f` が手元に無いためである。
-> 再現するには `git fetch --unshallow`（または `git fetch origin 2fbee12f`）が要る。
+> 再現するには `git fetch --unshallow` が要る。
+> **単一コミットだけ取るなら 40 桁の完全な SHA を指定する** ——
+> `git fetch origin 2fbee12fb29d2a6614b70b6f61f3cceeaf235245`。
+> **短縮形は使えない**（`git fetch origin 2fbee12f` は refspec として解釈され
+> `fatal: couldn't find remote ref 2fbee12f` になる。2026-09-01 実測）。
 
 
 | ファイル | 変更 |
@@ -141,7 +145,7 @@ security-patch 10 / refactor 10 / express 10 / bugfix 9 / poc 8）。
 
 ## 16.3 2.6.124 — 状態ファイルから絶対パスが消えた
 
-区間内で**実装が動いたのはこの 1 版だけ**である（#962 / issue #937）。
+区間内で**ロジックが動いたのはこの 1 版だけ**である（#962 / issue #937）。
 
 | 場所 | 旧 | 新 |
 |---|---|---|
