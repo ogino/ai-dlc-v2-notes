@@ -29,8 +29,10 @@ rebase も squash も行われていない。**旧 `v2` の SHA は今も `main`
 **⚠ ただし `main` というブランチ自体は force-update されている。**
 旧 `main`（1.x の内容）と現 `main`（2.x の内容）に共通の祖先関係は無い。
 **旧 `main` を clone 済みの環境では通常の `git pull` は通らない。**
-`git fetch && git reset --hard origin/main` するか、clone し直すことになる
-（1.x を追い続けるなら `v1` ブランチへ切り替える）。
+**既定は別ディレクトリへの clone し直しにすること。** 既存 checkout をそのまま作り直す
+（`git fetch && git reset --hard origin/main`）と、**未コミットの変更と、旧先端からしか辿れない
+ローカルコミットが失われる**。どうしても同じ checkout を使うなら、退避してから行うこと。
+1.x を追い続けるなら `v1` ブランチへ切り替える。
 
 ### インストール手順が変わった
 
@@ -46,6 +48,12 @@ git checkout v2
 git clone --branch main https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows
 ```
+
+> **⚠ 「もう動かない」の出方は 2 通りある。** 新規 clone での `--branch v2` や
+> `git fetch origin v2` は失敗するが、**既にローカル `v2` ブランチを持つ使い回しの clone では
+> `git checkout v2` が今も成功する**。リモートの削除はローカル ref を消さず、`checkout` は fetch もしない。
+> 使い回しのワークスペースで動く CI は、**エラーを出さずに旧コミットのまま走り続ける**。
+> `git ls-remote --heads origin v2` が空であることで確認できる。
 
 Spec PDF の URL も `blob/v2/assets/...` から `blob/main/assets/...` に変わった
 （ファイル自体は両方の ref に存在する）。本ノートの該当箇所は
@@ -107,6 +115,10 @@ security-patch 10 / refactor 10 / express 10 / bugfix 9 / poc 8）。
 ### `core/` の変更は 4 ファイル 4 行だけ
 
 `git diff --stat 2fbee12f..origin/main -- core/` の結果:
+
+> **⚠ `--depth 1` の shallow clone では再現できない。** `2fbee12f` が手元に無いためである。
+> 再現するには `git fetch --unshallow`（または `git fetch origin 2fbee12f`）が要る。
+
 
 | ファイル | 変更 |
 |---|---|
@@ -174,7 +186,7 @@ Contract Design を追加」「Classic と Express が第一級スコープ」�
 | `README.md` | バージョンバッジ |
 | `CHANGELOG.md` | `## [2.7.0]` の追記 |
 
-**コードの変更は 1 行も無い。**
+**ロジックの変更は 1 行も無い。** 変わった `.ts` は `AIDLC_VERSION` の 1 行だけである。
 
 ### 「33 ステージ」はいつ入ったのか
 
@@ -200,6 +212,18 @@ CHANGELOG の書き方だと 2.7.0 で入ったように読めるが、そうで
 15 章 15.3 で扱った 2.6.121 の `review_artifact:` 追加のような一度きりの移行は、
 2.7.0 のエントリを読んだだけでは実行されない。
 [06-harnesses-install.md](./06-harnesses-install.md) 6.4 の注記はこの前提のまま有効である。
+
+### ⚠ 上げたあとに `/aidlc plugin sync` が要る
+
+2.7.0 の Upgrade 文は、再コピーで終わりだとは言っていない。
+
+> **Upgrade:** replace the complete `dist/<harness>/` tree in one quiescent operation,
+> then run `/aidlc plugin sync` for every installed plugin.
+
+**プラグインを入れている場合、`dist/` を置き換えただけでは合成が失われる。**
+エンジンを入れ替えるとコンパイル済みのグラフが素の状態に戻るためで、
+これは 2.6.110 で顕在化した挙動である（→ [15.7](./15-release-impact-26123.md#157-プラグイン--作成ツールチェーンと再インストールで消える合成)）。
+**2.7.0 に固有の話ではないが、上げるたびに必要である。**
 
 エントリはもう 1 つ前提条件を書いている。CHANGELOG の原文は次のとおり。
 
