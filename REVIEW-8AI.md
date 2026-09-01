@@ -179,11 +179,15 @@ Devin 判定: **PUBLISH WITH NITS** / **privacy: clean** / HIGH なし
 | AI | Status | HIGH | MEDIUM | LOW | 判定 |
 |----|--------|------|--------|-----|------|
 | Session self | ✅ Complete | 0 | 3 | 2 | NEEDS FIXES（自己検出） |
+
+> **Devin の経緯**: 初回は `Refusing to run in an untrusted workspace`、次に非対話モードで
+> ツール確認により停止した。プロンプト冒頭に「ツールを使わずテキストのみで回答」と明記して
+> リポジトリ内から再実行したところ完了した。`--permission-mode dangerous` は付与していない。
 | Codex CLI | ✅ Complete | 1 | 4 | 1 | NEEDS FIXES |
 | Cursor Agent | ✅ Complete | 2 | 3 | 2 | NEEDS FIXES |
 | Copilot CLI | ✅ Complete | 2 | 3 | 1 | NEEDS FIXES |
 | Antigravity (agy) | ✅ Complete | 0 | 2 | 2 | APPROVE WITH NITS |
-| Devin CLI | ⚠ 未実施 | — | — | — | 非対話モードでツール確認が要求され停止。`--permission-mode dangerous` は付与しない判断 |
+| Devin CLI | ✅ Complete（再実行後） | 1 | 0 | 1 | NEEDS FIXES |
 | Kiro CLI | ⚠ 未実施 | — | — | — | 本環境の `kiro` は IDE の CLI で、`kiro chat` が stdout に出力しない（極小プロンプトでも空） |
 | Grok CLI | ⚠ 除外 | — | — | — | ユーザー指示により今回除外 |
 
@@ -192,7 +196,7 @@ Devin 判定: **PUBLISH WITH NITS** / **privacy: clean** / HIGH なし
 | # | 指摘元 | Severity | 内容 | 対応 |
 |---|--------|:--:|---|---|
 | 1 | Codex / Cursor | **HIGH** | 「2.6.1 より前のワークフロー拒否」を **2.7.0 が追加した前提**として書いていた。2.7.0 はコード変更ゼロなので両立しない | ✅ **2.6.1 の永続 state スキーマ v8 の再掲**と書き直した（16.4 / 6.4） |
-| 2 | Copilot / Cursor / self | **HIGH** | 非公開側レポートの変更内訳表が合計 76 で、総数 74 と合わない | ✅ 再集計（`docs` 22→18、`scripts` 2 を追加）。4+28+18+15+5+2+2=74 |
+| 2 | Copilot / Cursor / Devin / self | **HIGH** | 非公開側レポートの変更内訳表が合計 76 で、総数 74 と合わない | ✅ 再集計（`docs` 22→18、`scripts` 2 を追加）。4+28+18+15+5+2+2=74 |
 | 3 | self | **HIGH** | 16.1 の表で「v2 系のタグ無し」と書いていたが、`v2.1.1` / `v2.2.0` / `v2.3.0` は以前から存在する | ✅ 「GitHub Release の Latest が `v1.0.1` → `v2.7.0`」に訂正。**2.x が初めてリリース公開された**ことを新知見として追記 |
 | 4 | self | MEDIUM | roadmap から外れた 7 件を「いずれも出荷済みへ移った」と書いたが、**#754 は移動先が無い** | ✅ 6 件と #754 を分け、#754 は「移動先が無い。取り下げか記載漏れか判断できない」と明記 |
 | 5 | self | MEDIUM | `.github/ISSUE_TEMPLATE/` を「1.x の main から引き継がれた」と書いたが、**`v1` に存在しない** | ✅ `labeler.yml` のみ引き継ぎ、テンプレート類はこの移行で新設と訂正 |
@@ -204,7 +208,8 @@ Devin 判定: **PUBLISH WITH NITS** / **privacy: clean** / HIGH なし
 | 11 | Cursor | LOW | 16.2 の不変メトリクス表と CONVERSATION_LOG の列挙に **センサー 6** が抜けている | ✅ 追加（両 ref で `core/sensors/` はバイト単位で同一を確認） |
 | 12 | Antigravity | LOW | 非公開側の比較レポート冒頭の「差分の全体像」参照先が前区間のまま | ✅ 最新区間へ更新 |
 | 13 | Codex | LOW | 追従実績表に「3 日で 2 件」の行を足したのに「ペースは落ちていない」評価が残る | ✅ 評価の射程が 3 期目までである旨と、**追従コストが件数に比例しない**ことを注記 |
-| 14 | self | LOW | 「2.6.1 〜 2.6.124 の 124 版分」は誤り（欠番がある）／「2.6.1 は 2026-08-14 頃」 | ✅ 「2.6.x サイクル全体（公開 CHANGELOG 上 95 エントリ）」／CHANGELOG 日付 **2026-08-13** に訂正 |
+| 14 | Devin | LOW | 追従実績表の「約 3 日」と 16 章の「期間 4 日」が食い違って見える | ✅ 数え方が違うだけ（取得日の経過日数 / 上流コミット日の両端含み）。既存表の慣例に合わせ「約 3 日（上流は 4 日分）」とし、16 章に「両端を含む」を明記 |
+| 15 | self | LOW | 「2.6.1 〜 2.6.124 の 124 版分」は誤り（欠番がある）／「2.6.1 は 2026-08-14 頃」 | ✅ 「2.6.x サイクル全体（公開 CHANGELOG 上 95 エントリ）」／CHANGELOG 日付 **2026-08-13** に訂正 |
 
 ### 却下した指摘
 
@@ -221,4 +226,5 @@ Devin 判定: **PUBLISH WITH NITS** / **privacy: clean** / HIGH なし
 - 過去章の日付付き測定記録は本文を 1 行も書き換えていない（Cursor が明示的に確認）
 - 内部リンク・アンカーは機械検査で全解決
 - 公開リポジトリの機密語スキャン: **残存 0 件**
+- 8 系統中 **6 系統で実施**（Devin は再実行で完了、Kiro は本環境で非対話出力不可、Grok は除外）
 - **判定: APPROVE**（マージ可）
