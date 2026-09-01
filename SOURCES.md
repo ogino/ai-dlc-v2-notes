@@ -7,7 +7,8 @@
 
 1. GitHub `awslabs/aidlc-workflows` tree/main README  
    https://github.com/awslabs/aidlc-workflows/tree/main
-2. 公式 `main` ブランチのローカル clone（`git clone --depth 1 --branch main`）  
+2. 公式 `main` ブランチのローカル clone  
+   `git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git`  
    **2026-09-01 の再編以前は `v2` ブランチだった。`v2` は削除済みで、`main` がその線形な継続である**
    （11〜15 章の `基準:` 行が記録している HEAD SHA は、いずれも `main` から到達できる。
    10 章は `対象:` 行にブランチ名のみで SHA を持たない）

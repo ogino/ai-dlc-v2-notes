@@ -59,8 +59,11 @@ Spec PDF の URL も `blob/v2/assets/...` から `blob/main/assets/...` に変�
 タグ `v2.7.0` は `main` の HEAD `96b11d39` を指す。
 
 これで **Latest リリースが `v1.0.1` から `v2.7.0` に移った**。
-版を pin して運用する場合、これまでは「タグはあるがリリースは無い」状態だったので、
-**タグ `v2.7.0` は初めて公式に pin できる 2.x の版**ということになる。
+
+**ただし「pin できるようになった」わけではない。** タグは以前からあり、
+`git clone --branch v2.3.0` のような固定はもともと可能だった。
+変わったのは **Releases のページと Latest の表示**であり、
+「リリース一覧から辿れる 2.x が 1 つも無い」状態が解消された、というのが正確なところである。
 
 > **⚠ 上流の `docs/roadmap.md` はこれをまだ反映していない。**
 > 更新後も「GitHub still marks `v1.0.1` as Latest, tracked by #635」「no public v2 native release exists yet」
