@@ -261,8 +261,13 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >
 > - **Copilot / Cursor 以外のハーネスを使う**（Claude Code / Codex CLI / Kiro / opencode は影響を受けない）
 > - **`52da70ad` を含むリリースの公開を待つ**（**版番号は未確定**。`v2.8.1` とは限らない。
->   確認は `git ls-remote --tags origin` で新タグを見つけ、`git merge-base --is-ancestor 52da70ad <tag>` で
->   そのタグが修正を含むかを判定する）
+>   確認手順:
+>   ```bash
+>   git fetch origin --tags          # ⚠ 先に取得する。ls-remote は一覧を表示するだけでタグを取得しない
+>   git tag --list 'v2.*' | sort -V | tail -3
+>   git merge-base --is-ancestor 52da70ad <tag> && echo '修正を含む' || echo '含まない'
+>   ```
+>   ）
 > - **ソースから生成する経路（暫定回避）** —— **上流は利用者向けの経路とは認めていない。**
 >   **本調査では生成も導入もフック起動も検証していない。** 採る場合は自環境で確認すること。
 >

@@ -348,7 +348,8 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > **したがって「2.5.69 以降なら安全」ではない。**
 > - **2.5.63〜2.5.68 に当たっている場合**: エンジンを **2.5.69 以上 2.7.x 以下**へ更新して再導入する。
 > - **v2.8.0 に当たっている場合**: **更新では直らない**。修正は **`52da70ad`** で入ったが**未リリース**（公開時の版番号は未確定）。
->   **`52da70ad` を含むリリース**の公開を待つ（**版番号は未確定**。`git merge-base --is-ancestor 52da70ad <tag>` で判定）か、
+>   **`52da70ad` を含むリリース**の公開を待つ（**版番号は未確定**。`git fetch origin --tags` してから
+>   `git merge-base --is-ancestor 52da70ad <tag>` で判定する。**`ls-remote` だけではタグを取得できない**）か、
 >   **ソース生成による暫定回避**を採る（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
 >   手順は `git checkout 52da70ad` → `bun install --frozen-lockfile` →
 >   `bun scripts/package.ts cursor` → `bun dist/cursor/install.ts <project>`。
