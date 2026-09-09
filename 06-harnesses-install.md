@@ -57,8 +57,12 @@
 curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh | sh
 ```
 
-> **bun が要るのは、上流リポジトリを clone してソースから生成する場合だけ**である
-> （`bun scripts/package.ts`。開発者向け経路。→ [6.3](#63-インストール要点)）。
+> **bun が要るのは次の 2 つの場合である。**
+> 1. 上流リポジトリを clone してソースから生成する場合（`bun scripts/package.ts`。開発者向け経路。→ [6.3](#63-インストール要点)）
+> 2. **`codekb-scope-diff` を使う場合** —— 上流はこの診断コマンドを今も
+>    `bun <harness-dir>/tools/aidlc-utility.ts codekb-scope-diff` の形でしか案内しておらず、
+>    **ネイティブ導入だけの環境には公式な実行手段が無い**（→ [6.5](#65-よく使うコマンド)）。
+>    **Reverse Engineering の再実行前チェックを使うなら bun が要る。**
 > その場合は非対話シェルからも見える PATH に入れること
 > （zsh なら `~/.zshenv` にも `BUN_INSTALL` / `PATH` を書く必要がある場合あり）。
 >
@@ -344,8 +348,15 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > エンジンの入手は `install.sh` / `install.ps1`、プロジェクトへの適用は `aidlc config` になった
 > （→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
 > 本節以下に並ぶ版ごとの手順は、**その版の時点で上流が指示していた操作**の記録である。
-> 「`dist/` の再コピー」と書かれている箇所は、現在は `aidlc update` →
-> 各プロジェクトで `aidlc config` に読み替える。
+> 「`dist/` の再コピー」と書かれている箇所の読み替えは、**現在の導入状態で変わる**。
+>
+> | 現在の状態 | 読み替え先 |
+> |---|---|
+> | **2.7.1 以前（`dist/` をコピーした状態）** | **`install.sh` / `install.ps1` → `aidlc config`**。`aidlc update` は使えない |
+> | ネイティブ `aidlc` を導入済み | `aidlc update` → 各プロジェクトで `aidlc config` |
+>
+> **⚠ 初回の移行で `aidlc update` から始めてはいけない。**
+> 2.7.1 以前の導入にはネイティブ `aidlc` 実行ファイルが存在せず、最初のコマンドで失敗する。
 >
 > **⚠ 「再コピー後に `/aidlc plugin sync`」という指示の扱いは、2.8.x では断定できない。**
 > 上流の記述が 2 つに割れているためである（HEAD `c03f9e28` 実測）——

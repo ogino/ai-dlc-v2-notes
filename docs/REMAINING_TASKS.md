@@ -22,9 +22,16 @@
 - [x] 上流 2.6.123 → 2.7.0 の差分反映（2026-09-01。`main` HEAD `96b11d39`。**上流の `v2` ブランチ削除に伴う参照先の一斉更新を含む**）→ [16-release-impact-2700.md](../16-release-impact-2700.md)
 - [x] 上流 2.7.0 → 2.8.1 の差分反映（2026-09-09。`main` HEAD `c03f9e28`。**上流の `dist/` 削除に伴う導入手順の全面改訂を含む**）→ [17-release-impact-2801.md](../17-release-impact-2801.md)
 - [ ] **追従フローの定例化** — 担当者と頻度を決める
-  - **⚠ 2.8.x で前提が変わった。** 「上流には in-place upgrade も版数比較の仕組みも無い」という
-    従来の前提は成立しない。ネイティブ CLI に `aidlc update` / `aidlc version` / `aidlc doctor` が入り、
-    `aidlc update --check` で更新の有無を確認できる。追従フローはこれを前提に組み直せる
+  - **⚠ 2.7.2 で前提が一部変わった。** ネイティブ CLI に `aidlc update` / `aidlc version` /
+    `aidlc doctor` が入り、**導入済みの版とリリースの比較**はコマンドでできるようになった。
+  - **⚠ ただし `aidlc update --check` は上流 `main` の追跡には使えない。**
+    比較対象は**公開済みリリース**であり、`main` はそれより先に進む。
+    現に **`main` は 2.8.1 だがリリースは 2.8.0 まで**である（→ 17 章 17.3）。
+    `update --check` に頼ると「最新です」と言われながら、
+    **本ノートが追跡している未リリースのコミットを丸ごと取りこぼす。**
+  - **したがって一次のチェックは従来どおり `main` に対して行う**
+    （`AIDLC_VERSION` の差分と CHANGELOG。加えて `git ls-remote --tags origin` でタグの実在を確認）。
+    `aidlc update --check` は**リリース追従の確認としてのみ**使う
   - 確認コマンド（導入済みなら）: `aidlc version` / `aidlc update --check`
   - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）:
     `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分。
