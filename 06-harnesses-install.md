@@ -8,7 +8,7 @@
 >
 > **🔴 v2.8.0 では GitHub Copilot と Cursor のフックが動作しない。**
 > Copilot は全イベントでクラッシュ、Cursor は**全ツール呼び出しがブロックされる**。
-> 修正は未リリースの 2.8.1。**根拠は上流コミット `52da70ad` の本文（実機再現はしていない）。**
+> 修正は上流コミット **`52da70ad`** で入ったが**未リリース**（**公開時の版番号は未確定** —— コミット本文は 2.8.2、CHANGELOG は 2.8.1 に統合）。**根拠は同コミットの本文（実機再現はしていない）。**
 > **この 2 ハーネスの導入は現時点で保留するか、ソース生成経路を採ること**（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
 > 上流リポジトリから **`dist/` ディレクトリが削除された**。
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）で `aidlc` コマンドを入れ、
@@ -347,7 +347,7 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > **⚠ ただし同じ失敗様式が v2.8.0 で再発している**（ネイティブ化でアダプタ経路が外れたため。→ 下記の表と 17.3）。
 > **したがって「2.5.69 以降なら安全」ではない。**
 > - **2.5.63〜2.5.68 に当たっている場合**: エンジンを **2.5.69 以上 2.7.x 以下**へ更新して再導入する。
-> - **v2.8.0 に当たっている場合**: **更新では直らない**。修正は未リリースの 2.8.1（`52da70ad`）。
+> - **v2.8.0 に当たっている場合**: **更新では直らない**。修正は **`52da70ad`** で入ったが**未リリース**（公開時の版番号は未確定）。
 >   `v2.8.1` の公開を待つか、**ソース生成による暫定回避**を採る（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
 >   手順は `git checkout 52da70ad` → `bun install --frozen-lockfile` →
 >   `bun scripts/package.ts cursor` → `bun dist/cursor/install.ts <project>`。
@@ -654,8 +654,8 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 | Kiro CLI で `/aidlc --status` 等が無反応（silent no-op） | 2.6.46 の verb interceptor 修正。エンジンを更新して `aidlc config --harness kiro` を再実行（**Kiro CLI のみの修正**） |
 | Kiro: プラグインの compose がアップグレード後に走らない | 2.6.47。projection を再ビルド／再コピーし、**CLI は** `aidlc plugin sync` か `hooks/compose.ts` を明示実行（**IDE は不要**）。§6.4 |
 | Kiro IDE hooks 無反応 | v2 schema hooks の正しい中身コピー（2.5.10） |
-| GitHub Copilot でフックが全イベントでクラッシュする（`undefined is not an object (evaluating 'input.length')`） | **v2.8.0 の既知不具合**（ネイティブ化で Copilot アダプタが引数 1 個のフック経路に落ち、対象が捨てられる）。**更新では直らない。修正は未リリースの 2.8.1**（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)） |
-| Cursor IDE で全ツール呼び出しがブロックされる | **原因が 2 つある。どちらかを切り分けること。**<br>**(a) 2.5.63〜2.5.68 の既知不具合**（allow JSON 未出力 × `failClosed`）→ **2.5.69 以上 2.7.x 以下**へ更新して再導入。<br>**(b) v2.8.0 の再発**（ネイティブ化で Cursor アダプタが引数 1 個のフック経路に落ちた。→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）→ **更新では直らない。修正は未リリースの 2.8.1**。`v2.8.1` の公開を待つか、ソースから生成する経路を採る |
+| GitHub Copilot でフックが全イベントでクラッシュする（`undefined is not an object (evaluating 'input.length')`） | **v2.8.0 の既知不具合**（ネイティブ化で Copilot アダプタが引数 1 個のフック経路に落ち、対象が捨てられる）。**更新では直らない。修正は `52da70ad` で入ったが未リリース**（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)） |
+| Cursor IDE で全ツール呼び出しがブロックされる | **原因が 2 つある。どちらかを切り分けること。**<br>**(a) 2.5.63〜2.5.68 の既知不具合**（allow JSON 未出力 × `failClosed`）→ **2.5.69 以上 2.7.x 以下**へ更新して再導入。<br>**(b) v2.8.0 の再発**（ネイティブ化で Cursor アダプタが引数 1 個のフック経路に落ちた。→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）→ **更新では直らない。修正は `52da70ad` で入ったが未リリース**。`v2.8.1` の公開を待つか、ソースから生成する経路を採る |
 | 学習 persist が `selections-json is malformed: missing or non-string space` で落ちる | 2.6.36 の非互換。該当ステージの **`surface` を再実行**して selections を作り直す（`persist` のリトライでは直らない）。§6.4 |
 
 ### GitHub Copilot: アップグレード後は進行中ワークフローを新しい会話で継続する（2.6.12）
