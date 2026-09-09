@@ -188,8 +188,9 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > バイナリを入れずに `runtime/<harness>/` だけ置くと、フックもコマンドも起動できない。
 > **⚠ この前提が掛かるのは `runtime/<harness>/` と `dist-release/<harness>/` だけである。**
 > チェックアウトから生成する **`dist/<harness>/` は従来どおり Bun 前提の投影**で、
-> ネイティブ `aidlc` を呼ばない。**bun さえあればネイティブバイナリなしで動く。**
-> したがって **Copilot / Cursor のフック不具合を避けるソース生成経路は成立する** ——
+> ネイティブ `aidlc` を呼ばない。**したがって、この経路には対応するネイティブバイナリが要らない**（代わりに bun が要る）。
+> **これは投影の呼び出し形からの読解であり、本調査では実機で確かめていない。**
+> したがって **Copilot / Cursor のフック不具合を避けるソース生成経路が考えられる**（未検証）——
 > `52da70ad` 以降を checkout し、`bun scripts/package.ts <harness>` で `dist/<harness>/` を生成して使う
 > （**この経路には対応するネイティブバイナリは要らない。bun が要る。**）。
 
@@ -347,8 +348,10 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > **したがって「2.5.69 以降なら安全」ではない。**
 > - **2.5.63〜2.5.68 に当たっている場合**: エンジンを **2.5.69 以上 2.7.x 以下**へ更新して再導入する。
 > - **v2.8.0 に当たっている場合**: **更新では直らない**。修正は未リリースの 2.8.1（`52da70ad`）。
->   `v2.8.1` の公開を待つか、**`52da70ad` 以降を checkout して
->   `bun scripts/package.ts cursor` が生成する `dist/cursor/` を使う**（Bun 前提。バイナリ不要）。
+>   `v2.8.1` の公開を待つか、**ソース生成による暫定回避**を採る（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
+>   手順は `git checkout 52da70ad` → `bun install --frozen-lockfile` →
+>   `bun scripts/package.ts cursor` → `bun dist/cursor/install.ts <project>`。
+>   **上流非推奨の経路であり、本調査では検証していない。**
 > 切り分けは [6.6 のトラブルシュート表](#66-トラブルシュート頻出)を参照。
 
 #### opencode

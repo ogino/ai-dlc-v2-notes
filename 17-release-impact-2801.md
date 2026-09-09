@@ -108,8 +108,9 @@ root での実行は拒否される。Homebrew / Nix が管理する既存の `a
 > バイナリを入れずに `runtime/<harness>/` だけ置くと、フックもコマンドも起動できない。
 > **⚠ この前提が掛かるのは `runtime/<harness>/` と `dist-release/<harness>/` だけである。**
 > チェックアウトから生成する **`dist/<harness>/` は従来どおり Bun 前提の投影**で、
-> ネイティブ `aidlc` を呼ばない。**bun さえあればネイティブバイナリなしで動く。**
-> したがって **Copilot / Cursor のフック不具合を避けるソース生成経路は成立する** ——
+> ネイティブ `aidlc` を呼ばない。**したがって、この経路には対応するネイティブバイナリが要らない**（代わりに bun が要る）。
+> **これは投影の呼び出し形からの読解であり、本調査では実機で確かめていない。**
+> したがって **Copilot / Cursor のフック不具合を避けるソース生成経路が考えられる**（未検証）——
 > `52da70ad` 以降を checkout し、`bun scripts/package.ts <harness>` で `dist/<harness>/` を生成して使う
 > （**この経路には対応するネイティブバイナリは要らない。bun が要る。**）。
 > **また上流は「Install the *matching* native `aidlc` command」と書いており、
@@ -260,10 +261,22 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >
 > - **Copilot / Cursor 以外のハーネスを使う**（Claude Code / Codex CLI / Kiro / opencode は影響を受けない）
 > - **`v2.8.1` タグの公開を待つ**
-> - **ソースから生成する経路を採る** —— `52da70ad` 以降を checkout し、
->   `bun scripts/package.ts <harness>` が生成する **`dist/<harness>/`** をプロジェクトへ入れる。
+> - **ソースから生成する経路（暫定回避）** —— **上流は利用者向けの経路とは認めていない。**
+>   **本調査では生成も導入もフック起動も検証していない。** 採る場合は自環境で確認すること。
+>
+>   ```bash
+>   git clone https://github.com/awslabs/aidlc-workflows.git
+>   cd aidlc-workflows
+>   git checkout 52da70ad          # Copilot / Cursor のフック修正が入った最初のコミット
+>   bun install --frozen-lockfile  # 依存の導入。これを省くと生成できない
+>   bun scripts/package.ts cursor  # または copilot。dist/<harness>/ が生成される
+>
+>   # 生成物をプロジェクトへ入れる（Cursor の例）
+>   bun dist/cursor/install.ts /path/to/your-project
+>   ```
+>
 >   **この投影は Bun 前提でネイティブ `aidlc` を呼ばないため、対応するバイナリは要らない**
->   （**bun が要る**）。上流は利用者向けの経路とは認めていないので、暫定回避として扱うこと。
+>   （代わりに **bun が要る**）。**理屈上そうなるという読解であり、実機で確かめていない。**
 >
 > **本ノートが `install.sh`（= `releases/latest` = v2.8.0）を案内している箇所は、
 > この 2 ハーネスについては上記の制約付きで読むこと。**
