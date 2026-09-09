@@ -170,9 +170,15 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > **手動コピーは「ネイティブ導入の代替」ではなく「プロジェクト内ファイルを手で置く」という選択である。**
 > バイナリを入れずに `runtime/<harness>/` だけ置くと、フックもコマンドも起動できない。
 
-ネイティブ `aidlc` を導入したうえで、リリース資産 `aidlc-runtime-X.Y.Z.tar.gz` を展開し、
-**`runtime/<harness>/`** をプロジェクトへコピーする。
+ネイティブ `aidlc` を導入したうえで、**導入したバイナリと同じ版**のリリース資産
+`aidlc-runtime-X.Y.Z.tar.gz` を展開し、**`runtime/<harness>/`** をプロジェクトへコピーする。
 これがプロジェクト内ファイルを手で管理する場合の正規経路である。
+
+> **⚠ バイナリとアーカイブの版を揃えること。** 上流は 「Install the **matching** native `aidlc` command」と書いている。
+> 前節の `releases/latest` インストーラで入れたバイナリと、別リリースのアーカイブを組み合わせると版がずれる。
+> **版を固定するなら両方に同じ `X.Y.Z` を指定する**（`install.sh --version 2.8.0` と
+> `aidlc-runtime-2.8.0.tar.gz`）。**`v2.8.1` は未公開なので選べない。**
+> 導入済みの版は `aidlc version` で確認できる。
 
 **チェックアウトから `bun scripts/package.ts <harness>` で `dist/<harness>/` を生成することも今も可能**だが、
 上流はこれを利用者向けとは認めていない（`docs/guide/12-cli-commands.md:243-246` 逐語）:
