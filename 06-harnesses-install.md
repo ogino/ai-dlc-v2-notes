@@ -1,25 +1,35 @@
 # 06. ハーネスと導入
 
+> **⚠ 2.8.x で導入方法が根本的に変わった（2026-09-08）。**
+> 上流リポジトリから **`dist/` ディレクトリが削除された**。
+> 導入はネイティブインストーラ（`install.sh` / `install.ps1`）で `aidlc` コマンドを入れ、
+> プロジェクトごとに `aidlc config --harness <name>` を実行する形になった。
+> **Bun / Node.js は不要である。**
+> 本章の版ごとのアップグレード記録に出てくる「`dist/<harness>/` の再コピー」は、
+> **その版の時点で上流が指示していた操作の記録**であり、現在の手順ではない。
+> 経緯は [17-release-impact-2801.md](./17-release-impact-2801.md) を参照。
+
 ## 6.1 対応ハーネス（2.x）
 
-| Harness | 最低バージョン目安 | 導入元 | 起動 |
+| Harness | 最低バージョン目安 | 導入コマンド（2.8.x） | 起動 |
 |---------|-------------------|--------|------|
-| **Claude Code** | 最新推奨 | `dist/claude/` をコピー | `/aidlc` |
-| **Kiro IDE** | hooks v2 対応含む | `dist/kiro-ide/` をコピー | `/aidlc` |
-| **Kiro CLI** | ≥ 2.6 | `dist/kiro/` をコピー | `/aidlc` |
-| **Codex CLI** | ≥ **0.145.0** | `dist/codex/` をコピー | `$aidlc` |
-| **Cursor** | 明示の最低版なし（上流は cursor-agent **2026.07** で検証） | **コピーではなく同梱インストーラ実行**: `bun dist/cursor/install.ts <project>` | `/aidlc` |
-| **opencode** | ≥ 1.17 | `dist/opencode/` をコピー | `/aidlc` |
-| **GitHub Copilot** | CLI ≥ **1.0.74** / VS Code ≥ **1.130**（2026-07-22 リリース） | `dist/copilot/` をコピー | `/aidlc` |
+| **Claude Code** | 最新推奨 | `aidlc config --harness claude` | `/aidlc` |
+| **Kiro IDE** | hooks v2 対応含む | `aidlc config --harness kiro-ide` | `/aidlc` |
+| **Kiro CLI** | ≥ 2.6 | `aidlc config --harness kiro` | `/aidlc` |
+| **Codex CLI** | ≥ **0.145.0** | `aidlc config --harness codex` | `$aidlc` |
+| **Cursor** | 明示の最低版なし（上流は cursor-agent **2026.07** で検証） | `aidlc config --harness cursor` | `/aidlc` |
+| **opencode** | ≥ 1.17 | `aidlc config --harness opencode` | `/aidlc` |
+| **GitHub Copilot** | CLI ≥ **1.0.74** / VS Code ≥ **1.130**（2026-07-22 リリース） | `aidlc config --harness copilot` | `/aidlc` |
 
 **計 7 種**（`ls harness/` = claude / codex / copilot / cursor / kiro / kiro-ide / opencode）。
 決定論エンジン（state machine・audit・並列の審判）はハーネス横断で同一。違うのはシェル（skills/hooks の載せ方）。
 
 > **Cursor は 2.5.63 で追加**（IDE と CLI `agent` の両方を 1 つの `.cursor/` で兼ねる）。
-> **7 種のうち Cursor だけ導入形態が違う**。他の 6 種は `dist/<harness>/` を `cp` するのに対し、
-> Cursor は配布物に同梱された**インストーラ `dist/cursor/install.ts` を bun で実行**する
-> （`bun dist/cursor/install.ts <project>`）。
-> インストーラはプロジェクト所有ファイルとの衝突を拒否し、`.cursor/.gitignore` と既存の method memory を保全、
+> **2.7.0 までは 7 種のうち Cursor だけ導入形態が違い**、他の 6 種が `dist/<harness>/` を `cp` するのに対し
+> Cursor は同梱インストーラ `bun dist/cursor/install.ts <project>` を実行する形だった。
+> **2.8.x で 7 種すべてが `aidlc config --harness <name>` に統一され、この非対称は解消した。**
+> 導入処理の性質は引き継がれている —— プロジェクト所有ファイルとの衝突を拒否し、
+> `.cursor/.gitignore` と既存の method memory を保全、
 > `.cursor/hooks.json` と `.cursor/cli.json` は配列を構造マージ、`AGENTS.md` と `.gitignore` には
 > AI-DLC 用のマーク付き区画を追記する。再実行はアップグレードとして働き、active-space ポインタは保たれる。
 
@@ -35,15 +45,24 @@
 
 ### 全ハーネス共通
 
-1. **bun** を PATH に入れる（非対話シェルからも見えること）  
-   zsh なら `~/.zshenv` にも `BUN_INSTALL`/`PATH` を書く必要がある場合あり
+1. **ネイティブ導入なら bun は要らない**（2.8.x 以降）。配布されるのは単一バイナリで、
+   Bun / Node.js のいずれも前提にしない
 2. 推奨モデル: **Claude Opus 4.8**（公式 README。Kiro では有料プランが必要な場合あり）
 
 ```bash
-curl -fsSL https://bun.sh/install | bash
-git clone --branch main https://github.com/awslabs/aidlc-workflows.git
-cd aidlc-workflows
+curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh | sh
 ```
+
+> **bun が要るのは、上流リポジトリを clone してソースから生成する場合だけ**である
+> （`bun scripts/package.ts`。開発者向け経路。→ [6.3](#63-インストール要点)）。
+> その場合は非対話シェルからも見える PATH に入れること
+> （zsh なら `~/.zshenv` にも `BUN_INSTALL` / `PATH` を書く必要がある場合あり）。
+>
+> ```bash
+> curl -fsSL https://bun.sh/install | bash
+> git clone --branch main https://github.com/awslabs/aidlc-workflows.git
+> cd aidlc-workflows
+> ```
 
 ### 6.2.1 実行環境の前提: 単一ローカルファイルシステム（2.6.51 以降）
 
@@ -86,43 +105,111 @@ cd aidlc-workflows
 
 ## 6.3 インストール要点
 
-### Claude Code
+> **⚠ 2.8.x で導入方法が変わった。** `cp -R dist/<harness>/` はもう上流の公式手順ではない。
+> 詳細は [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)。
+
+### 全ハーネス共通の導入手順
+
+**ネイティブ `aidlc` を 1 回入れれば、7 ハーネス分のランタイムがすべて含まれる。**
+プロジェクトごとに `--harness` でどの面を作るかを選ぶ。
 
 ```bash
-cp -R dist/claude/.claude/. your-project/.claude/
-cp -R dist/claude/aidlc/.   your-project/aidlc/
-cd your-project && claude
-# /aidlc --doctor
-# /aidlc <description>
+# 1. ネイティブ aidlc を導入（bun / Node.js は不要）
+curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh | sh
+#    Windows PowerShell:
+#    irm https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.ps1 | iex
+
+# 2. プロジェクトに面を作る
+cd your-project
+aidlc config --harness claude     # claude / codex / copilot / cursor / kiro / kiro-ide / opencode
+aidlc doctor
 ```
 
-### Kiro IDE / CLI
+導入先は Unix が `~/.local/bin`（`$AIDLC_BIN_DIR`）と
+`${XDG_DATA_HOME:-~/.local/share}/aidlc`（`$AIDLC_INSTALL_ROOT`）、
+Windows が `%LOCALAPPDATA%\aidlc`（コマンド名は `aidlc.cmd`）。
+root での実行は拒否される。Homebrew / Nix 管理の既存 `aidlc` があれば置き換えず譲る。
 
-**重要**: 既存 `.kiro` がある場合は **中身コピー**しないとネストする。
+`aidlc config` が作るもの: 選んだハーネスのツリー、`aidlc/` ワークスペースシェル、
+ルート統合、投影スタンプ、所有権ベースライン。**ワークフローの intent は作らない。**
 
-```bash
-mkdir -p your-project/.kiro your-project/aidlc
-cp -R dist/kiro-ide/.kiro/. your-project/.kiro/     # IDE
-cp -R dist/kiro-ide/aidlc/. your-project/aidlc/
-cp dist/kiro-ide/AGENTS.md your-project/AGENTS.md
+> **⚠ ワンライナーはダウンロードしたスクリプトを直接パイプ実行する。**
+> 実行前に内容を確認したい場合は 2 段階の手順を使う。上流にも併存している。
+>
+> ```bash
+> tmp="$(mktemp -d)"
+> curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh -o "$tmp/install.sh"
+> sh "$tmp/install.sh"
+> rm -rf "$tmp"
+> ```
+
+`install.sh` のオプション（逐語）:
+
+```
+Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <startup-file>] [--json|--quiet] [--no-color] [--yes]
 ```
 
-CLI は `dist/kiro/` を同様に。  
-`aidlc/` は `.kiro/` の**兄弟**（内側ではない）。
+> **⚠ `--version 2.8.1` は現時点で成立しない。** 実装は 2.8.1 だが `v2.8.1` タグは無い。
+> 版を固定するなら `--version 2.8.0`（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
 
-### GitHub Copilot（2.5.60 で追加）
+### 手動でファイルを置きたい場合
 
-**他ハーネスと違い、コピーだけでは動かない。folder trust の設定が要る。**
+リリース資産 `aidlc-runtime-X.Y.Z.tar.gz` を展開し、**`runtime/<harness>/`** をプロジェクトへコピーする。
+これが手動管理を続ける場合の正規経路である。
 
-```bash
-mkdir -p your-project/.aidlc your-project/aidlc your-project/.github
-cp -R dist/copilot/.aidlc/.  your-project/.aidlc/
-cp -R dist/copilot/aidlc/.   your-project/aidlc/    # .aidlc/ の兄弟（内側ではない）
-cp -R dist/copilot/.github/. your-project/.github/  # マージ。すべて aidlc- 接頭辞なので既存は上書きされない
-cp dist/copilot/AGENTS.md    your-project/AGENTS.md # 既存があればマージ（@-import ブロックは残す）
-```
+**チェックアウトから `bun scripts/package.ts <harness>` で `dist/<harness>/` を生成することも今も可能**だが、
+上流はこれを利用者向けとは認めていない（`docs/guide/12-cli-commands.md:243-246` 逐語）:
 
-その後:
+> Framework developers may generate the ignored Bun-shaped `dist/` projection locally with
+> `bun scripts/package.ts`; **release users should not copy from a checkout.**
+
+なお `bun scripts/package.ts <harness>` は `dist/<harness>/` と `dist-release/<harness>/` の
+**両方**を生成する。前者は従来どおり `bun …` を呼ぶ Bun 前提の投影、
+後者はネイティブ `aidlc` を呼ぶ形で、**リリース資産に入るのは後者**である。
+
+### 初回実行ウィザード
+
+未設定プロジェクトで TTY から引数なしに `aidlc config` を実行すると、6 ステップのウィザードが動く。
+
+| # | 内容 | 選択肢 |
+|---|---|---|
+| 1 | Harness | 7 種から |
+| 2 | Model provider | `amazon-bedrock` / `other`（bedrock なら region と profile） |
+| 3 | Model effort preset | `balanced` / `thorough` / `minimal` |
+| 4 | Plugins | `all installed` / `none optional` / `choose` |
+| 5 | MCP servers | `on` / `off` |
+| 6 | 記録先 | project 共有 / project 個人 / machine |
+
+最後に `Apply? [Y/n]` のゲートがあり、**それより前にはファイルを 1 つも書かない**。
+
+> **⚠ このゲートで Enter を押すとキャンセル扱いになる不具合がある。**
+> 2.8.1 で修正されたが、**2.8.1 は未リリース**である。
+> 2.8.0 を使う間は、既定を受け入れる場合も明示的に `y` を入力すること。
+
+セクションを指定してピンポイントに設定することもできる:
+`aidlc config models` / `runtime` / `providers` / `trust` / `flags` / `project`。
+
+> **⚠ 名前が衝突している。** ここで説明したネイティブ CLI の `aidlc config` と、
+> セッション内のスラッシュコマンド `/aidlc config`（[6.5](#65-よく使うコマンド)。depth / test-strategy / review）は**別物**である。
+
+### ハーネス別の追加要件
+
+導入コマンド自体は共通だが、**ホスト側の前提はハーネスごとに残る**。
+
+#### Claude Code
+
+`aidlc config --harness claude` の後、`/hooks` からプロジェクトフックを承認して**完全に再起動**する。
+`disableAllHooks` が報告される場合は編集可能なレイヤで削除・上書きが要る。
+`allowManagedHooksOnly` は管理者ポリシーの変更が要る。
+
+#### Kiro IDE / CLI
+
+`aidlc/` は `.kiro/` の**兄弟**（内側ではない）。IDE と CLI は別のハーネスとして扱う
+（`--harness kiro-ide` / `--harness kiro`）。読み分けは [6.4](#kiro-cli-と-kiro-ide-は分けて読むこと) を参照。
+
+#### GitHub Copilot
+
+**導入しただけでは動かない。folder trust が要る。**
 
 1. **プロジェクトを信頼する**（必須）。`copilot` を対話起動して trust プロンプトを承認するか、
    `~/.copilot/config.json` の `trustedFolders` にプロジェクトの絶対パスを追加する。
@@ -132,65 +219,52 @@ cp dist/copilot/AGENTS.md    your-project/AGENTS.md # 既存があればマー�
 
 配置先: `/aidlc` とステージ／スコープランナーは `.github/skills/`、
 14 ペルソナは `.github/agents/`、フック定義は `.github/hooks/aidlc.json`。
+`aidlc/` は `.aidlc/` の**兄弟**（内側ではない）。
 
-### Codex CLI
+#### Codex CLI
 
-```bash
-cp -R dist/codex/.codex/.  your-project/.codex/
-cp -R dist/codex/.agents/. your-project/.agents/
-cp -R dist/codex/aidlc/.   your-project/aidlc/
-cp dist/codex/AGENTS.md   your-project/AGENTS.md
-# プロジェクトは git repo であること（Codex が .codex/hooks.json を発見する条件）
-```
+**プロジェクトが git repo であること**が前提（Codex が `.codex/hooks.json` を発見する条件）。
+上流のハーネス別ガイドも「Codex requires the target project to be a Git repository for project hook discovery」と明記している。
 
 **hooks の trust（未信頼だと hooks が動かない）** — どちらか:
 
 1. **TUI で "Trust all"**（初回セッション）
-2. **生成した trust エントリを `$CODEX_HOME/config.toml` に反映**:
+2. **生成した trust エントリを `$CODEX_HOME/config.toml` に反映**する。
+   現在の trust 状態は `aidlc config trust --show` / `--check` で確認できる。
+   上流リポジトリのチェックアウトから生成する場合は従来どおり:
+
    ```bash
-   # AI-DLC ソース checkout 側（dist を出したリポジトリ）で
    bun install --frozen-lockfile
    bun scripts/package.ts codex trust --project <プロジェクトの絶対パス>
    # 出力の [hooks...] TOML を $CODEX_HOME/config.toml にマージ
    # （同一 hook path の既存エントリは置換。二重追記で TOML が壊れる）
    ```
 
-詳細は公式 `docs/guide/harnesses/codex-cli.md`。
+   > **⚠ ネイティブ導入時に同等の TOML を生成する上流コマンドは未確認である。**
+   > `aidlc config trust` は検証・確認系のサブコマンドとして実装されているが、
+   > 生成手段が同じかは本調査では確かめていない。
 
-> **trust テーブルは「初回だけ」ではない（2.6.44）。** 上の手順は初回導入時のものだが、
+> **trust テーブルは「初回だけ」ではない（2.6.44）。**
 > 2.6.44 で `request_user_input` を拾う新しい PostToolUse 登録が
 > **`.codex/hooks.json` の PostToolUse 配列の先頭に挿入された**。
 > trust エントリは `post_tool_use:N` という**位置インデックス**で hook を指すため、
 > 先頭挿入によって**既存エントリのインデックスが全部 1 つずつズレる**。
-> `dist/codex/` を再コピーしただけでは、古い trust テーブルが別の hook を指したままになる。
-> アップグレード時は次を行うこと:
->
-> ```bash
-> bun scripts/package.ts codex trust --project "<プロジェクトの絶対パス>"
-> # 出力の TOML で $CODEX_HOME/config.toml の既存 AI-DLC trust エントリを「差し替える」
-> # （追記ではない。同一 hook path の古いエントリは消す）
-> ```
->
+> **エンジンを更新しただけでは、古い trust テーブルが別の hook を指したままになる。**
+> 更新時は trust エントリを**差し替え**（追記ではない。同一 hook path の古いエントリは消す）、
 > そのうえで**新しい Codex セッションを開始する**。
+>
+> なお 2.8.x では hook の起動コマンド自体が `{{INVOKE}} engine hook <name>` 形式に変わったため、
+> **trust のハッシュ対象文字列も変わっている**。更新後の trust 再登録は必須である。
 
-### Cursor（2.5.63 で追加）
+#### Cursor
 
-**他ハーネスと違い、`cp` ではない。同梱インストーラを bun で実行する。**
+2.7.0 までは「他ハーネスと違い、同梱インストーラ `bun dist/cursor/install.ts <project>` を実行する」
+という**Cursor だけ別扱い**の導入形態だった。
+**2.8.x では 7 ハーネスすべてが `aidlc config --harness <name>` に統一され、この非対称は解消した。**
+（`harness/cursor/install.ts` はソース側に残っているが、利用者が直接叩く経路ではない。）
 
-```bash
-bun dist/cursor/install.ts your-project
-# 検証（プロジェクトルートに入ってから相対パスで実行）
-cd your-project
-bun .cursor/tools/aidlc-utility.ts doctor
-```
-
-その後、`your-project/` を Cursor IDE で開く（または中で `agent` を起動する）と `/aidlc` が使える。
-
-- IDE と CLI（`agent`）は**同じ `.cursor/` を読む**ので、インストールは 1 回でよい
-- `aidlc/` は `.cursor/` の**兄弟**。エンジンが読む `aidlc/spaces/default/memory/` のメソッドツリーが同梱されており、
-  これが無いと `/aidlc --doctor` の "workspace shell ready" チェックが落ちる
-- 再実行は**アップグレード**として働き、フレームワーク管理ファイルだけを更新して active-space や
-  プラグイン選択状態は保つ。管理下のどのパスを保全したかはインストーラが出力する
+- IDE と CLI（`agent`）は**同じ `.cursor/` を読む**ので、導入は 1 回でよい
+- `aidlc/` は `.cursor/` の**兄弟**
 - Cursor ネイティブのショートカットとして `/aidlc-status`・`/aidlc-jump --stage <slug>`（または `--phase <name>`）・
   `/aidlc-scope <name>` が入る（同じ決定論エンジンを叩く）
 
@@ -205,22 +279,16 @@ bun .cursor/tools/aidlc-utility.ts doctor
 
 > **既知の不具合と修正**: 2.5.63〜2.5.68 の Cursor 配布物は、allow 経路で stdout に何も書かずに終了していた。
 > （この範囲のうち **2.5.65 / 2.5.66 は欠番**で存在しない。実在するのは 2.5.63 / 64 / 67 / 68。
-> 自分の版を照合するときは `core/tools/aidlc-version.ts` を見ること。）
+> 自分の版を照合するときは `aidlc version`、またはソースの `core/tools/aidlc-version.ts` を見ること。）
 > `failClosed: true` の下では空 stdout が不正 JSON と扱われるため、**Cursor IDE ではあらゆるツール呼び出しが
 > ブロックされた**（CLI は沈黙を allow と解釈したため無症状）。**2.5.69 で修正済み**。
-> 該当版を入れている場合は `dist/cursor/` を更新して `bun dist/cursor/install.ts <project>` を再実行する。
+> 該当版を入れている場合はエンジンを更新して `aidlc config --harness cursor` を再実行する。
 
-### opencode
+#### opencode
 
-```bash
-cp -R dist/opencode/.aidlc/.    your-project/.aidlc/     # エンジン（.opencode 外）
-cp -R dist/opencode/.opencode/. your-project/.opencode/  # ネイティブ殻
-cp -R dist/opencode/aidlc/.     your-project/aidlc/
-cp dist/opencode/opencode.json your-project/opencode.json
-cp dist/opencode/AGENTS.md     your-project/AGENTS.md
-```
-
-理由: opencode は `.opencode/tools/*.ts` をカスタムツールとして自動 import するため、エンジンをそこへ置くとクラッシュする。
+`aidlc/` と `.aidlc/`（エンジン）は `.opencode/` の**外**に置かれる。
+理由: opencode は `.opencode/tools/*.ts` をカスタムツールとして自動 import するため、
+エンジンをそこへ置くとクラッシュする。
 
 ---
 
@@ -234,7 +302,12 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 > **2.6.123 から 2.7.0 へ上げるだけなら、下の表の作業は増えない。** 2.6.124 に移行処理は無く、2.7.0 が変えたのは**バージョン定数だけ**でロジックの変更は無い。
 > **ただしプラグインを入れているなら、再コピー後に `/aidlc plugin sync` が要る**
 > （エンジンを入れ替えるとコンパイル済みグラフが素に戻り、合成が失われる）。これは版によらず毎回必要である。
-> ただし **`dist/<harness>/` の取得元が変わった** —— clone は `git clone --branch main` になる（`v2` は削除済み）。
+> ただし **配布物の入手方法そのものが 2.8.x で変わった** —— `dist/` は上流から消え、
+> エンジンの入手は `install.sh` / `install.ps1`、プロジェクトへの適用は `aidlc config` になった
+> （→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
+> 本節以下に並ぶ版ごとの手順は、**その版の時点で上流が指示していた操作**の記録である。
+> 「`dist/` の再コピー」と書かれている箇所は、現在は `aidlc update` →
+> 各プロジェクトで `aidlc config` に読み替える。
 > また 2.6.124 は**既存の `aidlc-state.md` を書き換えないし、コミット済みの履歴も変えない**。
 > **2.7.0 の CHANGELOG は 2.6.x 全体のロールアップ再掲なので、それを読んだだけでは
 > 下の 20 版の一度きりの作業は済まない**（→ [16.4](./16-release-impact-2700.md#164-270-の-changelog-はロールアップであって新機能一覧ではない)）。
@@ -315,7 +388,9 @@ cp dist/opencode/AGENTS.md     your-project/AGENTS.md
 
 1. **静止状態で行う。** AI-DLC のコマンドが 1 つも走っておらず、フックも発火していない瞬間に
    交換を完了させる（上流原文: `in one quiescent swap (no AI-DLC command or hook running)`）。
-2. **部分コピーせず、`dist/<harness>/` を全ツリーで入れ替える。** 新旧混在は非サポート
+2. **部分適用せず、ツリー全体を一度に入れ替える。** 新旧混在は非サポート
+   （2.7.0 までは `dist/<harness>/` の全ツリーコピー。2.8.x では `aidlc config` が
+   トランザクションとして同じ保証を担う）
    （`mixed old/new tool files are unsupported`）。旧 `aidlc-orchestrate` は 2.6.51 で削除された
    シンボルを named import するため、混在させると**挙動が混ざるのではなく AI-DLC のコマンドが全部落ちる**。
    同種の制約は 2.6.50 にもある（旧散文の `Accept as-is after N cycles` や
@@ -402,6 +477,9 @@ opencode と GitHub Copilot の出荷ペルソナは、記憶参照を `aidlc/sp
 
 ### `dist/` の変更ファイル数を「開発量」と読まないこと
 
+> **⚠ この測定手法は 2.8.x 以降では再現できない。** `dist/` が上流リポジトリから消えたためである。
+> 以下は測定当時（2.6.x 期）の記録として残す。
+
 2.6.2 → 2.6.49 で `dist/` の変更ファイル数はハーネス間でほぼ同数になる。
 
 | ハーネス | 変更ファイル数 |
@@ -460,19 +538,19 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 | Bedrock AccessDenied（Claude/Codex 出荷設定） | モデル有効化 + 資格情報 + region |
 | Codex hooks が動かない | §6.3 の trust（TUI または config.toml へ TOML 反映） |
 | Codex: アップグレード後に hooks が誤動作／効かない | **trust テーブルの再生成**（2.6.44 で PostToolUse 配列の先頭に新フックが入りインデックスがズレる。§6.3 の囲み） |
-| 新 dist をコピーしたが反映されない | **新セッション**起動 |
+| エンジンを更新したが反映されない | **新セッション**起動 |
 | Copilot: アップグレード後に進行中ワークフローが進まない／古い挙動をする | **`next` を打つ**（2.6.51 以降。7 ハーネス共通の手順で、Copilot 固有ではない。2.6.12 当時の手当ては「新しい会話を開始」だった。下記） |
-| Kiro CLI で `/aidlc --status` 等が無反応（silent no-op） | 2.6.46 の verb interceptor 修正。`dist/kiro/` を再コピー（**Kiro CLI のみの修正**） |
+| Kiro CLI で `/aidlc --status` 等が無反応（silent no-op） | 2.6.46 の verb interceptor 修正。エンジンを更新して `aidlc config --harness kiro` を再実行（**Kiro CLI のみの修正**） |
 | Kiro: プラグインの compose がアップグレード後に走らない | 2.6.47。projection を再ビルド／再コピーし、**CLI は** `aidlc plugin sync` か `hooks/compose.ts` を明示実行（**IDE は不要**）。§6.4 |
 | Kiro IDE hooks 無反応 | v2 schema hooks の正しい中身コピー（2.5.10） |
-| Cursor IDE で全ツール呼び出しがブロックされる | 2.5.63〜2.5.68 の既知不具合（allow JSON 未出力 × `failClosed`）。**2.5.69 以降**へ更新し `bun dist/cursor/install.ts <project>` を再実行 |
+| Cursor IDE で全ツール呼び出しがブロックされる | 2.5.63〜2.5.68 の既知不具合（allow JSON 未出力 × `failClosed`）。**2.5.69 以降**へ更新し `aidlc config --harness cursor` を再実行 |
 | 学習 persist が `selections-json is malformed: missing or non-string space` で落ちる | 2.6.36 の非互換。該当ステージの **`surface` を再実行**して selections を作り直す（`persist` のリトライでは直らない）。§6.4 |
 
 ### GitHub Copilot: アップグレード後は進行中ワークフローを新しい会話で継続する（2.6.12）
 
 2.6.12 で Copilot は、直近に配信した AI-DLC ディレクティブを **Copilot 所有のアトミックなエンジンカーソル**で保持し、Stop からの継続とリプレイ拒否をそこで判定する設計になった。カーソルは提示トークンのダイジェストを丸ごと比較してから後続トークンを公開する仕組みで、**アップグレード前の転送マーカーは形式が合わず再利用できない**（欠落・不正・v1・陳腐化したコンテキストは従来のステートレス経路に落ちる）。
 
-そのため、**進行中のワークフローを抱えたまま `dist/copilot/` を更新した場合は、新しい Copilot の会話を開始してから続きを進めること。** 同じ会話を続けると、アップグレード前のマーカーを引きずった状態で再開しようとすることになる。
+そのため、**進行中のワークフローを抱えたまま Copilot 面を更新した場合は、新しい Copilot の会話を開始してから続きを進めること。** 同じ会話を続けると、アップグレード前のマーカーを引きずった状態で再開しようとすることになる。
 
 > **追記: 2.6.51 で状況が変わった。上の 2.6.12 の記述は、当時の事実としては正しい。**
 > 2.6.12 の CHANGELOG 自身が「`sessionless:` and **non-Copilot continuation remain stateless in this release**」と
@@ -493,23 +571,31 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 
 ## 6.7 ソースの確認方法
 
+導入済みなら版はコマンドで確認できる。
+
 ```bash
-# 本ノートが記述している版を確認するなら、タグで固定する
-git clone --depth 1 --branch v2.7.0 https://github.com/awslabs/aidlc-workflows.git
+aidlc version
+```
+
+ソースを直接見る場合:
+
+```bash
+# 版を固定して調べるなら、タグで固定する
+# ⚠ v2.8.1 タグは存在しない（実装は 2.8.1 だがリリースは 2.8.0 まで）
+git clone --depth 1 --branch v2.8.0 https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows
 
 # 上流の現在を追うなら main（動くブランチなので、本ノートの数値と食い違いうる）
 # git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git
 
-ls dist/     # claude  codex  copilot  cursor  kiro  kiro-ide  opencode  plugins
-             # ＋ "AI-DLC Workflows 2.0 Specification.pdf"（空白区切りの名前）
 ls harness/  # claude  codex  copilot  cursor  kiro  kiro-ide  opencode  ← ハーネスは 7 種
 ls assets/   # AI-DLC-Workflows-2.0-Specification.pdf（ハイフン区切りの名前）
 ```
 
 > **Spec PDF**: 2.6.2 時点で PDF は 2 箇所にあり、**ファイル名が異なる**。
 > `assets/AI-DLC-Workflows-2.0-Specification.pdf`（ハイフン区切り）と
-> `dist/AI-DLC Workflows 2.0 Specification.pdf`（空白区切り）。**リンク・引用は `assets/` を正とする。**
+> `dist/AI-DLC Workflows 2.0 Specification.pdf`（空白区切り）。
+> **2.8.x で `dist/` 側は消えたため、現在の所在は `assets/` のみである。**
 > なお PDF の内容が 33 ステージ構成に更新されているかは**未確認**。
 
 ---

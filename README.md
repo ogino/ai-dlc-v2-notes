@@ -7,9 +7,17 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-09-01  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **`main` ブランチ**（実装バージョン **2.7.0**。上流 HEAD `96b11d39` / 取得日 2026-09-01）
+最終同期日: 2026-09-09  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **`main` ブランチ**（実装バージョン **2.8.1**。上流 HEAD `c03f9e28` / 取得日 2026-09-09）
 
+> **⚠ 上流の `dist/` ディレクトリは 2026-09-08 に削除された。**
+> 導入はネイティブインストーラ（`install.sh` / `install.ps1`）と `aidlc config` に変わった。
+> **`cp -R dist/<harness>/` は上流の公式手順ではなくなった。**
+> 経緯と影響は [17-release-impact-2801.md](./17-release-impact-2801.md) を参照。
+>
+> **⚠ 実装バージョンは 2.8.1 だが、リリースされているのは 2.8.0 までである。**
+> `v2.8.1` タグは存在しない。版を固定するなら `v2.8.0` か SHA `c03f9e28` を使うこと。
+>
 > **⚠ 上流の `v2` ブランチは 2026-09-01 に削除された。**`main` が 2.x の正本である（旧 1.x は新設の `v1` ブランチへ移動）。
 > 経緯と影響は [16-release-impact-2700.md](./16-release-impact-2700.md) を参照。
 
@@ -60,6 +68,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [14-release-impact-2655.md](./14-release-impact-2655.md) | 2.6.49 → 2.6.55 のリリース差分。**中核メトリクスは全項目不変**で、変わったのは実行時のガード・継続トークン・監査の発火条件 |
 | [15-release-impact-26123.md](./15-release-impact-26123.md) | 2.6.55 → 2.6.123 のリリース差分。**フック 17→18 / `core/tools/*.ts` 41→51 / 監査 86→91 / `bugfix` 7→9・`refactor` 8→10**、プラグイン作成ツールチェーン、Bolt 用語の再定義 |
 | [16-release-impact-2700.md](./16-release-impact-2700.md) | 2.6.123 → 2.7.0 のリリース差分。**中核メトリクスは全項目不変**。上流の `v2` ブランチ削除と `main` への一本化、2.6.124 の状態ファイル相対パス化、**2.7.0 の CHANGELOG がロールアップ再掲である**こと |
+| [17-release-impact-2801.md](./17-release-impact-2801.md) | 2.7.0 → 2.8.1 のリリース差分。**上流から `dist/` が消えネイティブ配布へ**、`aidlc` CLI と設定階層の新設、ガードレール 9 種の設定ファイル記録、2.7.1 の Plan Approval デッドロック修正、**2.8.1 は未リリース**であること |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
 ### メンテナ向け（作業記録）
@@ -83,7 +92,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | 深度 / テスト戦略 | 各 3 段階（独立） |
 | 監査イベント種別 | **91**（22 分類）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
-| 実装バージョン | **2.7.0**（上流 `main` HEAD `96b11d39`。取得日 2026-09-01） |
+| 実装バージョン | **2.8.1**（上流 `main` HEAD `c03f9e28`。取得日 2026-09-09）※リリース済みは 2.8.0 まで |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 
@@ -94,24 +103,40 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 ## クイック開始（概念）
 
 ```bash
-# 1. 全ハーネス共通: bun を PATH に（非対話シェルからも見えること）
-curl -fsSL https://bun.sh/install | bash
+# 1. ネイティブ aidlc を導入（bun / Node.js は不要）
+#    macOS / Linux / WSL
+curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh | sh
+#    Windows PowerShell
+#    irm https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.ps1 | iex
 
-# 2. ソース取得
-#    導入するだけなら上流の案内どおり main（最新を入れる）
-#    本ノートの数値を再現・照合するならタグ固定（下記 6.7 と同じ）
-git clone --branch main https://github.com/awslabs/aidlc-workflows.git   # 最新を導入する場合
-# git clone --branch v2.7.0 https://github.com/awslabs/aidlc-workflows.git  # 本ノートの版に合わせる場合
-cd aidlc-workflows
+# 2. プロジェクトに導入（dist のコピーはもう要らない）
+cd your-project
+aidlc config --harness claude
+aidlc doctor
 
-# 3. 使うハーネスの dist をプロジェクトへコピー
-# 例: Claude Code
-cp -R dist/claude/.claude/. your-project/.claude/
-cp -R dist/claude/aidlc/.   your-project/aidlc/
-
-# 4. セッション内 — まずヘルスチェック、問題なければワークフロー開始
-/aidlc --doctor
+# 3. セッション内 — ワークフロー開始
 /aidlc Build a task management API with user authentication
+```
+
+> **⚠ 上のワンライナーはダウンロードしたスクリプトを直接パイプ実行する。**
+> 実行前に内容を検証したい場合は、上流のハーネス別ガイドが載せている 2 段階の手順を使う。
+> どちらも上流に併存している（[17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
+>
+> ```bash
+> tmp="$(mktemp -d)"
+> curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh -o "$tmp/install.sh"
+> # ここで "$tmp/install.sh" を確認してから実行する
+> sh "$tmp/install.sh"
+> rm -rf "$tmp"
+> ```
+
+**本ノートの数値を再現・照合する場合**は、上流リポジトリを clone してソースを直接測る。
+版を固定するなら `v2.8.0`（**`v2.8.1` タグは存在しない**）か SHA を使う。
+
+```bash
+git clone --branch main https://github.com/awslabs/aidlc-workflows.git   # 最新を追う場合
+# git clone --branch v2.8.0 https://github.com/awslabs/aidlc-workflows.git  # 版を固定する場合
+cd aidlc-workflows
 ```
 
 **モデル／認証の前提（ハーネス別）**: 出荷設定は多くの場合 **AWS Bedrock** を想定するが、**全ハーネス共通の必須ではない**。Claude Code / Codex の出荷設定は Bedrock 寄り、Kiro はサインインとセッションモデル、opencode はグローバル設定のプロバイダ、に依存する。詳細は [06-harnesses-install.md](./06-harnesses-install.md)。

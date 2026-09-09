@@ -9,7 +9,8 @@
    https://github.com/awslabs/aidlc-workflows/tree/main
 2. 公式 `main` ブランチのローカル clone  
    `git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git`  
-   （**版を固定して調べるなら `--branch v2.7.0`**。また **`--depth 1` では過去 SHA との差分が取れない** ——
+   （**版を固定して調べるなら `--branch v2.8.0`**。**`v2.8.1` タグは存在しない** ——
+   実装バージョンは 2.8.1 だがリリース済みは 2.8.0 まで。SHA なら `c03f9e28`。また **`--depth 1` では過去 SHA との差分が取れない** ——
    `git diff 2fbee12f..origin/main` のような測定には `git fetch --unshallow` が要る）  
    **2026-09-01 の再編以前は `v2` ブランチだった。`v2` は削除済みで、`main` がその線形な継続である**
    （11〜15 章の `基準:` 行が記録している HEAD SHA は、いずれも `main` から到達できる。
@@ -17,7 +18,7 @@
 3. 同 clone 内（精読・突合済み）:
    - `README.md`（GA、ハーネス、バージョン要件）
    - `CHANGELOG.md`（**2.5.x を中心**に参照。2.4 / 2.3 も一部）
-   - `core/tools/aidlc-version.ts` → `2.7.0`（2026-09-01 再取得。branch `main` HEAD `96b11d39`。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`）→ 2026-08-29 時点 `2.6.123`（branch `v2` HEAD `2fbee12f`））
+   - `core/tools/aidlc-version.ts` → `2.8.1`（2026-09-09 再取得。branch `main` HEAD `c03f9e28`。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`）→ 2026-08-29 時点 `2.6.123`（branch `v2` HEAD `2fbee12f`）→ 2026-09-01 時点 `2.7.0`（branch `main` HEAD `96b11d39`））
    - `docs/guide/00-introduction.md`
    - `docs/guide/03-spaces-and-intents.md`
    - `docs/guide/04-phases-and-stages.md`
@@ -26,13 +27,20 @@
    - `docs/guide/09-rules-and-the-learning-loop.md`
    - `core/knowledge/aidlc-shared/audit-format.md`（監査イベントの実レジストリ。2026-08-11 に独立集計）
    - `core/hooks/aidlc-fold-usage.ts` / `core/tools/aidlc-metrics.ts`（2026-08-11）
-   - `docs/guide/harnesses/copilot.md` / `dist/copilot/AGENTS.md`（2026-08-11）
+   - `docs/guide/harnesses/copilot.md` / `dist/copilot/AGENTS.md`（2026-08-11）※
    - `docs/guide/harnesses/cursor.md`（2026-08-14。2.5.63 で追加された Cursor ハーネス）
    - `core/sensors/aidlc-traceability.md`（2026-08-14。2.5.71 で追加された 6 本目のセンサー）
    - `core/aidlc-common/stages/inception/domain-design.md` / `contract-design.md`（2026-08-14。2.6.1 で `application-design` を置き換え）
-   - `dist/kiro/.kiro/settings/mcp.json` と `dist/kiro/.kiro/agents/*.json`（14 ペルソナ＋指揮役 `aidlc.json`）（2026-08-14。2.5.74 の MCP レジストリ）
-   - `dist/kiro-ide/.kiro/agents/aidlc-composer-agent.json` と `dist/claude/.mcp.json`（2026-08-14。MCP 同梱の有無をハーネス間で突き合わせるため）
-   - 全 7 ハーネスの `dist/*/…/agents/` 配下（2026-08-14。`@server` 付与の有無を機械的に集計）
+   - `dist/kiro/.kiro/settings/mcp.json` と `dist/kiro/.kiro/agents/*.json`（14 ペルソナ＋指揮役 `aidlc.json`）（2026-08-14。2.5.74 の MCP レジストリ）※
+   - `dist/kiro-ide/.kiro/agents/aidlc-composer-agent.json` と `dist/claude/.mcp.json`（2026-08-14。MCP 同梱の有無をハーネス間で突き合わせるため）※
+   - 全 7 ハーネスの `dist/*/…/agents/` 配下（2026-08-14。`@server` 付与の有無を機械的に集計）※
+
+   > ※ **`dist/` 配下のパスは取得当時のものである。**
+   > 2.8.x で `dist/` は上流リポジトリから削除されたため、**clone しただけでは解決できない**。
+   > 同じ内容を見るには `bun scripts/package.ts <harness>` でローカル生成するか、
+   > リリース資産 `aidlc-runtime-X.Y.Z.tar.gz` の `runtime/<harness>/` を展開する。
+   > とくに「全 7 ハーネスの `dist/*/…/agents/` を機械的に集計」した測定は、
+   > **clone だけでは再現できない**（→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
    - `docs/guide/glossary.md`（2026-08-29 に再読。**2.6.86 で Bolt の定義が書き換わっている**）
    - `core/` ディレクトリ一覧（stages/tools/hooks/scopes/sensors）
    - 2.6.55 → 2.6.123 区間（2026-08-29 実測。HEAD `2fbee12f`）:
@@ -45,6 +53,13 @@
      上記と同じ測定を再実行し**全項目不変**を確認 / `git diff 2fbee12f..origin/main`（`core/` は 4 ファイル 4 行）/
      `docs/roadmap.md` / `.github/workflows/` — 詳細は
      [16-release-impact-2700.md](./16-release-impact-2700.md)
+   - 2.7.0 → 2.8.1 区間（2026-09-09 実測。branch `main` HEAD `c03f9e28`）:
+     上記と同じ測定を再実行し、**動いたのは `core/tools/*.ts` の 51 → 69 のみ**であることを確認 /
+     `git ls-tree` による `dist/` 消滅の確認 / `.gitignore` / `scripts/install.sh` と `install.ps1` /
+     `scripts/package.ts` と `package-release.ts` / `core/tools/aidlc-settings.ts` の
+     `RECORDABLE_PROJECT_BYPASSES` / `core/tools/aidlc-tiers.ts` / `harness/claude/settings.json` /
+     `.github/workflows/release.yml` / `gh release list` と `git ls-remote --tags` — 詳細は
+     [17-release-impact-2801.md](./17-release-impact-2801.md)
 
 ## 二次情報（裏取りに使用）
 
@@ -93,9 +108,12 @@
 - Method Definition Paper 全文（Amplify ホスト）
 - `docs/reference/*` 各章（エンジン内部）
 - `docs/harness-engineering/*`
-- `docs/rfcs/` のうち **HTML 版 2 本**（`IMPLEMENTATION-PLAN.html` / `kiro-ide-hooks-fix-plan.html`）。
-  Markdown 版 2 本（`IMPLEMENTATION-PLAN.md` / `reviewer-reliability-and-stage-decomposition.md`）は
-  **精読済み**で、第12.9節で逐語引用している（ただし仕様ではなく上流の作業用メモとして扱う）
+- ~~`docs/rfcs/` のうち **HTML 版 2 本**~~ —— **2.8.x で `docs/rfcs/` ごと削除された（2026-09-08）ため、
+  もう取得できない。** Markdown 版 2 本（`IMPLEMENTATION-PLAN.md` /
+  `reviewer-reliability-and-stage-decomposition.md`）は削除前に**精読済み**で、
+  第12.9節で逐語引用している（仕様ではなく上流の作業用メモとして扱う）。
+  引用は当時の記録として有効だが、**読者が同じパスで追検証することはできない**
+  （→ [17.9](./17-release-impact-2801.md#179-リポジトリ運用ファイルの変化)）
 - 全 stage ファイルの frontmatter マトリクス
 
 ## 正本の優先順位（本ノート内）

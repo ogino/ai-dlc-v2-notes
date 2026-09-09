@@ -36,9 +36,9 @@
 | `docs/guide/` | User Guide |
 | `docs/harness-engineering/` | ハーネス拡張ガイド |
 | `docs/reference/` | 開発者リファレンス |
-| `docs/rfcs/` | 上流の**作業用メモ置き場。仕様書ではない**（上流自身が「コミットしない scratch」「Draft」と明記し、記述が実装より古い）。読み方は [12.9 節](./12-release-impact-2602.md) を参照 |
+| ~~`docs/rfcs/`~~ | **2.8.x で削除**（2026-09-08）。上流の**作業用メモ置き場で仕様書ではなかった**。現在は `.gitignore` 済みで、設計提案は GitHub issue の RFC テンプレートへ移った。当時の読み方は [12.9 節](./12-release-impact-2602.md) を参照 |
 | `core/` | 手書き正本 |
-| `dist/` | 生成配布物 |
+| ~~`dist/`~~ | **2.8.x で削除**。`.gitignore` 済みのローカル生成物になった（→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)） |
 | `CHANGELOG.md` | 2.x 変更履歴 |
 | `assets/AI-DLC-Workflows-2.0-Specification.pdf` | 2.0 Specification（公式パス） |
 
@@ -85,5 +85,5 @@ rg 'AIDLC_VERSION' core/tools/aidlc-version.ts
 上流の変更に合わせて、本ノート側の数値・差分表を再同期すること。
 
 **本ノートが記述している版をそのまま再現したいときは、`main` ではなくタグを使う**
-（`--branch v2.7.0`。手順は [6.7](./06-harnesses-install.md#67-ソースの確認方法)）。
+（`--branch v2.8.0`。**`v2.8.1` タグは存在しない**。手順は [6.7](./06-harnesses-install.md#67-ソースの確認方法)）。
 用途が違うので、この 2 つを取り違えないこと。

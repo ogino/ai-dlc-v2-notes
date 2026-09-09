@@ -43,7 +43,7 @@
 `scope-grid.json` の差分は **4 行だけ**で、両スコープの `deployment-pipeline` と
 `deployment-execution` が `SKIP` → `EXECUTE` に変わったものである。
 
-| スコープ | 2.6.55 | 2.7.0 | 承認ゲート（2.7.0） |
+| スコープ | 2.6.55 | 2.8.1 | 承認ゲート（2.8.1） |
 |---|---:|---:|---:|
 | `bugfix` | 7/33 | **9/33** | **6** |
 | `refactor` | 8/33 | **10/33** | **7** |
@@ -153,7 +153,7 @@ test strategy は depth から継承して **Standard**（`workshop` と違っ�
 
 | ハーネス | 出荷設定ファイル | 2.6.2 | 2.6.49 |
 |---|---|---|---|
-| Claude Code | `dist/claude/.claude/settings.json` / `harness/claude/settings.json` | `"workshop"` | **`"classic"`** |
+| Claude Code | `harness/claude/settings.json`（2.7.0 までは `dist/claude/.claude/settings.json` にも投影） | `"workshop"` | **`"classic"`** |
 | codex | **該当ファイルを出荷していない** | 未設定 | 未設定 |
 | copilot | **該当ファイルを出荷していない** | 未設定 | 未設定 |
 | cursor | **該当ファイルを出荷していない** | 未設定 | 未設定 |
@@ -337,4 +337,4 @@ reviewer 宣言（frontmatter の `reviewer:`）を持つステージは**両版
 
 2.6.49 は frontmatter の文字列リスト項目で **1 行の flow 記法 `keywords: [a, b]` が黙って空リストとして解析されていた**不具合を修正した。**構文エラーにならないので気づけない**種類のバグで、キーワードを書いたつもりのスコープが自動検出に一切参加しない状態になる。scope の `keywords`、agent の examples、stage のリスト項目が対象。
 
-影響を受けるのは主に**カスタムスコープを自作するチーム**である。**出荷の `classic` / `express` 自体はブロックスタイルで書かれているのでこのバグの被害者ではない**（`classic` の `keywords: []` は空が意図どおり）。対処は `dist/<harness>/` の再コピーで修正済みパーサを入れること。
+影響を受けるのは主に**カスタムスコープを自作するチーム**である。**出荷の `classic` / `express` 自体はブロックスタイルで書かれているのでこのバグの被害者ではない**（`classic` の `keywords: []` は空が意図どおり）。対処はエンジンを更新して修正済みパーサを入れること（2.8.x では `aidlc update` → `aidlc config`）。

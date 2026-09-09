@@ -11,7 +11,7 @@
 - [ ] `docs/reference/*` 精読後のエンジン内部メモ追加
 - [ ] `docs/guide/agents/*.md`・`workshop-mode.md` が 2.5.11 時点で既に存在したか（新規追加か索引漏れか）の切り分け
 
-## 上流追従（2.7.0 まで同期済み）
+## 上流追従（2.8.1 まで同期済み）
 
 - [x] 上流 2.5.11 → 2.5.37 の差分反映（2026-08-05）
 - [x] 上流 2.5.37 → 2.5.62 の差分反映（2026-08-11）→ [11-release-impact-2562.md](../11-release-impact-2562.md)
@@ -20,9 +20,18 @@
 - [x] 上流 2.6.49 → 2.6.55 の差分反映（2026-08-22。HEAD `840ba653`）→ [14-release-impact-2655.md](../14-release-impact-2655.md)
 - [x] 上流 2.6.55 → 2.6.123 の差分反映（2026-08-29。HEAD `2fbee12f`）→ [15-release-impact-26123.md](../15-release-impact-26123.md)
 - [x] 上流 2.6.123 → 2.7.0 の差分反映（2026-09-01。`main` HEAD `96b11d39`。**上流の `v2` ブランチ削除に伴う参照先の一斉更新を含む**）→ [16-release-impact-2700.md](../16-release-impact-2700.md)
-- [ ] **追従フローの定例化** — 上流には in-place upgrade も版数比較の仕組みも無い（`docs/roadmap.md` #535 未実装）ため、追従は運用で担保するしかない。担当者と頻度を決める
-  - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）: `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分
+- [x] 上流 2.7.0 → 2.8.1 の差分反映（2026-09-09。`main` HEAD `c03f9e28`。**上流の `dist/` 削除に伴う導入手順の全面改訂を含む**）→ [17-release-impact-2801.md](../17-release-impact-2801.md)
+- [ ] **追従フローの定例化** — 担当者と頻度を決める
+  - **⚠ 2.8.x で前提が変わった。** 「上流には in-place upgrade も版数比較の仕組みも無い」という
+    従来の前提は成立しない。ネイティブ CLI に `aidlc update` / `aidlc version` / `aidlc doctor` が入り、
+    `aidlc update --check` で更新の有無を確認できる。追従フローはこれを前提に組み直せる
+  - 確認コマンド（導入済みなら）: `aidlc version` / `aidlc update --check`
+  - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）:
+    `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分。
+    **実装バージョンと最新タグは一致しないことがあるので `git ls-remote --tags origin` も見ること**
 - [ ] **2.6.1 の破壊的変更を読者向け移行手順として点検する** — 永続 state が v8 に上がり、`/aidlc next` / `/aidlc report` / `/aidlc --doctor` が pre-v8 state を拒否する。アップグレード時は `skills/aidlc-application-design/` の**手動削除**が要る（`cp -R` マージでは残る）。実機での再現は未実施
+  - **⚠ 2.8.x では `aidlc config` の取り込み規則が別途効く。** 記録済み SHA-256 署名が一致しない
+    変更済みファイルは「曖昧」として取り込みを拒否される。手動削除の要否は再確認が要る
 
 ## 2.6.2 調査で残った未確認事項
 
@@ -100,6 +109,34 @@
       2.7.0 を roadmap 上の版として数えない意図かは判断できない
 - [ ] #968（Devin CLI / Desktop ハーネス）がマージされた場合のハーネス 8 種目の扱い — PR 段階のため未追跡
 - [ ] `v2_backup`（`d898b74e`）が何のために残されているか — 旧 `v2` HEAD ではないことのみ確認済み
+- [ ] （継続）上流テストスイートは未実行
+
+## 2.8.1 調査で残った未確認事項
+
+（判断の経緯は [17-release-impact-2801.md](../17-release-impact-2801.md) を参照）
+
+- [ ] **ネイティブインストーラを実機で走らせていない** — `install.sh` / `install.ps1` の記述は
+      スクリプトとドキュメントの読解によるもので、導入結果を確認していない
+- [ ] **`aidlc config` がプラグインの compose フックを自動実行するか** — 上流ドキュメントは
+      「プラグイン合成ファイルと記録済みステージ寄与を保持してグラフを再生成する」と書くが、
+      compose フックの自動実行は明記していない。`/aidlc plugin sync` の完全代替かは不明
+- [ ] **Windows ARM64 でのネイティブバイナリの挙動** — `install.ps1` にアーキテクチャ判定が無く、
+      `aidlc-windows-x64.exe` を固定で取得する。エミュレーション前提かどうか上流に記述が無い
+- [ ] **`v2.8.1` タグがいつ付くか** — 実装は 2.8.1 だがリリースは 2.8.0 まで。
+      2.8.1 の 2 件の修正（ウィザードの Enter 受理 / umask 非依存の same-version update）は
+      **現時点で動作を確認する手段が無い**
+- [ ] **リリース時のフルテストスイートの無効化がいつ解除されるか** —
+      `.github/workflows/release.yml:61-63` の "TEMPORARY" コメントアウトが HEAD でも残っている
+- [ ] **上流内に残る `dist/` 前提の記述** — `core/tools/aidlc-init.ts:6523,6531` と
+      `docs/guide/12-cli-commands.md:1128` が旧手順を指示している。上流の同期漏れか意図的かは不明
+- [ ] **上流内のインストール手順の不一致** — `README.md:20` は `curl | sh`、
+      `docs/guide/harnesses/README.md:18-23` は `mktemp` + `curl -o` + `sh` の 2 段階。
+      どちらが正式かを上流が示していない
+- [ ] **`dist/` / `dist-release/` の生成物の実バイトを検証していない** — ワーキングツリーに存在しないため、
+      パッケージャのコードからの読解にとどまる
+- [ ] **#968（Devin CLI / Desktop ハーネス）の判定基準を再定義する** — 従来は「`dist/` に実体があるか」で
+      判定していたが、`dist/` が消えたため使えない。`harness/` 直下かリリース資産で判定する。
+      なお **#996「feat: Devin Harness」も別に OPEN** で、Devin ハーネスの PR が 2 本並存している
 - [ ] （継続）上流テストスイートは未実行
 
 ## 運用
