@@ -1,6 +1,8 @@
 # 06. ハーネスと導入
 
-> **⚠ 2.8.x で導入方法が根本的に変わった（2026-09-08）。**
+> **⚠ 導入方法が根本的に変わった（2026-09-08）。**
+> **実装版としては 2.7.2、利用者が入手できるリリースとしては v2.8.0 が最初である**
+> （`v2.7.1` / `v2.7.2` のタグは存在しない。→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
 > 上流リポジトリから **`dist/` ディレクトリが削除された**。
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）で `aidlc` コマンドを入れ、
 > プロジェクトごとに `aidlc config --harness <name>` を実行する形になった。
@@ -25,9 +27,9 @@
 決定論エンジン（state machine・audit・並列の審判）はハーネス横断で同一。違うのはシェル（skills/hooks の載せ方）。
 
 > **Cursor は 2.5.63 で追加**（IDE と CLI `agent` の両方を 1 つの `.cursor/` で兼ねる）。
-> **2.7.0 までは 7 種のうち Cursor だけ導入形態が違い**、他の 6 種が `dist/<harness>/` を `cp` するのに対し
+> **2.7.1 以前は 7 種のうち Cursor だけ導入形態が違い**、他の 6 種が `dist/<harness>/` を `cp` するのに対し
 > Cursor は同梱インストーラ `bun dist/cursor/install.ts <project>` を実行する形だった。
-> **2.8.x で 7 種すべてが `aidlc config --harness <name>` に統一され、この非対称は解消した。**
+> **2.7.2 以降（リリースとしては v2.8.0 以降）は 7 種すべてが `aidlc config --harness <name>` に統一され、この非対称は解消した。**
 > 導入処理の性質は引き継がれている —— プロジェクト所有ファイルとの衝突を拒否し、
 > `.cursor/.gitignore` と既存の method memory を保全、
 > `.cursor/hooks.json` と `.cursor/cli.json` は配列を構造マージ、`AGENTS.md` と `.gitignore` には
@@ -105,7 +107,7 @@ curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/i
 
 ## 6.3 インストール要点
 
-> **⚠ 2.8.x で導入方法が変わった。** `cp -R dist/<harness>/` はもう上流の公式手順ではない。
+> **⚠ 2.7.2 以降（リリースは v2.8.0 以降）で導入方法が変わった。** `cp -R dist/<harness>/` はもう上流の公式手順ではない。
 > 詳細は [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)。
 
 ### 全ハーネス共通の導入手順
@@ -276,9 +278,9 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 
 #### Cursor
 
-2.7.0 までは「他ハーネスと違い、同梱インストーラ `bun dist/cursor/install.ts <project>` を実行する」
+2.7.1 以前は「他ハーネスと違い、同梱インストーラ `bun dist/cursor/install.ts <project>` を実行する」
 という**Cursor だけ別扱い**の導入形態だった。
-**2.8.x では 7 ハーネスすべてが `aidlc config --harness <name>` に統一され、この非対称は解消した。**
+**2.7.2 以降（リリースとしては v2.8.0 以降）は 7 ハーネスすべてが `aidlc config --harness <name>` に統一され、この非対称は解消した。**
 （`harness/cursor/install.ts` はソース側に残っているが、利用者が直接叩く経路ではない。）
 
 - IDE と CLI（`agent`）は**同じ `.cursor/` を読む**ので、導入は 1 回でよい
@@ -419,7 +421,7 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 1. **静止状態で行う。** AI-DLC のコマンドが 1 つも走っておらず、フックも発火していない瞬間に
    交換を完了させる（上流原文: `in one quiescent swap (no AI-DLC command or hook running)`）。
 2. **部分適用せず、ツリー全体を一度に入れ替える。** 新旧混在は非サポート
-   （2.7.0 までは `dist/<harness>/` の全ツリーコピー。2.8.x では `aidlc config` が
+   （2.7.1 以前は `dist/<harness>/` の全ツリーコピー。2.7.2 以降は `aidlc config` が
    トランザクションとして同じ保証を担う）
    （`mixed old/new tool files are unsupported`）。旧 `aidlc-orchestrate` は 2.6.51 で削除された
    シンボルを named import するため、混在させると**挙動が混ざるのではなく AI-DLC のコマンドが全部落ちる**。

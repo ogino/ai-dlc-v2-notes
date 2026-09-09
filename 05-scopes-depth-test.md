@@ -153,7 +153,7 @@ test strategy は depth から継承して **Standard**（`workshop` と違っ�
 
 | ハーネス | 出荷設定ファイル | 2.6.2 | 2.6.49 |
 |---|---|---|---|
-| Claude Code | `harness/claude/settings.json`（2.7.0 までは `dist/claude/.claude/settings.json` にも投影） | `"workshop"` | **`"classic"`** |
+| Claude Code | `harness/claude/settings.json`（2.7.1 以前は `dist/claude/.claude/settings.json` にも投影） | `"workshop"` | **`"classic"`** |
 | codex | **該当ファイルを出荷していない** | 未設定 | 未設定 |
 | copilot | **該当ファイルを出荷していない** | 未設定 | 未設定 |
 | cursor | **該当ファイルを出荷していない** | 未設定 | 未設定 |

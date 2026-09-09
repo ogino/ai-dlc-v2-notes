@@ -14,7 +14,7 @@
   ハーネスは 7 種（claude / codex / copilot / cursor / kiro / kiro-ide / opencode）
 ```
 
-> **⚠ 2.8.x で `dist/` は上流リポジトリから消えた。**
+> **⚠ `dist/` は上流リポジトリから消えた（実装版 2.7.2、リリースは v2.8.0 以降）。**
 > `.gitignore` に `/dist/` と `/dist-release/` が入り、両者は
 > **`scripts/package.ts` がローカルで materialize する生成物**になった。
 > 利用者がプロジェクトへ入れるのは、リリース資産経由の `runtime/<harness>/` である
@@ -38,7 +38,7 @@ bun scripts/package.ts --check    # 決定性ガード（CI）
 
 **ルール**: 方法論の変更は `core/`（と必要なら `harness/`）のみ。`dist*` の手編集は禁止。
 
-> **⚠ `--check` の意味が変わった。** 2.7.0 までは
+> **⚠ `--check` の意味が変わった。** 2.7.1 以前は
 > 「コミット済み `dist/` と再生成結果のバイト一致（drift guard）」を見ていたが、
 > `dist/` がコミットされなくなったため、
 > **独立した一時ルートで 2 回ビルドして結果が一致するか（determinism guard）**を見る形になった。
