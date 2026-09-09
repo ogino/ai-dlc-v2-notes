@@ -285,11 +285,16 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   # 🔴 aidlc/ はワークスペースである。既存プロジェクトでは無造作に上書きしないこと。
 >   #    aidlc/spaces/<space>/memory/ と aidlc/knowledge/ には利用者の記録が入る。
 >   #    判定は mkdir より前に行う（mkdir 後だと必ず「既存あり」になる）。
->   if [ -d aidlc ] && [ -n "$(ls -A aidlc 2>/dev/null)" ]; then
->     aidlc_existing=1
->     cp -R aidlc "aidlc.bak-$(date +%Y%m%d-%H%M%S)" || { echo '退避に失敗。中止する' >&2; exit 1; }
->   else
->     aidlc_existing=0
+>   aidlc_existing=0
+>   if [ -d aidlc ]; then
+>     # ⚠ 読めない場合を「空」と混同しないこと。混同すると退避なしで新規扱いになる
+>     if ! contents=$(ls -A aidlc 2>/dev/null); then
+>       echo 'aidlc/ の中身を読めない（権限等）。中止する' >&2; exit 1
+>     fi
+>     if [ -n "$contents" ]; then
+>       aidlc_existing=1
+>       cp -R aidlc "aidlc.bak-$(date +%Y%m%d-%H%M%S)" || { echo '退避に失敗。中止する' >&2; exit 1; }
+>     fi
 >   fi
 >
 >   mkdir -p .aidlc aidlc .github
@@ -320,7 +325,8 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   **⚠ `cp -Rn` は既存ファイルを一切上書きしないため、`aidlc/` 配下に古いシェルが残っている場合は
 >   更新されない。** 既存導入へこの回避策を当てる場合は、退避した `aidlc.bak-*` と突き合わせ、
 >   利用者の記録（`spaces/` `knowledge/`）以外に古いままのファイルが無いか確認すること。
->   **修正版がリリースされたら、`aidlc config` に正規手順で作り直させるのが本筋である。**>
+>   **修正版がリリースされたら、`aidlc config` に正規手順で作り直させるのが本筋である。**
+>
 > **Copilot はコピーしただけでは動かない。**（詳細は [6.3 の GitHub Copilot 節](./06-harnesses-install.md#github-copilot)）
 >
 >   1. **folder trust を設定する** —— `copilot` を対話起動して trust プロンプトを承認するか、
