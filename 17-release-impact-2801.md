@@ -106,6 +106,12 @@ root での実行は拒否される。Homebrew / Nix が管理する既存の `a
 > **バイナリ導入を先に置いている**。
 > **手動コピーは「ネイティブ導入の代替」ではなく「プロジェクト内ファイルを手で置く」という選択である。**
 > バイナリを入れずに `runtime/<harness>/` だけ置くと、フックもコマンドも起動できない。
+> **⚠ この前提が掛かるのは `runtime/<harness>/` と `dist-release/<harness>/` だけである。**
+> チェックアウトから生成する **`dist/<harness>/` は従来どおり Bun 前提の投影**で、
+> ネイティブ `aidlc` を呼ばない。**bun さえあればネイティブバイナリなしで動く。**
+> したがって **Copilot / Cursor のフック不具合を避けるソース生成経路は成立する** ——
+> `52da70ad` 以降を checkout し、`bun scripts/package.ts <harness>` で `dist/<harness>/` を生成して使う
+> （**この経路には対応するネイティブバイナリは要らない。bun が要る。**）。
 > **また上流は「Install the *matching* native `aidlc` command」と書いており、
 > バイナリとアーカイブの版を揃える必要がある**（`aidlc version` で確認できる）。
 
@@ -254,7 +260,10 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >
 > - **Copilot / Cursor 以外のハーネスを使う**（Claude Code / Codex CLI / Kiro / opencode は影響を受けない）
 > - **`v2.8.1` タグの公開を待つ**
-> - ソースから生成する経路を採る（`bun scripts/package.ts`。**bun が要る**）
+> - **ソースから生成する経路を採る** —— `52da70ad` 以降を checkout し、
+>   `bun scripts/package.ts <harness>` が生成する **`dist/<harness>/`** をプロジェクトへ入れる。
+>   **この投影は Bun 前提でネイティブ `aidlc` を呼ばないため、対応するバイナリは要らない**
+>   （**bun が要る**）。上流は利用者向けの経路とは認めていないので、暫定回避として扱うこと。
 >
 > **本ノートが `install.sh`（= `releases/latest` = v2.8.0）を案内している箇所は、
 > この 2 ハーネスについては上記の制約付きで読むこと。**
