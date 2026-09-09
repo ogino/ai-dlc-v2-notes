@@ -453,6 +453,22 @@ AIDLC_DISABLE_USAGE_TRACKING
 上流のコメントは、`balanced` と `templated` が同一投影だった状態を解消し、
 `templated` を「別のダイヤルを持つグループのまま、出荷既定は継承」に置いた、と説明している。
 
+> **⚠ 削除されたのはトップレベルの pin と `templated` tier だけである。**
+> **`balanced` tier は 2.7.0 から変わっていない**（実測: 2 版でバイト同一）。
+> いまも次を固定している。
+>
+> | ハーネス | `balanced` の投影 |
+> |---|---|
+> | Claude Code | `model: sonnet` / `effort: medium` |
+> | Codex CLI | `openai.gpt-5.6-terra` / `medium` |
+> | opencode | `amazon-bedrock/global.anthropic.claude-sonnet-4-6` / `medium` |
+> | Cursor / Kiro / Copilot | 固定なし（セッション継承） |
+>
+> 上流のコメントは **`balanced` を「レビュア tier」**と説明し、
+> **「レビュー専用エージェント 2 体だけが持ち、他は持たない」**と明記している。
+> **したがって「モデル固定が全面的に消えた」わけではない。レビュー工程は今も Sonnet / medium で走る。**
+
+
 ---
 
 ## 17.7 リリースの検証経路が作り直された
