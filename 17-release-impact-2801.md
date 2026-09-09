@@ -268,6 +268,9 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   git clone https://github.com/awslabs/aidlc-workflows.git
 >   cd aidlc-workflows
 >   git checkout 52da70ad          # Copilot / Cursor のフック修正が入った最初のコミット
+>   #  ⚠ この修正が最終的に何版として公開されるかは未確定である。
+>   #     コミット本文は 2.8.2 と書き、CHANGELOG は 2.8.1 に統合している。
+>     #   タグが付くまでは版番号ではなく SHA で指すこと。
 >   bun install --frozen-lockfile  # 依存の導入。これを省くと生成できない
 >   bun scripts/package.ts cursor    # Copilot なら copilot。dist/<harness>/ が生成される
 >
@@ -279,8 +282,17 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   # GitHub Copilot: インストーラは無い。中身をコピーする
 >   cd /path/to/your-project
 >   mkdir -p .aidlc aidlc .github
->   cp -R <checkout>/dist/copilot/.aidlc/.  .aidlc/
->   cp -R <checkout>/dist/copilot/aidlc/.   aidlc/     # .aidlc/ の兄弟（内側ではない）
+>   cp -R <checkout>/dist/copilot/.aidlc/.  .aidlc/     # エンジン。上書きしてよい
+>
+>   # 🔴 aidlc/ はワークスペースである。既存プロジェクトでは無造作に上書きしないこと。
+>   #    aidlc/spaces/<space>/memory/ と aidlc/knowledge/ には利用者の記録が入る。
+>   if [ -d aidlc ]; then
+>     cp -R aidlc "aidlc.bak-$(date +%Y%m%d-%H%M%S)" || { echo '退避に失敗。中止する' >&2; exit 1; }
+>     # 既存がある場合は、不足しているシェルだけを足す（既存ファイルは上書きしない）
+>     cp -Rn <checkout>/dist/copilot/aidlc/. aidlc/    # -n = 既存を上書きしない（BSD/GNU cp 共通）
+>   else
+>     cp -R  <checkout>/dist/copilot/aidlc/. aidlc/    # 新規なら全部入れてよい
+>   fi
 >   # ⚠ .github/ は「AI-DLC 以外のファイルは触らない」だけで、
 >   #    AI-DLC 自身のファイル（.github/hooks/aidlc.json 等）は上書きされる。
 >   #    それらを手編集している場合は先に退避する。
