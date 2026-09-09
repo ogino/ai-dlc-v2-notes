@@ -240,7 +240,7 @@ your-project/
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|
-| Claude Code | 出荷 `settings.json` は Bedrock（region）。AWS 資格情報とモデル有効化が実質必要。**2.8.1 でモデル pin（`model: opus[1m]` / `effortLevel: xhigh`）は削除され、セッション設定を継承する**（→ [17.6](./17-release-impact-2801.md#176-claude-code-出荷設定からモデル固定と無制限-bash-許可が消えた)） |
+| Claude Code | 出荷 `settings.json` は Bedrock（region）。AWS 資格情報とモデル有効化が実質必要。**2.7.2（`12b8d6e0`）でモデル pin（`model: opus[1m]` / `effortLevel: xhigh`）は削除され、セッション設定を継承する。2.7.2 は公開済みの v2.8.0 に含まれるため、2.8.0 を使っていればすでに効いている**（→ [17.6](./17-release-impact-2801.md#176-claude-code-出荷設定からモデル固定と無制限-bash-許可が消えた)） |
 | Codex CLI | 出荷 `config.toml` は Bedrock ブロック。OpenAI 認証等への差し替え余地あり（ガイド参照） |
 | Kiro IDE / CLI | **Kiro サインイン + セッションモデル**が中心。2.5.6 以降エージェントはセッションモデル継承 |
 | opencode | プロジェクト `opencode.json` はセッションモデルを固定しない。**グローバル opencode 設定のプロバイダ** |
