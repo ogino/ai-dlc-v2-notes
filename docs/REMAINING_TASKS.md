@@ -29,9 +29,20 @@
     現に **`main` は 2.8.1 だがリリースは 2.8.0 まで**である（→ 17 章 17.3）。
     `update --check` に頼ると「最新です」と言われながら、
     **本ノートが追跡している未リリースのコミットを丸ごと取りこぼす。**
-  - **したがって一次のチェックは従来どおり `main` に対して行う**
-    （`AIDLC_VERSION` の差分と CHANGELOG。加えて `git ls-remote --tags origin` でタグの実在を確認）。
-    `aidlc update --check` は**リリース追従の確認としてのみ**使う
+  - **一次のチェックは記録済み HEAD SHA と `origin/main` の比較である。**
+    版定数も CHANGELOG も変えないコミットがあるため、**版だけを見ると取りこぼす**。
+    ```bash
+    # 本ノートが記録している同期地点（README / 各章の `基準:` 行）
+    last=c03f9e28
+    git ls-remote origin main            # 現在の origin/main を取得
+    # 差があれば、その範囲を調べる
+    git log --oneline $last..origin/main
+    git diff --stat $last..origin/main
+    ```
+  - 版・リリース状態の確認は**補助**として次を併用する:
+    `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` ／ CHANGELOG の差分 ／
+    `git ls-remote --tags origin`（**タグの実在確認**。実装版とリリースは一致しない）
+  - `aidlc update --check` は**リリース追従の確認としてのみ**使う
   - 確認コマンド（導入済みなら）: `aidlc version` / `aidlc update --check`
   - 確認コマンド（**上流リポジトリのローカル clone 内**で実行。本リポジトリには `core/` は無い）:
     `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` と CHANGELOG の差分。

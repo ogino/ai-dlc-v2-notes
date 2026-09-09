@@ -57,12 +57,15 @@
 curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh | sh
 ```
 
-> **bun が要るのは次の 2 つの場合である。**
+> **bun が要るのは、本章に出てくる範囲では次の 3 つの場合である。**
 > 1. 上流リポジトリを clone してソースから生成する場合（`bun scripts/package.ts`。開発者向け経路。→ [6.3](#63-インストール要点)）
 > 2. **`codekb-scope-diff` を使う場合** —— 上流はこの診断コマンドを今も
 >    `bun <harness-dir>/tools/aidlc-utility.ts codekb-scope-diff` の形でしか案内しておらず、
 >    **ネイティブ導入だけの環境には公式な実行手段が無い**（→ [6.5](#65-よく使うコマンド)）。
 >    **Reverse Engineering の再実行前チェックを使うなら bun が要る。**
+> 3. **Codex の trust エントリをチェックアウトから生成する場合**
+>    （`bun install --frozen-lockfile` → `bun scripts/package.ts codex trust --project <path>`。
+>    → [6.3 の Codex CLI 節](#codex-cli)）。**TUI の "Trust all" を使うなら bun は要らない。**
 > その場合は非対話シェルからも見える PATH に入れること
 > （zsh なら `~/.zshenv` にも `BUN_INSTALL` / `PATH` を書く必要がある場合あり）。
 >
