@@ -24,7 +24,7 @@ CHANGELOG の実エントリ **4 件**（2.7.1 / 2.7.2 / 2.8.0 / 2.8.1）。
 | `dist/` | リポジトリにコミットされた配布物 2,201 ファイル | **リポジトリに存在しない**。`.gitignore` に `/dist/` `/dist-release/` |
 | 導入方法 | `git clone` → `cp -R dist/<harness>/. <project>/` | `install.sh` / `install.ps1` でネイティブ `aidlc` を導入 → `aidlc config` |
 | 前提ランタイム | Bun が必須 | **Bun / Node.js とも不要**（単一バイナリ） |
-| 手動コピー派の入手元 | リポジトリの `dist/<harness>/` | リリース資産 `aidlc-runtime-X.Y.Z.tar.gz` 内の **`runtime/<harness>/`** |
+| 手動コピー派の入手元 | リポジトリの `dist/<harness>/` | リリース資産 `aidlc-runtime-X.Y.Z.tar.gz` 内の **`runtime/<harness>/`**。**ネイティブ `aidlc` の導入が前提**（下記） |
 
 `.gitignore` の変更（逐語）:
 
@@ -97,6 +97,15 @@ root での実行は拒否される。Homebrew / Nix が管理する既存の `a
 2 段階版からパイプ直結版へ**短縮された**が、ハーネス側ガイドは 2 段階版のまま残っている。
 **2 段階版はダウンロードした内容を実行前に確認できる。**
 どちらを採るかは導入側の方針だが、上流が一方に統一していない事実は把握しておくとよい。
+
+> **⚠ 手動コピー経路でも、ネイティブ `aidlc` バイナリの導入は必須である。**
+> `runtime/<harness>/` の投影は**ネイティブ `aidlc` を呼ぶ形**に書き換えられており、
+> **tar.gz にバイナリ本体は入っていない**。
+> 上流 `README.md:33-36` も「**Install the matching native `aidlc` command**, download
+> `aidlc-runtime-X.Y.Z.tar.gz` …, and copy `runtime/<harness>/` into your project」と
+> **バイナリ導入を先に置いている**。
+> **手動コピーは「ネイティブ導入の代替」ではなく「プロジェクト内ファイルを手で置く」という選択である。**
+> バイナリを入れずに `runtime/<harness>/` だけ置くと、フックもコマンドも起動できない。
 
 ### `dist/` のコピーは今も可能か
 

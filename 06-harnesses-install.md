@@ -161,8 +161,18 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 
 ### 手動でファイルを置きたい場合
 
-リリース資産 `aidlc-runtime-X.Y.Z.tar.gz` を展開し、**`runtime/<harness>/`** をプロジェクトへコピーする。
-これが手動管理を続ける場合の正規経路である。
+> **⚠ 手動コピー経路でも、ネイティブ `aidlc` バイナリの導入は必須である。**
+> `runtime/<harness>/` の投影は**ネイティブ `aidlc` を呼ぶ形**に書き換えられており、
+> **tar.gz にバイナリ本体は入っていない**。
+> 上流 `README.md:33-36` も「**Install the matching native `aidlc` command**, download
+> `aidlc-runtime-X.Y.Z.tar.gz` …, and copy `runtime/<harness>/` into your project」と
+> **バイナリ導入を先に置いている**。
+> **手動コピーは「ネイティブ導入の代替」ではなく「プロジェクト内ファイルを手で置く」という選択である。**
+> バイナリを入れずに `runtime/<harness>/` だけ置くと、フックもコマンドも起動できない。
+
+ネイティブ `aidlc` を導入したうえで、リリース資産 `aidlc-runtime-X.Y.Z.tar.gz` を展開し、
+**`runtime/<harness>/`** をプロジェクトへコピーする。
+これがプロジェクト内ファイルを手で管理する場合の正規経路である。
 
 **チェックアウトから `bun scripts/package.ts <harness>` で `dist/<harness>/` を生成することも今も可能**だが、
 上流はこれを利用者向けとは認めていない（`docs/guide/12-cli-commands.md:243-246` 逐語）:
