@@ -513,3 +513,21 @@ Devin Review / Copilot / Codex の 3 ボットから**インラインコメン�
 
 **待った価値があった。** 1 ラウンド目の対応を push した直後に、`CLEAN` ではなくこの 2 件が届いた。
 → [[pr-merge-wait-for-rereview]] の再確認。
+
+#### 再レビュー 第 3 ラウンド（同日・Codex 完了）
+
+**Codex から新規 2 件。いずれも「失敗様式の取り違え」で、私の断定が実測を越えていた。**
+
+| 重大度 | 指摘 | 対応 |
+|---|---|---|
+| 🟡 | `04-agents.md` が「Composer への `@<server>` 追加はエンジン更新で**消える**」と断定 | **2.8.x では失敗様式が違う。** `aidlc config` は所有権ベースラインを持ち、記録済み SHA-256 と一致しない managed ファイルを**拒否して conflict として報告する**（`doctor` も conflict に分類）。`--force` を付けた場合に置換される。**「再付与」ではなく「衝突の解消」**が正しい手順であると書き直し、2.7.0 までとの対比表にした |
+| 🟡 | 内部 comparison の統合ステップが「追記は上流更新で消える」と断定。**新規に足した deny は user-owned JSON value なので `--force` でも上書きされない可能性がある** | **上流ドキュメントから確定できないことを実測で確認した。** 「Root Integrations and Ownership」表は部分所有の面を 5 つ列挙しているが、**`.claude/settings.json` はその表に載っていない**。よって user-owned JSON value 扱いか managed harness file 扱いかは判別できない。**どちらにも断定せず未確認とし、`aidlc config --dry-run --json` の planned action（`preserve` / `merge` / `update`）で確認する手順**を示した |
+
+**2 件目で、Codex の前提にも寄りかからずに済んだ。**
+Codex は「user-owned なので保存される」と推定していたが、上流の該当表を実測すると
+**`.claude/settings.json` は列挙されておらず、どちらとも決まらない**。
+**「私の断定が誤り」と「相手の断定が正しい」は別である。** → [[dont-overcorrect-into-the-opposite-claim]]
+
+修正の過程で、**自分の文章内の矛盾も 1 件見つかった** ——
+同じ `.claude/settings.json` を、上では「V2 が導入した管理対象」、下では
+「フレームワーク管理外なので入れ替えの影響を受けない」と書いていた。
