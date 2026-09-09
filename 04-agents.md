@@ -173,13 +173,18 @@ CodeKB は AI-DLC 同梱ではない外部 MCP。紛らわしい名前の store 
 > 「`--force` can replace a modified, **baseline-owned** managed block or managed harness file.
 > It **cannot adopt ambiguous unmarked content** …」
 >
-> | ファイルの出自 | `--force` | 対処 |
-> |---|---|---|
-> | **2.8.x の `aidlc config` が作った**あとで手編集した | **置換できる**（編集は失われる） | 編集内容を退避してから `--force` |
-> | **2.7.0 の `dist/` からコピーして手編集した**（ベースライン未登録） | **置換できない**。曖昧な未登録内容として拒否される | **ファイルを退避して移動または削除し、`aidlc config` に作り直させる** |
+> | 対象 | `--force` なし | `--force` あり | 対処 |
+> |---|---|---|---|
+> | **管理下のハーネスファイル**（`.claude/` `.github/` などハーネスツリー内。Composer 定義もここ） | `conflict`（`locally modified or unowned`） | **置換される。編集は失われる** | **退避してから `--force`** |
+> | **ルート統合の未マーク AI-DLC 内容**（`AGENTS.md` の区画など） | エラー | **効かない** | **移動または削除してから作り直させる**（上流のエラー文が `move or delete the unmarked AI-DLC content` と指示する） |
 >
-> **2.7.0 からの移行では後者に当たる。** 「`--force` を付ければよい」ではなく、
-> **一度どかしてから作り直させる**のが正しい手順である。
+> **判定は `core/tools/aidlc-init.ts` の実装で確認した**（管理下ファイルの conflict 分岐は `&& !force` で
+> 終わっており、`--force` を付けると copy に落ちる。ルート統合側は別経路で
+> `legacy root integration ambiguous; move or delete the unmarked AI-DLC content` を返す）。
+>
+> **Composer 定義は管理下のハーネスファイルなので、`--force` で置換できる。**
+> 出自（2.7.0 の `dist/` から来たか、2.8.x が作ったか）では分かれない。
+> **いずれにせよ編集は失われるので、先に退避すること。**
 >
 > **したがって 2.8.x での作業は「再付与」ではなく「衝突の解消」である。**
 > 恒久化したいなら、出荷ファイルを編集しない経路（Plugin 機構／プロジェクト側の設定）へ移すこと。
