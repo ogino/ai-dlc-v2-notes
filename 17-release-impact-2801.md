@@ -268,9 +268,9 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   git clone https://github.com/awslabs/aidlc-workflows.git
 >   cd aidlc-workflows
 >   git checkout 52da70ad          # Copilot / Cursor のフック修正が入った最初のコミット
->   #  ⚠ この修正が最終的に何版として公開されるかは未確定である。
->   #     コミット本文は 2.8.2 と書き、CHANGELOG は 2.8.1 に統合している。
->     #   タグが付くまでは版番号ではなく SHA で指すこと。
+>   # ⚠ この修正が最終的に何版として公開されるかは未確定。
+>   #   コミット本文は 2.8.2 と書き、CHANGELOG は 2.8.1 に統合している。
+>   #   タグが付くまでは版番号ではなく SHA で指すこと。
 >   bun install --frozen-lockfile  # 依存の導入。これを省くと生成できない
 >   bun scripts/package.ts cursor    # Copilot なら copilot。dist/<harness>/ が生成される
 >
@@ -281,17 +281,24 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >
 >   # GitHub Copilot: インストーラは無い。中身をコピーする
 >   cd /path/to/your-project
->   mkdir -p .aidlc aidlc .github
->   cp -R <checkout>/dist/copilot/.aidlc/.  .aidlc/     # エンジン。上書きしてよい
 >
 >   # 🔴 aidlc/ はワークスペースである。既存プロジェクトでは無造作に上書きしないこと。
 >   #    aidlc/spaces/<space>/memory/ と aidlc/knowledge/ には利用者の記録が入る。
->   if [ -d aidlc ]; then
+>   #    判定は mkdir より前に行う（mkdir 後だと必ず「既存あり」になる）。
+>   if [ -d aidlc ] && [ -n "$(ls -A aidlc 2>/dev/null)" ]; then
+>     aidlc_existing=1
 >     cp -R aidlc "aidlc.bak-$(date +%Y%m%d-%H%M%S)" || { echo '退避に失敗。中止する' >&2; exit 1; }
->     # 既存がある場合は、不足しているシェルだけを足す（既存ファイルは上書きしない）
->     cp -Rn <checkout>/dist/copilot/aidlc/. aidlc/    # -n = 既存を上書きしない（BSD/GNU cp 共通）
 >   else
->     cp -R  <checkout>/dist/copilot/aidlc/. aidlc/    # 新規なら全部入れてよい
+>     aidlc_existing=0
+>   fi
+>
+>   mkdir -p .aidlc aidlc .github
+>   cp -R <checkout>/dist/copilot/.aidlc/. .aidlc/      # エンジン。上書きしてよい
+>
+>   if [ "$aidlc_existing" = 1 ]; then
+>     cp -Rn <checkout>/dist/copilot/aidlc/. aidlc/     # -n = 既存を上書きしない（BSD/GNU 共通）
+>   else
+>     cp -R  <checkout>/dist/copilot/aidlc/. aidlc/     # 新規なら全部入れてよい
 >   fi
 >   # ⚠ .github/ は「AI-DLC 以外のファイルは触らない」だけで、
 >   #    AI-DLC 自身のファイル（.github/hooks/aidlc.json 等）は上書きされる。
@@ -310,7 +317,10 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >     cp <checkout>/dist/copilot/AGENTS.md AGENTS.md  # 既存が無い場合だけコピーでよい
 >   fi
 >   ```
->
+>   **⚠ `cp -Rn` は既存ファイルを一切上書きしないため、`aidlc/` 配下に古いシェルが残っている場合は
+>   更新されない。** 既存導入へこの回避策を当てる場合は、退避した `aidlc.bak-*` と突き合わせ、
+>   利用者の記録（`spaces/` `knowledge/`）以外に古いままのファイルが無いか確認すること。
+>   **修正版がリリースされたら、`aidlc config` に正規手順で作り直させるのが本筋である。**>
 > **Copilot はコピーしただけでは動かない。**（詳細は [6.3 の GitHub Copilot 節](./06-harnesses-install.md#github-copilot)）
 >
 >   1. **folder trust を設定する** —— `copilot` を対話起動して trust プロンプトを承認するか、
