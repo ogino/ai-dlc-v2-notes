@@ -264,7 +264,7 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   確認手順:
 >   ```bash
 >   git fetch origin --tags          # ⚠ 先に取得する。ls-remote は一覧を表示するだけでタグを取得しない
->   git tag --list 'v2.*' | sort -V | tail -3
+>   git tag --list 'v2.*' --sort=v:refname | tail -3   # git 自身の版ソート。外部 sort に依存しない
 >   git merge-base --is-ancestor 52da70ad <tag> && echo '修正を含む' || echo '含まない'
 >   ```
 >   ）
