@@ -232,6 +232,39 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 のうち、**`--version 2.8.1` の指定は現時点では成立しない**（指定先のリリースが無いため）。
 `aidlc update` も latest として 2.8.0 を返す。
 
+> **🔴 v2.8.0 では GitHub Copilot と Cursor のフックが動作しない（2026-09-09 実測・追記）。**
+> **リリース済みの 2.8.x は v2.8.0 だけなので、この 2 ハーネスでは現時点の推奨導入先が壊れている。**
+>
+> 上流コミット `52da70ad`（#1065）の本文（逐語要旨）:
+> 2.8.0 のネイティブ化はすべての `bun <dir>/hooks/aidlc-<name>.ts` を `aidlc engine hook <name>` に
+> 書き換えたが、**アダプタ経路へ回したのは kiro と codex だけ**だった。
+> Copilot と Cursor のアダプタは引数 1 個のフック経路に落ち、対象が捨てられる。
+>
+> | ハーネス | v2.8.0 での症状 |
+> |---|---|
+> | **GitHub Copilot** | 全イベントで `undefined is not an object (evaluating 'input.length')` でクラッシュ |
+> | **Cursor** | `guards` が対象に一致せず、**fail-closed な preToolUse の裏で無出力終了 → 全ツール呼び出しがブロックされる** |
+>
+> **Cursor の症状は 2.5.63〜2.5.68 の既知不具合と同じ失敗様式である**（空 stdout × `failClosed`）。
+>
+> 修正は **2.8.1**（`52da70ad` ほか）だが、**2.8.1 はまだリリースされていない**。
+> したがって現時点の選択肢は次のいずれかになる。
+>
+> - **Copilot / Cursor 以外のハーネスを使う**（Claude Code / Codex CLI / Kiro / opencode は影響を受けない）
+> - **`v2.8.1` タグの公開を待つ**
+> - ソースから生成する経路を採る（`bun scripts/package.ts`。**bun が要る**）
+>
+> **本ノートが `install.sh`（= `releases/latest` = v2.8.0）を案内している箇所は、
+> この 2 ハーネスについては上記の制約付きで読むこと。**
+
+> **⚠ 本章の測定後、上流はさらに進んでいる（2026-09-09 時点の追記）。**
+> 本章の `基準:` は `c03f9e28` だが、その後 **`52da70ad` まで 3 コミット**進んだ
+> （179 ファイル / +26,596 −3,694）。`AIDLC_VERSION` は **2.8.1 のまま**で、タグも **v2.8.0 のまま**である。
+> 内訳は #1064（Codex の pre-tool 入力書き換え許可）、
+> **#1000（Plan Approval の内容・試行への束縛、human-only exit、Kiro IDE の Windows シェル保護、Change Control）**、
+> **#1065（Copilot / Cursor のフック経路修正。下記）**。
+> **本章の測定値は `c03f9e28` 時点の記録として維持する。** 次回区間で扱う。
+
 **実際に到達できる最大は 2.8.0 である。**
 2.8.1 の 2 件の修正（`aidlc config` ウィザードで Enter が既定値として受理されない不具合、
 `aidlc update` が同一版で umask 依存の整合性検査に失敗する不具合）は、まだ利用者に届いていない。

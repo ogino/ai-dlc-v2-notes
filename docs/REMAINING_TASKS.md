@@ -34,7 +34,10 @@
     ```bash
     # 本ノートが記録している同期地点（README / 各章の `基準:` 行）
     last=c03f9e28
-    git ls-remote origin main            # 現在の origin/main を取得
+    # ⚠ 先に fetch する。`git ls-remote` は SHA を表示するだけで
+    #    refs/remotes/origin/main を更新しないため、直後の log / diff が古い参照を見る
+    git fetch origin main --tags
+    git rev-parse origin/main            # 現在の HEAD
     # 差があれば、その範囲を調べる
     git log --oneline $last..origin/main
     git diff --stat $last..origin/main
@@ -156,6 +159,10 @@
 - [ ] **#968（Devin CLI / Desktop ハーネス）の判定基準を再定義する** — 従来は「`dist/` に実体があるか」で
       判定していたが、`dist/` が消えたため使えない。`harness/` 直下かリリース資産で判定する。
       なお **#996「feat: Devin Harness」も別に OPEN** で、Devin ハーネスの PR が 2 本並存している
+- [ ] **🔴 v2.8.0 の Copilot / Cursor フック不具合の解消時期を追う** —— 修正は 2.8.1（`52da70ad` / #1065）だが未リリース。
+      **`v2.8.1` タグが公開されるまで、この 2 ハーネスは v2.8.0 で導入できない**
+- [ ] **上流はさらに `52da70ad` まで進んだ（2026-09-09 時点）** —— 3 コミット / 179 ファイル。
+      #1000（Plan Approval の内容束縛・Change Control）を含む。**次回区間で扱う**
 - [ ] （継続）上流テストスイートは未実行
 
 ## 運用
