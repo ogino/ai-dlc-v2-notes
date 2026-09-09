@@ -292,8 +292,13 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   fi
 >   ```
 >
->   **Copilot はコピー後に folder trust の設定が要る**（未信頼だとリポジトリフックが 1 本も動かない。
->   → [6.3 の GitHub Copilot 節](./06-harnesses-install.md#github-copilot)）。
+> **Copilot はコピーしただけでは動かない。**（詳細は [6.3 の GitHub Copilot 節](./06-harnesses-install.md#github-copilot)）
+>
+>   1. **folder trust を設定する** —— `copilot` を対話起動して trust プロンプトを承認するか、
+>      `~/.copilot/config.json` の `trustedFolders` にプロジェクトの絶対パスを追加する。
+>      **未信頼だとリポジトリフックが 1 本も動かない。**
+>   2. **`AGENTS.md` の「Git Integration」節にある `.gitignore` 記述を適用する。**
+>      **これを省くと、利用者固有の状態がリポジトリに入る。**
 >
 >   **この投影は Bun 前提でネイティブ `aidlc` を呼ばないため、対応するバイナリは要らない**
 >   （代わりに **bun が要る**）。**理屈上そうなるという読解であり、実機で確かめていない。**
