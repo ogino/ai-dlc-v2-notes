@@ -3,6 +3,8 @@
 > **⚠ 導入方法が根本的に変わった（2026-09-08）。**
 > **実装版としては 2.7.2、利用者が入手できるリリースとしては v2.8.0 が最初である**
 > （`v2.7.1` / `v2.7.2` のタグは存在しない。→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
+> **本章で単に「2.8.x」と書いている箇所はリリース観点である。**
+> 上流のコミットや CHANGELOG を追う場合は **2.7.2** を境界として見ること。
 > 上流リポジトリから **`dist/` ディレクトリが削除された**。
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）で `aidlc` コマンドを入れ、
 > プロジェクトごとに `aidlc config --harness <name>` を実行する形になった。
@@ -47,7 +49,7 @@
 
 ### 全ハーネス共通
 
-1. **ネイティブ導入なら bun は要らない**（2.8.x 以降）。配布されるのは単一バイナリで、
+1. **ネイティブ導入なら bun は要らない**（2.7.2 以降。リリースは v2.8.0 以降）。配布されるのは単一バイナリで、
    Bun / Node.js のいずれも前提にしない
 2. 推奨モデル: **Claude Opus 4.8**（公式 README。Kiro では有料プランが必要な場合あり）
 
@@ -273,7 +275,7 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > 更新時は trust エントリを**差し替え**（追記ではない。同一 hook path の古いエントリは消す）、
 > そのうえで**新しい Codex セッションを開始する**。
 >
-> なお 2.8.x では hook の起動コマンド自体が `{{INVOKE}} engine hook <name>` 形式に変わったため、
+> なお **2.7.2 以降**は hook の起動コマンド自体が `{{INVOKE}} engine hook <name>` 形式に変わったため、
 > **trust のハッシュ対象文字列も変わっている**。更新後の trust 再登録は必須である。
 
 #### Cursor
@@ -322,7 +324,7 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > **2.6.123 から 2.7.0 へ上げるだけなら、下の表の作業は増えない。** 2.6.124 に移行処理は無く、2.7.0 が変えたのは**バージョン定数だけ**でロジックの変更は無い。
 > **ただしプラグインを入れているなら、再コピー後に `/aidlc plugin sync` が要る**
 > （エンジンを入れ替えるとコンパイル済みグラフが素に戻り、合成が失われる）。これは版によらず毎回必要である。
-> ただし **配布物の入手方法そのものが 2.8.x で変わった** —— `dist/` は上流から消え、
+> ただし **配布物の入手方法そのものが 2.7.2 で変わった**（リリースとしては v2.8.0 以降）—— `dist/` は上流から消え、
 > エンジンの入手は `install.sh` / `install.ps1`、プロジェクトへの適用は `aidlc config` になった
 > （→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
 > 本節以下に並ぶ版ごとの手順は、**その版の時点で上流が指示していた操作**の記録である。
@@ -509,7 +511,7 @@ opencode と GitHub Copilot の出荷ペルソナは、記憶参照を `aidlc/sp
 
 ### `dist/` の変更ファイル数を「開発量」と読まないこと
 
-> **⚠ この測定手法は 2.8.x 以降では再現できない。** `dist/` が上流リポジトリから消えたためである。
+> **⚠ この測定手法は 2.7.2 以降では再現できない。** `dist/` が上流リポジトリから消えたためである。
 > 以下は測定当時（2.6.x 期）の記録として残す。
 
 2.6.2 → 2.6.49 で `dist/` の変更ファイル数はハーネス間でほぼ同数になる。
@@ -555,7 +557,7 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 | コマンド | 意味 |
 |----------|------|
 | `bun <harness-dir>/tools/aidlc-utility.ts codekb-scope-diff --repo <repo>` | Reverse Engineering 再実行前に codekb ストアの鮮度を確認（`NO_STORE` / `CURRENT` / `STALE` / `UNVERIFIED` / `UNKNOWN_SCOPE`）。2.5.35+ |
-| **`aidlc system workspace-sync [--force]`** | 任意の `repos.json` に基づき不足リポジトリを clone、管理対象 `.gitignore` を更新、VSCode マルチルート生成。2.5.36+。**2.8.x で上流はこのネイティブ形式を案内している**（従来は `bun <harness-dir>/tools/aidlc-workspace-sync.ts`） |
+| **`aidlc system workspace-sync [--force]`** | 任意の `repos.json` に基づき不足リポジトリを clone、管理対象 `.gitignore` を更新、VSCode マルチルート生成。2.5.36+。**2.7.2 以降、上流はこのネイティブ形式を案内している**（従来は `bun <harness-dir>/tools/aidlc-workspace-sync.ts`） |
 
 > **⚠ この 2 つは 2.8.x で扱いが分かれた。**
 > - `workspace-sync` は上流ドキュメントが **`aidlc system workspace-sync`** を案内するようになった。
@@ -642,7 +644,7 @@ ls assets/   # AI-DLC-Workflows-2.0-Specification.pdf（ハイフン区切りの
 > **Spec PDF**: 2.6.2 時点で PDF は 2 箇所にあり、**ファイル名が異なる**。
 > `assets/AI-DLC-Workflows-2.0-Specification.pdf`（ハイフン区切り）と
 > `dist/AI-DLC Workflows 2.0 Specification.pdf`（空白区切り）。
-> **2.8.x で `dist/` 側は消えたため、現在の所在は `assets/` のみである。**
+> **2.7.2 で `dist/` 側は消えたため、現在の所在は `assets/` のみである。**
 > なお PDF の内容が 33 ステージ構成に更新されているかは**未確認**。
 
 ---
