@@ -135,7 +135,12 @@ curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/i
 #    Windows PowerShell:
 #    irm https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.ps1 | iex
 
-# 2. プロジェクトに面を作る
+# 2. PATH を通す（インストーラは子シェルで走るため、親シェルには反映されない）
+#    `aidlc: command not found` になる場合はこれ。インストーラが表示する手順が正
+export PATH="$HOME/.local/bin:$PATH"   # $AIDLC_BIN_DIR を変えた場合はそのパス
+aidlc version                          # 版が出れば導入成功
+
+# 3. プロジェクトに面を作る
 cd your-project
 aidlc config --harness claude     # claude / codex / copilot / cursor / kiro / kiro-ide / opencode
 aidlc doctor

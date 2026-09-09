@@ -114,12 +114,17 @@ curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/i
 #    Windows PowerShell
 #    irm https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.ps1 | iex
 
-# 2. プロジェクトに導入（dist のコピーはもう要らない）
+# 2. PATH を通す（インストーラは子シェルで走るため、親シェルには反映されない）
+#    インストーラが表示する手順に従うか、新しいシェルを開く
+export PATH="$HOME/.local/bin:$PATH"   # Unix の既定。$AIDLC_BIN_DIR を変えた場合はそのパス
+aidlc version                          # ここで版が出れば導入成功
+
+# 3. プロジェクトに導入（dist のコピーはもう要らない）
 cd your-project
 aidlc config --harness claude
 aidlc doctor
 
-# 3. セッション内 — ワークフロー開始
+# 4. セッション内 — ワークフロー開始
 /aidlc Build a task management API with user authentication
 ```
 

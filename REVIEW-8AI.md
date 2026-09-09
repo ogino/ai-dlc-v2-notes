@@ -752,3 +752,18 @@ Codex は「user-owned なので保存される」と推定していたが、上
 前ラウンドの修正が、次のラウンドの指摘を生んだ形である。
 **数を更新したら、その数を前提にしている手順・SHA・リンクを同じコミットで確認する。**
 
+#### 再レビュー 第 19 ラウンド（同日・Codex）
+
+| 重大度 | 指摘 | 対応 |
+|---|---|---|
+| 🟡 | クイックスタートが `curl \| sh` の直後に `aidlc config` を呼んでいた。**インストーラは子シェルで走るため親シェルの PATH は更新されず、`aidlc: command not found` になる** | 上流 README も「If your shell cannot find `aidlc`, follow the PATH instruction printed by the installer or start a new shell」と書いている。**PATH を通す手順と `aidlc version` での確認をステップとして挿入**（README・6 章の両方） |
+
+**手順を写すとき、上流の散文に書かれた前提を落とした。**
+上流はコマンド列の**外**（散文）で PATH の注意を書いており、
+コマンドだけを追うと落ちる。**手順を引き写すときは、その前後の散文も読む。**
+→ [[read-upstream-prose-before-inferring]] と同じ型。
+
+**自己点検の走査（今回導入）ではこれは検出できなかった。**
+禁止パターンは「書いてはいけないこと」を捕まえるが、
+**「書き落としたこと」は捕まえられない。** レビューが要る種類が残る。
+
