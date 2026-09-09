@@ -297,8 +297,12 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   1. **folder trust を設定する** —— `copilot` を対話起動して trust プロンプトを承認するか、
 >      `~/.copilot/config.json` の `trustedFolders` にプロジェクトの絶対パスを追加する。
 >      **未信頼だとリポジトリフックが 1 本も動かない。**
->   2. **`AGENTS.md` の「Git Integration」節にある `.gitignore` 記述を適用する。**
+>   2. **ヘッドレスで使う場合は `GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=1` を設定する**
+>      （`copilot -p` などの非対話実行）。**設定しないとリポジトリフックが動かない。**
+>   3. **`AGENTS.md` の「Git Integration」節にある `.gitignore` 記述を適用する。**
 >      **これを省くと、利用者固有の状態がリポジトリに入る。**
+>
+>   （**6 章の Copilot 節に挙げた 3 項目と同じもの。1 つでも欠けると動かないか、状態が漏れる。**）
 >
 >   **この投影は Bun 前提でネイティブ `aidlc` を呼ばないため、対応するバイナリは要らない**
 >   （代わりに **bun が要る**）。**理屈上そうなるという読解であり、実機で確かめていない。**
