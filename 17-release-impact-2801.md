@@ -281,7 +281,11 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   mkdir -p .aidlc aidlc .github
 >   cp -R <checkout>/dist/copilot/.aidlc/.  .aidlc/
 >   cp -R <checkout>/dist/copilot/aidlc/.   aidlc/     # .aidlc/ の兄弟（内側ではない）
->   cp -R <checkout>/dist/copilot/.github/. .github/   # すべて aidlc- 接頭辞。既存は上書きされない
+>   # ⚠ .github/ は「AI-DLC 以外のファイルは触らない」だけで、
+>   #    AI-DLC 自身のファイル（.github/hooks/aidlc.json 等）は上書きされる。
+>   #    それらを手編集している場合は先に退避する。
+>   [ -d .github ] && cp -R .github .github.bak-$(date +%Y%m%d)
+>   cp -R <checkout>/dist/copilot/.github/. .github/   # aidlc- 接頭辞以外の既存ファイルは残る
 >   # ⚠ AGENTS.md は cp しないこと。cp は上書きであってマージではない。
 >   #    既存の AGENTS.md があると、プロジェクト固有の指示が失われる。
 >   if [ -e AGENTS.md ]; then
