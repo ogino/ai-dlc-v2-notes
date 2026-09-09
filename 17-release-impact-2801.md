@@ -282,7 +282,14 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   cp -R <checkout>/dist/copilot/.aidlc/.  .aidlc/
 >   cp -R <checkout>/dist/copilot/aidlc/.   aidlc/     # .aidlc/ の兄弟（内側ではない）
 >   cp -R <checkout>/dist/copilot/.github/. .github/   # すべて aidlc- 接頭辞。既存は上書きされない
->   cp    <checkout>/dist/copilot/AGENTS.md AGENTS.md  # 既存があればマージ
+>   # ⚠ AGENTS.md は cp しないこと。cp は上書きであってマージではない。
+>   #    既存の AGENTS.md があると、プロジェクト固有の指示が失われる。
+>   if [ -e AGENTS.md ]; then
+>     cp AGENTS.md AGENTS.md.bak                      # 退避してから
+>     diff -u AGENTS.md <checkout>/dist/copilot/AGENTS.md   # 差分を見て手でマージする
+>   else
+>     cp <checkout>/dist/copilot/AGENTS.md AGENTS.md  # 既存が無い場合だけコピーでよい
+>   fi
 >   ```
 >
 >   **Copilot はコピー後に folder trust の設定が要る**（未信頼だとリポジトリフックが 1 本も動かない。
