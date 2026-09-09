@@ -311,6 +311,18 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > 本節以下に並ぶ版ごとの手順は、**その版の時点で上流が指示していた操作**の記録である。
 > 「`dist/` の再コピー」と書かれている箇所は、現在は `aidlc update` →
 > 各プロジェクトで `aidlc config` に読み替える。
+>
+> **⚠ 「再コピー後に `/aidlc plugin sync`」という指示の扱いは、2.8.x では断定できない。**
+> 上流の記述が 2 つに割れているためである（HEAD `c03f9e28` 実測）——
+> `docs/guide/12-cli-commands.md` は「engine の再インストール・アップグレードのたびに再実行せよ」と書くが、
+> **その理由は「新しい `dist/<harness>/` をコピーすると出荷グラフに戻るため」**であり `dist/` コピー前提である。
+> 一方 `docs/guide/18-install-and-lifecycle.md:818-820` は
+> 「プラグイン変更はプロジェクト設定であり `aidlc config` に収束する。独立した公開プラグインコマンドは無い」
+> 「**`aidlc doctor` が installed 対 composed のプラグイン状態を報告する**」と書く。
+>
+> **実務手順**: 更新後に `aidlc doctor` を実行し、**ずれが報告された場合に `/aidlc plugin sync`** を打つ。
+> 手動コピー導入・明示的なプラグイン変更・構成破損の場合は従来どおり明示同期が要る。
+> **Kiro CLI は SessionStart の自己修復が効かない**ため、明示実行の必要性が最も高い。
 > また 2.6.124 は**既存の `aidlc-state.md` を書き換えないし、コミット済みの履歴も変えない**。
 > **2.7.0 の CHANGELOG は 2.6.x 全体のロールアップ再掲なので、それを読んだだけでは
 > 下の 20 版の一度きりの作業は済まない**（→ [16.4](./16-release-impact-2700.md#164-270-の-changelog-はロールアップであって新機能一覧ではない)）。
