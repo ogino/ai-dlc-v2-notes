@@ -269,11 +269,24 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   cd aidlc-workflows
 >   git checkout 52da70ad          # Copilot / Cursor のフック修正が入った最初のコミット
 >   bun install --frozen-lockfile  # 依存の導入。これを省くと生成できない
->   bun scripts/package.ts cursor  # または copilot。dist/<harness>/ が生成される
+>   bun scripts/package.ts cursor    # Copilot なら copilot。dist/<harness>/ が生成される
 >
->   # 生成物をプロジェクトへ入れる（Cursor の例）
+>   # --- 生成物をプロジェクトへ入れる。ハーネスで方式が違う ---
+>
+>   # Cursor: 同梱インストーラを実行する
 >   bun dist/cursor/install.ts /path/to/your-project
+>
+>   # GitHub Copilot: インストーラは無い。中身をコピーする
+>   cd /path/to/your-project
+>   mkdir -p .aidlc aidlc .github
+>   cp -R <checkout>/dist/copilot/.aidlc/.  .aidlc/
+>   cp -R <checkout>/dist/copilot/aidlc/.   aidlc/     # .aidlc/ の兄弟（内側ではない）
+>   cp -R <checkout>/dist/copilot/.github/. .github/   # すべて aidlc- 接頭辞。既存は上書きされない
+>   cp    <checkout>/dist/copilot/AGENTS.md AGENTS.md  # 既存があればマージ
 >   ```
+>
+>   **Copilot はコピー後に folder trust の設定が要る**（未信頼だとリポジトリフックが 1 本も動かない。
+>   → [6.3 の GitHub Copilot 節](./06-harnesses-install.md#github-copilot)）。
 >
 >   **この投影は Bun 前提でネイティブ `aidlc` を呼ばないため、対応するバイナリは要らない**
 >   （代わりに **bun が要る**）。**理屈上そうなるという読解であり、実機で確かめていない。**
