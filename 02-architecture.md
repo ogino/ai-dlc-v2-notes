@@ -231,7 +231,7 @@ your-project/
 
 | 項目 | 内容 |
 |------|------|
-| ランタイム | **bun**（全ハーネス共通の実行前提） |
+| ランタイム | **ビルド時は bun**（`scripts/package.ts` / テスト）。**配布版の実行には不要**（2.8.x のネイティブ `aidlc` は単一バイナリで Bun / Node.js を要求しない） |
 | 言語 | TypeScript（core tools / hooks / tests） |
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
@@ -240,7 +240,7 @@ your-project/
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|
-| Claude Code | 出荷 `settings.json` は Bedrock（region・モデル pin）。AWS 資格情報とモデル有効化が実質必要 |
+| Claude Code | 出荷 `settings.json` は Bedrock（region）。AWS 資格情報とモデル有効化が実質必要。**2.8.1 でモデル pin（`model: opus[1m]` / `effortLevel: xhigh`）は削除され、セッション設定を継承する**（→ [17.6](./17-release-impact-2801.md#176-claude-code-出荷設定からモデル固定と無制限-bash-許可が消えた)） |
 | Codex CLI | 出荷 `config.toml` は Bedrock ブロック。OpenAI 認証等への差し替え余地あり（ガイド参照） |
 | Kiro IDE / CLI | **Kiro サインイン + セッションモデル**が中心。2.5.6 以降エージェントはセッションモデル継承 |
 | opencode | プロジェクト `opencode.json` はセッションモデルを固定しない。**グローバル opencode 設定のプロバイダ** |

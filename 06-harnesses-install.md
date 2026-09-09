@@ -139,9 +139,12 @@ root での実行は拒否される。Homebrew / Nix 管理の既存 `aidlc` が
 > ```bash
 > tmp="$(mktemp -d)"
 > curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh -o "$tmp/install.sh"
+> less "$tmp/install.sh"          # ← ここで内容を確認する（この 1 行が 2 段階にする理由）
 > sh "$tmp/install.sh"
 > rm -rf "$tmp"
 > ```
+>
+> **確認を挟まずに `sh` するなら、パイプ直結版と実質同じである。**
 
 `install.sh` のオプション（逐語）:
 
@@ -523,7 +526,19 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 | コマンド | 意味 |
 |----------|------|
 | `bun <harness-dir>/tools/aidlc-utility.ts codekb-scope-diff --repo <repo>` | Reverse Engineering 再実行前に codekb ストアの鮮度を確認（`NO_STORE` / `CURRENT` / `STALE` / `UNVERIFIED` / `UNKNOWN_SCOPE`）。2.5.35+ |
-| `bun <harness-dir>/tools/aidlc-workspace-sync.ts [--force]` | 任意の `repos.json` に基づき不足リポジトリを clone、管理対象 `.gitignore` を更新、VSCode マルチルート生成。2.5.36+ |
+| **`aidlc system workspace-sync [--force]`** | 任意の `repos.json` に基づき不足リポジトリを clone、管理対象 `.gitignore` を更新、VSCode マルチルート生成。2.5.36+。**2.8.x で上流はこのネイティブ形式を案内している**（従来は `bun <harness-dir>/tools/aidlc-workspace-sync.ts`） |
+
+> **⚠ この 2 つは 2.8.x で扱いが分かれた。**
+> - `workspace-sync` は上流ドキュメントが **`aidlc system workspace-sync`** を案内するようになった。
+>   ネイティブ導入だけの利用者もそのまま実行できる。
+> - **`codekb-scope-diff` は上流ドキュメントが今も `bun …/aidlc-utility.ts` 形式のままである**
+>   （`docs/guide/12-cli-commands.md:1013-1015`、HEAD `c03f9e28` 実測）。
+>   ディスパッチャ上は `aidlc engine workspace codekb-scope-diff` というルートが存在するが、
+>   **`engine` 名前空間は上流自身が
+>   「Engine machinery - generated harness surfaces only; not for human scripts」と明記した hidden ルート**であり、
+>   利用者が直接叩く経路として案内されていない。
+>   **したがってネイティブ導入だけの環境では、この診断コマンドの公式な実行手段が現時点で無い**
+>   （`bun` を別途入れるか、上流の案内が更新されるのを待つことになる）。**未確認事項として記録した。**
 
 > `--doctor` は 2.5.36 で advisory 行が 3 つ増えた（`aidlc/` 配下の未コミット変更、`repos.json` とディスク上 sibling の drift、管理対象 `.gitignore` ブロックの陳腐化）。後者 2 つは `repos.json` が存在する場合のみ表示される。
 
@@ -580,10 +595,13 @@ aidlc version
 ソースを直接見る場合:
 
 ```bash
-# 版を固定して調べるなら、タグで固定する
-# ⚠ v2.8.1 タグは存在しない（実装は 2.8.1 だがリリースは 2.8.0 まで）
-git clone --depth 1 --branch v2.8.0 https://github.com/awslabs/aidlc-workflows.git
-cd aidlc-workflows
+# 本ノートが対象とする 2.8.1 のソースを照合する場合は SHA を指定する
+# ⚠ v2.8.1 タグは存在しない。v2.8.0 は 0d399dd8 を指し、その後の 2 コミットを含まない
+git clone https://github.com/awslabs/aidlc-workflows.git
+cd aidlc-workflows && git checkout c03f9e28
+
+# リリース済みの版だけを見るならタグで固定してよい
+# git clone --depth 1 --branch v2.8.0 https://github.com/awslabs/aidlc-workflows.git
 
 # 上流の現在を追うなら main（動くブランチなので、本ノートの数値と食い違いうる）
 # git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git
