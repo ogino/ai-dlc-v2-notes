@@ -284,12 +284,15 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 >   # ⚠ .github/ は「AI-DLC 以外のファイルは触らない」だけで、
 >   #    AI-DLC 自身のファイル（.github/hooks/aidlc.json 等）は上書きされる。
 >   #    それらを手編集している場合は先に退避する。
->   [ -d .github ] && cp -R .github .github.bak-$(date +%Y%m%d)
+>   # 退避に失敗したら上書きへ進まないよう && で連結する
+>   if [ -d .github ]; then
+>     cp -R .github ".github.bak-$(date +%Y%m%d-%H%M%S)" || { echo '退避に失敗。中止する' >&2; exit 1; }
+>   fi
 >   cp -R <checkout>/dist/copilot/.github/. .github/   # aidlc- 接頭辞以外の既存ファイルは残る
 >   # ⚠ AGENTS.md は cp しないこと。cp は上書きであってマージではない。
 >   #    既存の AGENTS.md があると、プロジェクト固有の指示が失われる。
 >   if [ -e AGENTS.md ]; then
->     cp AGENTS.md AGENTS.md.bak                      # 退避してから
+>     cp AGENTS.md AGENTS.md.bak || { echo '退避に失敗。中止する' >&2; exit 1; }
 >     diff -u AGENTS.md <checkout>/dist/copilot/AGENTS.md   # 差分を見て手でマージする
 >   else
 >     cp <checkout>/dist/copilot/AGENTS.md AGENTS.md  # 既存が無い場合だけコピーでよい
