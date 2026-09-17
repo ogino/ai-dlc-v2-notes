@@ -3,34 +3,46 @@
 ## 2.1 設計原則: One Core, Many Harnesses
 
 ```
-  手書きソース（編集する）          生成物（手編集禁止・CI でドリフト検出）
-  ─────────────────────          ────────────────────────────────
-  core/          方法論の正本  ──►  dist/claude/
-  harness/<name>/ 薄い表面     ──►  dist/kiro-ide/
-  plugins/       拡張         ──►  dist/kiro/
-  scripts/package.ts ビルド    ──►  dist/codex/
-                                  dist/opencode/
-                                  dist/copilot/   ← 2.5.60 で追加
-                                  dist/cursor/    ← 2.5.63 で追加
+  手書きソース（編集する）        生成物（版管理されない・手編集禁止）
+  ─────────────────────        ──────────────────────────────
+  core/          方法論の正本  ──►  dist/<harness>/         Bun 前提の投影（開発用）
+  harness/<name>/ 薄い表面     ──►  dist-release/<harness>/ ネイティブ aidlc 呼び出し形
+  plugins/       拡張                    │
+  scripts/package.ts ビルド              └─► aidlc-runtime-X.Y.Z.tar.gz の
+                                             runtime/<harness>/ としてリリースへ
+
+  ハーネスは 7 種（claude / codex / copilot / cursor / kiro / kiro-ide / opencode）
 ```
+
+> **⚠ `dist/` は上流リポジトリから消えた（実装版 2.7.2、リリースは v2.8.0 以降）。**
+> `.gitignore` に `/dist/` と `/dist-release/` が入り、両者は
+> **`scripts/package.ts` がローカルで materialize する生成物**になった。
+> 利用者がプロジェクトへ入れるのは、リリース資産経由の `runtime/<harness>/` である
+> （→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
 
 | ゾーン | 役割 |
 |--------|------|
 | **core/** | エンジン・33 ステージ・14 エージェント・スコープ・センサー・知識・hooks |
 | **harness/** | 各 CLI への薄いアダプタ（manifest, settings, orchestrator skill） |
-| **dist/** | ユーザーがプロジェクトへコピーする配布物 |
+| **dist/** / **dist-release/** | ローカル生成物（版管理されない）。前者は Bun 前提の開発用投影、後者はリリース資産の中身 |
 | **docs/** | User Guide / Harness Engineer Guide / Developer Reference |
 | **plugins/** | 任意の追加ステージ等（例: `test-pro`） |
 
 ビルド:
 
 ```bash
-bun scripts/package.ts            # 全 dist 再生成
+bun scripts/package.ts            # 全ハーネスの dist/ と dist-release/ を生成
 bun scripts/package.ts claude     # 1 ハーネスのみ
-bun scripts/package.ts --check    # バイト一致ドリフトガード（CI）
+bun scripts/package.ts --check    # 決定性ガード（CI）
 ```
 
-**ルール**: 方法論の変更は `core/`（と必要なら `harness/`）のみ。`dist/` の手編集は CI 失敗。
+**ルール**: 方法論の変更は `core/`（と必要なら `harness/`）のみ。`dist*` の手編集は禁止。
+
+> **⚠ `--check` の意味が変わった。** 2.7.1 以前は
+> 「コミット済み `dist/` と再生成結果のバイト一致（drift guard）」を見ていたが、
+> `dist/` がコミットされなくなったため、
+> **独立した一時ルートで 2 回ビルドして結果が一致するか（determinism guard）**を見る形になった。
+> 上流の `package.json` の `check` も `package.ts && package.ts --check` の 2 段になっている。
 
 ---
 
@@ -97,18 +109,21 @@ core/
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数（2.7.0 実測）**: `core/tools/*.ts` は **51 本**（2.6.55 時点は 41 本。2.6.123 から不変）。
+**tools 本数（2.8.1 実測）**: `core/tools/*.ts` は **69 本**（2.6.55 時点は 41 本、2.6.123 〜 2.7.0 は 51 本）。
+**2.7.0 → 2.8.1 の +18 本はすべてインストール・配布・更新・設定のライフサイクル系**であり、
+ワークフロー実行系は 1 本も増えていない（→ [17.2](./17-release-impact-2801.md#172-数値の変化--動いたのは-coretools-だけ)）。
 
-**⚠ 51 は「CLI の本数」ではない。** `core/tools/*.ts` はファイル数であって、
-そのうち実際に単体起動できる CLI（`import.meta.main` を持つもの）は **32 本**、
-残る **19 本は他ツールから import されるライブラリモジュール**である。
+**⚠ 69 は「CLI の本数」ではない。** `core/tools/*.ts` はファイル数であって、
+そのうち実際に単体起動できる CLI（`import.meta.main` を持つもの）は **39 本**、
+残る **30 本は他ツールから import されるライブラリモジュール**である。
+2.7.0 時点は 51 本＝ CLI 32 本 + ライブラリ 19 本、
 2.6.55 時点は 41 本＝ CLI 26 本 + ライブラリ 15 本だった。
 
-| | 2.6.55 | 2.6.123 |
-|---|---:|---:|
-| `core/tools/*.ts` ファイル数 | 41 | **51** |
-| うち `import.meta.main` を持つ実際の CLI | 26 | **32** |
-| ライブラリモジュール | 15 | **19** |
+| | 2.6.55 | 2.6.123 / 2.7.0 | 2.8.1 |
+|---|---:|---:|---:|
+| `core/tools/*.ts` ファイル数 | 41 | 51 | **69** |
+| うち `import.meta.main` を持つ実際の CLI | 26 | 32 | **39** |
+| ライブラリモジュール | 15 | 19 | **30** |
 
 本ノート群は 13 章以前でこの数を「CLI tools」と呼んでいるが、
 **正しくは「`core/tools/*.ts` のファイル数」である**（過去章の数値自体は誤っていない）。
@@ -216,18 +231,18 @@ your-project/
 
 | 項目 | 内容 |
 |------|------|
-| ランタイム | **bun**（全ハーネス共通の実行前提） |
+| ランタイム | **ビルド時は bun**（`scripts/package.ts` / テスト）。**配布版の実行には不要**（2.8.x のネイティブ `aidlc` は単一バイナリで Bun / Node.js を要求しない） |
 | 言語 | TypeScript（core tools / hooks / tests） |
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.7.0"`（本ノート整理時点。上流 `main` HEAD `96b11d39` / 取得日 2026-09-01。2.6.123 → 2.7.0 の差分は [16-release-impact-2700.md](./16-release-impact-2700.md)、2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.8.1"`（本ノート整理時点。上流 `main` HEAD `c03f9e28` / 取得日 2026-09-09。**リリース済みは 2.8.0 まで**。2.7.0 → 2.8.1 の差分は [17-release-impact-2801.md](./17-release-impact-2801.md)、2.6.123 → 2.7.0 は [16-release-impact-2700.md](./16-release-impact-2700.md)、2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|
-| Claude Code | 出荷 `settings.json` は Bedrock（region・モデル pin）。AWS 資格情報とモデル有効化が実質必要 |
+| Claude Code | 出荷 `settings.json` は Bedrock（region）。AWS 資格情報とモデル有効化が実質必要。**2.7.2（`12b8d6e0`）でトップレベルのモデル pin（`model: opus[1m]` / `effortLevel: xhigh`）は削除され、セッション設定を継承する。2.7.2 は公開済みの v2.8.0 に含まれるため、2.8.0 を使っていればすでに効いている。ただし `balanced` tier（レビュー専用エージェント 2 体）は今も `sonnet` / `medium` に固定されたままである**（→ [17.6](./17-release-impact-2801.md#176-claude-code-出荷設定からモデル固定と無制限-bash-許可が消えた)） |
 | Codex CLI | 出荷 `config.toml` は Bedrock ブロック。OpenAI 認証等への差し替え余地あり（ガイド参照） |
 | Kiro IDE / CLI | **Kiro サインイン + セッションモデル**が中心。2.5.6 以降エージェントはセッションモデル継承 |
 | opencode | プロジェクト `opencode.json` はセッションモデルを固定しない。**グローバル opencode 設定のプロバイダ** |
 | GitHub Copilot | GitHub Copilot の認証を使用。**folder trust が前提**（`~/.copilot/config.json` の `trustedFolders`）。2.5.60 で追加 |
-| Cursor | Cursor 自身のランタイムに設定したプロバイダ／認証を使用。**出荷ペルソナにモデル pin が無く、セッションモデルを継承**。named model（`--model` やペルソナ pin）は有料プラン必須で、Free は `Auto`。導入だけコピーではなく **インストーラ実行**（`bun dist/cursor/install.ts <project>`）。2.5.63 で追加 |
+| Cursor | Cursor 自身のランタイムに設定したプロバイダ／認証を使用。**出荷ペルソナにモデル pin が無く、セッションモデルを継承**。named model（`--model` やペルソナ pin）は有料プラン必須で、Free は `Auto`。導入は 2.8.x で他ハーネスと同じ `aidlc config --harness cursor` に統一された（2.7.0 までは専用インストーラ実行）。2.5.63 で追加 |
