@@ -109,21 +109,24 @@ core/
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数（2.8.1 実測）**: `core/tools/*.ts` は **69 本**（2.6.55 時点は 41 本、2.6.123 〜 2.7.0 は 51 本）。
+**tools 本数（2.9.0 実測）**: `core/tools/*.ts` は **71 本**（2.6.55 時点は 41 本、2.6.123 〜 2.7.0 は 51 本、2.8.1 は 69 本）。
+**2.8.1 → 2.9.0 の +2 本は `aidlc-attest.ts`（Commit Provenance）と `aidlc-channel.ts`（リリースチャネル）である**（→ [18.12](./18-release-impact-290.md)）。
 **2.7.0 → 2.8.1 の +18 本はすべてインストール・配布・更新・設定のライフサイクル系**であり、
 ワークフロー実行系は 1 本も増えていない（→ [17.2](./17-release-impact-2801.md#172-数値の変化--動いたのは-coretools-だけ)）。
 
 **⚠ 69 は「CLI の本数」ではない。** `core/tools/*.ts` はファイル数であって、
-そのうち実際に単体起動できる CLI（`import.meta.main` を持つもの）は **39 本**、
-残る **30 本は他ツールから import されるライブラリモジュール**である。
+そのうち実際に単体起動できる CLI（`import.meta.main` を持つもの）は **40 本**、
+残る **31 本は他ツールから import されるライブラリモジュール**である
+（2.8.1 時点は CLI 39 + ライブラリ 30。追加された `aidlc-channel.ts` は
+`import.meta.main` を持たない純ライブラリである）。
 2.7.0 時点は 51 本＝ CLI 32 本 + ライブラリ 19 本、
 2.6.55 時点は 41 本＝ CLI 26 本 + ライブラリ 15 本だった。
 
-| | 2.6.55 | 2.6.123 / 2.7.0 | 2.8.1 |
-|---|---:|---:|---:|
-| `core/tools/*.ts` ファイル数 | 41 | 51 | **69** |
-| うち `import.meta.main` を持つ実際の CLI | 26 | 32 | **39** |
-| ライブラリモジュール | 15 | 19 | **30** |
+| | 2.6.55 | 2.6.123 / 2.7.0 | 2.8.1 | 2.9.0 |
+|---|---:|---:|---:|---:|
+| `core/tools/*.ts` ファイル数 | 41 | 51 | 69 | **71** |
+| うち `import.meta.main` を持つ実際の CLI | 26 | 32 | 39 | **40** |
+| ライブラリモジュール | 15 | 19 | 30 | **31** |
 
 本ノート群は 13 章以前でこの数を「CLI tools」と呼んでいるが、
 **正しくは「`core/tools/*.ts` のファイル数」である**（過去章の数値自体は誤っていない）。
@@ -236,7 +239,7 @@ your-project/
 | リント | Biome |
 | モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.8.1"`（本ノート整理時点。上流 `main` HEAD `c03f9e28` / 取得日 2026-09-09。**リリース済みは 2.8.0 まで**。2.7.0 → 2.8.1 の差分は [17-release-impact-2801.md](./17-release-impact-2801.md)、2.6.123 → 2.7.0 は [16-release-impact-2700.md](./16-release-impact-2700.md)、2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.9.0"`（本ノート整理時点。上流 `main` HEAD `2931ef02` / 取得日 2026-09-17。**現 Latest は `v2.9.0`**。2.8.1 → 2.9.0 の差分は [18-release-impact-290.md](./18-release-impact-290.md)、2.7.0 → 2.8.1 は [17-release-impact-2801.md](./17-release-impact-2801.md)、2.6.123 → 2.7.0 は [16-release-impact-2700.md](./16-release-impact-2700.md)、2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|

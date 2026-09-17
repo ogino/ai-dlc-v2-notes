@@ -11,12 +11,31 @@
 > その後 **v2.8.2（09-11）と v2.9.0（09-15、現 Latest）** が公開されている。
 > **Copilot / Cursor を使う場合も、v2.8.1 以降を導入すれば不具合は起きない。**
 > **17 章が案内するソース生成の暫定回避策は不要である。**
-> 上流 `main` は `be94bde7` / 2.9.0 まで進んでおり、**2.8.1 → 2.9.0 の差分は次回区間で扱う。**
+> 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md) で扱う。
+
+> **🔴 v2.9.0 へ更新するときは、プロジェクトごとに `aidlc config --yes` が要る。**
+> CHANGELOG 逐語:
+> ```
+> run `aidlc update`, then run `aidlc config --yes` in each project to refresh its harness runtime.
+> ```
+> 2.8.x までの「何もしなくてよい」とは違う（→ [18.5](./18-release-impact-290.md)）。
+
+> **🔴 現 Latest の v2.9.0 に、ネイティブ導入限定の不具合が 2 件残っている（2026-09-17 時点）。**
+> **`bun` 実行では再現せず、上流 `main` では修正済みだが、タグの付いたリリースには未収録である。**
 >
-> **🔴 v2.8.0 では GitHub Copilot と Cursor のフックが動作しない（2026-09-09 時点の記録）。**
+> | 症状 | 影響 |
+> |---|---|
+> | **ゲートの Review brief が動かない**（#1070） | `loadDelegate` に `review-brief` の分岐が無く `does not export main(argv)` で終わる。**2.8.0 以降の全ネイティブリリースが該当** |
+> | **ゲートのセンサーが発火しない**（#1166） | `aidlc sensor …` が `unknown command 'sensor'` になる。**`blocking` はゲートを拒否し、`advisory` は黙って捨てられる** |
+>
+> **センサーを使う予定があるなら、ネイティブ v2.9.0 では期待どおりに動かない。**
+> 詳細と根拠は [18.6](./18-release-impact-290.md)。
+>
+> **⚠ v2.8.0 に限り、GitHub Copilot と Cursor のフックが動作しない。**
 > Copilot は全イベントでクラッシュ、Cursor は**全ツール呼び出しがブロックされる**。
-> 修正は上流コミット **`52da70ad`** で入ったが**未リリース**（**公開時の版番号は未確定** —— コミット本文は 2.8.2、CHANGELOG は 2.8.1 に統合）。**根拠は同コミットの本文（実機再現はしていない）。**
-> **この 2 ハーネスの導入は現時点で保留するか、ソース生成経路を採ること**（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
+> **修正 `52da70ad` は v2.8.1 に含まれるため、v2.8.1 以降では起きない。**
+> **v2.8.0 を使っている場合のみ、v2.8.1 以降（推奨は現 Latest の v2.9.0）へ更新する。**
+> **根拠は同コミットの本文とタグ包含判定（実機再現はしていない）。**
 > 上流リポジトリから **`dist/` ディレクトリが削除された**。
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）で `aidlc` コマンドを入れ、
 > プロジェクトごとに `aidlc config --harness <name>` を実行する形になった。
@@ -180,8 +199,9 @@ root での実行は拒否される。Homebrew / Nix 管理の既存 `aidlc` が
 Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <startup-file>] [--json|--quiet] [--no-color] [--yes]
 ```
 
-> **⚠ `--version 2.8.1` は現時点で成立しない。** 実装は 2.8.1 だが `v2.8.1` タグは無い。
-> 版を固定するなら `--version 2.8.0`（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
+> **⚠ 版を固定するなら `--version 2.9.0`（現 Latest）を使う。**
+> `v2.8.1` / `v2.8.2` / `v2.9.0` はいずれも実在するタグである
+> （「`v2.8.1` タグは存在しない」という旧記述は 2026-09-09 時点の話で、現在は誤り）。
 
 ### 手動でファイルを置きたい場合
 
@@ -197,18 +217,33 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > チェックアウトから生成する **`dist/<harness>/` は従来どおり Bun 前提の投影**で、
 > ネイティブ `aidlc` を呼ばない。**したがって、この経路には対応するネイティブバイナリが要らない**（代わりに bun が要る）。
 > **これは投影の呼び出し形からの読解であり、本調査では実機で確かめていない。**
-> したがって **Copilot / Cursor のフック不具合を避けるソース生成経路が考えられる**（未検証）——
-> `52da70ad` 以降を checkout し、`bun scripts/package.ts <harness>` で `dist/<harness>/` を生成して使う
-> （**この経路には対応するネイティブバイナリは要らない。bun が要る。**）。
+> **📌 かつてここに「Copilot / Cursor のフック不具合を避けるソース生成経路」を記していたが、
+> その回避策はもう不要である。** 不具合は `52da70ad` で修正され、**v2.8.1 以降に含まれる**。
+> **素直に v2.8.1 以降（推奨は現 Latest の v2.9.0）を導入すればよい。**
 
-ネイティブ `aidlc` を導入したうえで、**導入したバイナリと同じ版**のリリース資産
-`aidlc-runtime-X.Y.Z.tar.gz` を展開し、**`runtime/<harness>/`** をプロジェクトへコピーする。
+ネイティブ `aidlc` を導入したうえで、**導入したバイナリと同じ版**のリリース資産を展開し、
+**`runtime/<harness>/`** をプロジェクトへコピーする。
 これがプロジェクト内ファイルを手で管理する場合の正規経路である。
+
+> **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
+>
+> | 版 | ネイティブ用 | **手動コピー用** |
+> |---|---|---|
+> | v2.8.x | `aidlc-runtime-X.Y.Z.tar.gz` | 同じもの |
+> | **v2.9.0 以降** | `aidlc-runtime-X.Y.Z.tar.gz` | **`aidlc-copy-runtime-X.Y.Z.tar.gz`** |
+>
+> **v2.9.0 で `aidlc-runtime-2.9.0.tar.gz` を取っても手動コピー用ではない。**
+> CHANGELOG 逐語:
+> ```
+> Manual-copy users must replace the complete `runtime/<harness>/` tree from
+> `aidlc-copy-runtime-2.9.0.tar.gz`.
+> ```
+> （→ [18.4](./18-release-impact-290.md)）
 
 > **⚠ バイナリとアーカイブの版を揃えること。** 上流は 「Install the **matching** native `aidlc` command」と書いている。
 > 前節の `releases/latest` インストーラで入れたバイナリと、別リリースのアーカイブを組み合わせると版がずれる。
-> **版を固定するなら両方に同じ `X.Y.Z` を指定する**（`install.sh --version 2.8.0` と
-> `aidlc-runtime-2.8.0.tar.gz`）。**`v2.8.1` は未公開なので選べない。**
+> **版を固定するなら両方に同じ `X.Y.Z` を指定する**（`install.sh --version 2.9.0` と
+> **`aidlc-copy-runtime-2.9.0.tar.gz`**）。
 > 導入済みの版は `aidlc version` で確認できる。
 
 **チェックアウトから `bun scripts/package.ts <harness>` で `dist/<harness>/` を生成することも今も可能**だが、
@@ -252,10 +287,8 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 最後に `Apply? [Y/n]` のゲートがあり、**それより前にはファイルを 1 つも書かない**。
 
 > **⚠ このゲートで Enter を押すとキャンセル扱いになる不具合がある。**
-> **実装版 2.8.1**（`c03f9e28`）で修正されたが、**それを含むリリースはまだ無い**。
-> なお**公開時にどの版番号が付くかは未確定**である（後続の `52da70ad` はコミット本文で 2.8.2 を名乗り、
-> CHANGELOG は 2.8.1 に統合している）。**修正の有無はタグ名ではなくコミットの包含で判定すること。**
-> 2.8.0 を使う間は、既定を受け入れる場合も明示的に `y` を入力すること。
+> **`c03f9e28` で修正され、リリース版 `v2.8.1` 以降に含まれる（解消済み）。**
+> **v2.8.0 を使い続ける場合のみ**、既定を受け入れるときも明示的に `y` を入力すること。
 
 セクションを指定してピンポイントに設定することもできる:
 `aidlc config models` / `runtime` / `providers` / `trust` / `flags` / `project`。
@@ -356,13 +389,10 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > **⚠ ただし同じ失敗様式が v2.8.0 で再発している**（ネイティブ化でアダプタ経路が外れたため。→ 下記の表と 17.3）。
 > **したがって「2.5.69 以降なら安全」ではない。**
 > - **2.5.63〜2.5.68 に当たっている場合**: エンジンを **2.5.69 以上 2.7.x 以下**へ更新して再導入する。
-> - **v2.8.0 に当たっている場合**: **更新では直らない**。修正は **`52da70ad`** で入ったが**未リリース**（公開時の版番号は未確定）。
->   **`52da70ad` を含むリリース**の公開を待つ（**版番号は未確定**。`git fetch origin --tags` してから
->   `git merge-base --is-ancestor 52da70ad <tag>` で判定する。**`ls-remote` だけではタグを取得できない**）か、
->   **ソース生成による暫定回避**を採る（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
->   手順は `git checkout 52da70ad` → `bun install --frozen-lockfile` →
->   `bun scripts/package.ts cursor` → `bun dist/cursor/install.ts <project>`。
->   **上流非推奨の経路であり、本調査では検証していない。**
+> - **v2.8.0 に当たっている場合**: **v2.8.1 以降へ更新すれば直る**（推奨は現 Latest の v2.9.0）。
+>   修正 `52da70ad` は **v2.8.1 に含まれる**（`git fetch origin --tags` してから
+>   `git merge-base --is-ancestor 52da70ad v2.8.1` で確認済み）。
+>   **かつてここに記していたソース生成による暫定回避は、もう不要である。**
 > 切り分けは [6.6 のトラブルシュート表](#66-トラブルシュート頻出)を参照。
 
 #### opencode
@@ -665,8 +695,8 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 | Kiro CLI で `/aidlc --status` 等が無反応（silent no-op） | 2.6.46 の verb interceptor 修正。エンジンを更新して `aidlc config --harness kiro` を再実行（**Kiro CLI のみの修正**） |
 | Kiro: プラグインの compose がアップグレード後に走らない | 2.6.47。projection を再ビルド／再コピーし、**CLI は** `aidlc plugin sync` か `hooks/compose.ts` を明示実行（**IDE は不要**）。§6.4 |
 | Kiro IDE hooks 無反応 | v2 schema hooks の正しい中身コピー（2.5.10） |
-| GitHub Copilot でフックが全イベントでクラッシュする（`undefined is not an object (evaluating 'input.length')`） | **v2.8.0 の既知不具合**（ネイティブ化で Copilot アダプタが引数 1 個のフック経路に落ち、対象が捨てられる）。**更新では直らない。修正は `52da70ad` で入ったが未リリース**（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)） |
-| Cursor IDE で全ツール呼び出しがブロックされる | **原因が 2 つある。どちらかを切り分けること。**<br>**(a) 2.5.63〜2.5.68 の既知不具合**（allow JSON 未出力 × `failClosed`）→ **2.5.69 以上 2.7.x 以下**へ更新して再導入。<br>**(b) v2.8.0 の再発**（ネイティブ化で Cursor アダプタが引数 1 個のフック経路に落ちた。→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）→ **更新では直らない。修正は `52da70ad` で入ったが未リリース**。`v2.8.1` の公開を待つか、ソースから生成する経路を採る |
+| GitHub Copilot でフックが全イベントでクラッシュする（`undefined is not an object (evaluating 'input.length')`） | **v2.8.0 の既知不具合**（ネイティブ化で Copilot アダプタが引数 1 個のフック経路に落ち、対象が捨てられる）。**v2.8.1 以降へ更新すれば直る**（修正 `52da70ad` は v2.8.1 に含まれる。→ [18 章](./18-release-impact-290.md)） |
+| Cursor IDE で全ツール呼び出しがブロックされる | **原因が 2 つある。どちらかを切り分けること。**<br>**(a) 2.5.63〜2.5.68 の既知不具合**（allow JSON 未出力 × `failClosed`）→ **2.5.69 以上 2.7.x 以下**へ更新して再導入。<br>**(b) v2.8.0 の再発**（ネイティブ化で Cursor アダプタが引数 1 個のフック経路に落ちた。→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）→ **v2.8.1 以降へ更新すれば直る**（修正 `52da70ad` は v2.8.1 に含まれる。推奨は現 Latest の v2.9.0） |
 | 学習 persist が `selections-json is malformed: missing or non-string space` で落ちる | 2.6.36 の非互換。該当ステージの **`surface` を再実行**して selections を作り直す（`persist` のリトライでは直らない）。§6.4 |
 
 ### GitHub Copilot: アップグレード後は進行中ワークフローを新しい会話で継続する（2.6.12）
@@ -703,13 +733,13 @@ aidlc version
 ソースを直接見る場合:
 
 ```bash
-# 本ノートが対象とする 2.8.1 のソースを照合する場合は SHA を指定する
-# ⚠ v2.8.1 タグは存在しない。v2.8.0 は 0d399dd8 を指し、その後の 2 コミットを含まない
+# 17 章が対象とする 2.8.1 のソースを照合する場合は SHA を指定する
+# ⚠ c03f9e28 はリリース版 v2.8.1（= 215afe1a）ではない。タグは 5 コミット後を指す
 git clone https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows && git checkout c03f9e28
 
-# リリース済みの版だけを見るならタグで固定してよい
-# git clone --depth 1 --branch v2.8.0 https://github.com/awslabs/aidlc-workflows.git
+# リリース済みの版を見るならタグで固定する（現 Latest は v2.9.0）
+# git clone --depth 1 --branch v2.9.0 https://github.com/awslabs/aidlc-workflows.git
 
 # 上流の現在を追うなら main（動くブランチなので、本ノートの数値と食い違いうる）
 # git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git

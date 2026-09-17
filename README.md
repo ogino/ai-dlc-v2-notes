@@ -7,8 +7,8 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-09-09  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **`main` ブランチ**（実装バージョン **2.8.1**。上流 HEAD `c03f9e28` / 取得日 2026-09-09）
+最終同期日: 2026-09-17  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **`main` ブランチ**（実装バージョン **2.9.0**。上流 HEAD `2931ef02` / 取得日 2026-09-17）
 
 > **⚠ 上流の `dist/` ディレクトリは 2026-09-08 に削除された。**
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）と `aidlc config` に変わった。
@@ -20,15 +20,36 @@
 > その後 **v2.8.2（09-11）と v2.9.0（09-15、現 Latest）** が公開されている。
 > **Copilot / Cursor を使う場合も、v2.8.1 以降を導入すれば不具合は起きない。**
 > **17 章が案内するソース生成の暫定回避策は不要である。**
-> 上流 `main` は `be94bde7` / 2.9.0 まで進んでおり、**2.8.1 → 2.9.0 の差分は次回区間で扱う。**
+> 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md) で扱う。
+
+> **⚠ 版を固定するなら `v2.9.0`（現 Latest）を使う。**
+> **`v2.8.1` / `v2.8.2` / `v2.9.0` はいずれも実在するタグである**
+> （旧記述の「`v2.8.1` タグは存在しない」は 2026-09-09 時点の話で、現在は誤り）。
 >
-> **⚠ 実装バージョンは 2.8.1 だが、リリースされているのは 2.8.0 までである（2026-09-09 時点）。**
-> `v2.8.1` タグは存在しない。版を固定するなら `v2.8.0` か SHA `c03f9e28` を使うこと。
+> **⚠ 17 章の基準 `c03f9e28` は、リリース版 `v2.8.1`（＝ `215afe1a`）ではない。**
+> どちらも `AIDLC_VERSION` は `2.8.1` だが、タグは 5 コミット後を指す。
+> ソースを照合する目的なら SHA を、導入するならタグを使うこと（→ [18.1](./18-release-impact-290.md)）。
+
+> **🔴 現 Latest の v2.9.0 に、ネイティブ導入限定の不具合が 2 件残っている（2026-09-17 時点）。**
+> **`bun` 実行では再現せず、`main` では修正済みだが、タグの付いたリリースには未収録である。**
+> - **ゲートの Review brief が動かない**（#1070）—— 2.8.0 以降の全ネイティブリリースが該当
+> - **ゲートのセンサーが発火しない**（#1166）—— `blocking` はゲートを拒否し、`advisory` は黙って捨てられる
 >
-> **🔴 その v2.8.0 では GitHub Copilot と Cursor のフックが動作しない**（Copilot はクラッシュ、
-> Cursor は**全ツール呼び出しがブロックされる**）。修正は **`52da70ad`** で入ったが**未リリース**（公開時の版番号は未確定。タグが付くまでは SHA で指すこと）。
-> **根拠は上流コミット `52da70ad` の本文と CHANGELOG。実機再現はしていない。**
-> 詳細と回避策は [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)。
+> **社内でセンサーを使う予定があるなら、ネイティブ v2.9.0 では期待どおりに動かない。**
+> 詳細は [18.6](./18-release-impact-290.md)。
+
+> **🔴 2.9.0 への更新は全プロジェクトで作業が要る。** `aidlc update` の後、
+> **プロジェクトごとに `aidlc config --yes`** を実行する。
+> **手動コピー運用なら、取得するアセットは `aidlc-copy-runtime-2.9.0.tar.gz` である**
+> （`aidlc-runtime-2.9.0.tar.gz` とは別物。→ [18.4](./18-release-impact-290.md)）。
+
+> **🔴 既存ワークフローは Change Control が暗黙に `strict` になる。**
+> `Change Control` 行を持たない既存の `aidlc-state.md` は、スコープ既定ではなく **`strict`** として扱われる。
+> **doctor にも診断にも該当する finding が無く、気付く手段が用意されていない。**
+> 既存 intent には一度 `/aidlc --change-control <strict|relaxed>` を実行して意図を固定すること（→ [18.3.1](./18-release-impact-290.md)）。
+
+> **🔴 既定スコープ `classic` が 26 → 18 ステージに縮小した（v2.9.0、破壊的）。**
+> スコープ名を指定しない利用者に効く。旧 classic の形が要るなら **`workshop`** を使う（→ [18.2](./18-release-impact-290.md)）。
 >
 > **⚠ 上流の `v2` ブランチは 2026-09-01 に削除された。**`main` が 2.x の正本である（旧 1.x は新設の `v1` ブランチへ移動）。
 > 経緯と影響は [16-release-impact-2700.md](./16-release-impact-2700.md) を参照。
@@ -80,7 +101,8 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [14-release-impact-2655.md](./14-release-impact-2655.md) | 2.6.49 → 2.6.55 のリリース差分。**中核メトリクスは全項目不変**で、変わったのは実行時のガード・継続トークン・監査の発火条件 |
 | [15-release-impact-26123.md](./15-release-impact-26123.md) | 2.6.55 → 2.6.123 のリリース差分。**フック 17→18 / `core/tools/*.ts` 41→51 / 監査 86→91 / `bugfix` 7→9・`refactor` 8→10**、プラグイン作成ツールチェーン、Bolt 用語の再定義 |
 | [16-release-impact-2700.md](./16-release-impact-2700.md) | 2.6.123 → 2.7.0 のリリース差分。**中核メトリクスは全項目不変**。上流の `v2` ブランチ削除と `main` への一本化、2.6.124 の状態ファイル相対パス化、**2.7.0 の CHANGELOG がロールアップ再掲である**こと |
-| [17-release-impact-2801.md](./17-release-impact-2801.md) | 2.7.0 → 2.8.1 のリリース差分。**上流から `dist/` が消えネイティブ配布へ**、`aidlc` CLI と設定階層の新設、ガードレール 9 種の設定ファイル記録、2.7.1 の Plan Approval デッドロック修正、**2.8.1 は未リリース**であること |
+| [17-release-impact-2801.md](./17-release-impact-2801.md) | 2.7.0 → 2.8.1 のリリース差分。**上流から `dist/` が消えネイティブ配布へ**、`aidlc` CLI と設定階層の新設、ガードレール 9 種の設定ファイル記録、2.7.1 の Plan Approval デッドロック修正、**測定時点で 2.8.1 が未リリースだった**こと（→ 18 章で解消） |
+| [18-release-impact-290.md](./18-release-impact-290.md) | 2.8.1 → 2.9.0 のリリース差分。**既定スコープ `classic` が 26 → 18**（破壊的）、**Change Control** の新設と既存レコードが暗黙に `strict` になる件、**手動コピー用アセットの分離**、監査イベント 91 → 99、**現 Latest に残るネイティブ限定の不具合 2 件** |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
 ### メンテナ向け（作業記録）
@@ -102,13 +124,14 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | エージェント | 14（ドメイン 11 + レビュア 2 + Composer 1） |
 | スコープ | 11 + 自動検出 + カスタム compose |
 | 深度 / テスト戦略 | 各 3 段階（独立） |
-| 監査イベント種別 | **91**（22 分類）※ |
+| 監査イベント種別 | **99**（2.8.1 は 91）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
-| 実装バージョン | **2.8.1**（上流 `main` HEAD `c03f9e28`。取得日 2026-09-09）※リリース済みは 2.8.0 まで |
+| 実装バージョン | **2.9.0**（上流 `main` HEAD `2931ef02`。取得日 2026-09-17）※現 Latest は `v2.9.0` |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 
-※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準（22）。`docs/reference/12-state-machine.md` 基準では 19 分類（イベント種別の集合自体は両出典で同一）。
+※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準で **25**（2.8.1 は 22。追加は Change Control / Ceremony / Commit Provenance の 3 分類。形式見出し 3 本は分類に数えない）。
+※ **`Interaction Events` は見出しが宣言する件数と表の行数が 1 件ずれている**（2.8.1: 宣言 10 / 行 9、2.9.0: 宣言 11 / 行 10）。上流の既知の齟齬で、本区間でも解消していない。
 
 ---
 
@@ -148,11 +171,11 @@ aidlc doctor
 > ```
 
 **本ノートの数値を再現・照合する場合**は、上流リポジトリを clone してソースを直接測る。
-版を固定するなら `v2.8.0`（**`v2.8.1` タグは存在しない**）か SHA を使う。
+版を固定するなら **`v2.9.0`**（現 Latest）か SHA を使う。
 
 ```bash
 git clone --branch main https://github.com/awslabs/aidlc-workflows.git   # 最新を追う場合
-# git clone --branch v2.8.0 https://github.com/awslabs/aidlc-workflows.git  # 版を固定する場合
+# git clone --branch v2.9.0 https://github.com/awslabs/aidlc-workflows.git  # 版を固定する場合
 cd aidlc-workflows
 ```
 
