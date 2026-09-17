@@ -70,7 +70,7 @@ v2.9.0（`1b064585` / #1151、`feat!:`）で **暗黙の既定スコープ `clas
 | ステージ数 | 26/33 | **18/33** |
 | `skeleton` | `on` | **`off`** |
 | `summary_confirmation` | （キー無し） | **`off`** |
-| `change_control` | （キー無し） | `relaxed` |
+| `change_control` | （キー無し。**ただしリリース版 `v2.8.1` では既に `relaxed`**） | `relaxed` |
 
 外れた 8 本は **CI Pipeline 1 本と Operation 全 7 本**である。
 `scopes:` から `- classic` が消えたのはちょうどこの 8 ファイルで、

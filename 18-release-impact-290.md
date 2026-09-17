@@ -78,7 +78,7 @@ v2.8.1 を導入した時点で、これらはすでに効いている。
 |---|---|---|
 | grid に入るステージ数 | **26 / 33** | **18 / 33** |
 | `skeleton` | `on` | **`off`** |
-| `change_control` | （キー自体が無い） | `relaxed` |
+| `change_control` | （`c03f9e28` にはキーが無い。**タグ `v2.8.1` では既に `relaxed`** → 18.3） | `relaxed` |
 | `sensors` / `learnings` | （無し） | `on` / `on` |
 | `summary_confirmation` | （無し） | **`off`** |
 
@@ -178,7 +178,12 @@ const stateValue = intent?.value ?? "strict";            // ← 既定は scope 
 /aidlc --change-control strict     # または relaxed
 ```
 
-これが state 行と `CHANGE_CONTROL_SET` 監査行の**両方を書く唯一の経路**である。
+これで state 行と `CHANGE_CONTROL_SET` 監査行の両方が書かれる。
+**「唯一の経路」ではない** —— `scope-change` も同じ処理を通り、
+governed checkpoint が memory 編集による実効値の変化を観測したときにも記録される。
+**ただし、行が無いレコードにスコープ既定が自動で入ることはない**
+（自動補完は直前の値のソースが `scope ` で始まるときだけ働く）。
+**明示的に固定するなら `config-change`（= `/aidlc --change-control`）が実用上の経路である。**
 
 なお ceremony 3 種（`sensors` / `learnings` / `summary_confirmation`）は**安全**で、
 行が無ければスコープ既定にフォールバックする。同じ挙動ではない点に注意。
@@ -305,7 +310,7 @@ Testing Contract のハッシュ）／**place**（target, intent）／**attempt*
 
 ## 18.8 監査イベントが 91 → 99 になった — ガードレール評価への影響
 
-追加 **8 件**、削除 **0 件**。うち 3 件が統制上の意味を持つ。
+追加 **8 件**、削除 **0 件**。うち 4 件が統制上の意味を持つ。
 
 | イベント | 初出リリース | 意味 |
 |---|---|---|
@@ -409,13 +414,15 @@ Event Registry 見出し基準。末尾の形式見出し 3 本は分類に数�
 ## 18.11 レビュー記録の所在が変わった — 次期 minor で旧形式は廃止
 
 **⚠ 初出リリースは v2.9.0 ではなく v2.8.1 である**（`d7521b19` / #1000）。
-**v2.9.0（`1b064585` / #1151）がやったのは記録の置き場所の移設だけ**である
-（`<record>/.aidlc-reviews/` → `<record>/.aidlc-engine/reviews/`）。
+**v2.9.0（`1b064585` / #1151）がやったのは 2 点** —— 記録の置き場所の移設
+（`<record>/.aidlc-reviews/` → `<record>/.aidlc-engine/reviews/`）と、
+**人間向け Markdown コピーの新設**である。
 
 | | 初出リリース |
 |---|---|
 | レビュー記録方式（record-is-the-review）と `## Review` の廃止予告 | **v2.8.1**（#1000） |
 | 記録の `.aidlc-engine/reviews/` への移設 | **v2.9.0**（#1151） |
+| **人間向けコピー `<stage dir>/reviews/review-NN.md` の新設** | **v2.9.0**（#1151） |
 
 **v2.8.1 を導入していれば、ハーネスへの影響と廃止期限はすでに発生している。**
 
@@ -431,7 +438,7 @@ Event Registry 見出し基準。末尾の形式見出し 3 本は分類に数�
 > **The record is the review**; only this command writes one, and a record edited afterwards
 > stops being the review because its digest no longer matches.
 
-人間向けのコピーは `<stage dir>/reviews/review-NN.md` に出るが、
+**人間向けのコピー（v2.9.0 で新設）**は `<stage dir>/reviews/review-NN.md` に出るが、
 「the copy is not an artifact, nothing reads it back」である。
 
 ### ⚠ 廃止予告（逐語）
@@ -493,7 +500,9 @@ Event Registry 見出し基準。末尾の形式見出し 3 本は分類に数�
 > **⚠ 出荷物に同梱される「compiled scope grid」表とは一部が食い違う。**
 > `harness/<name>/skills/aidlc/SKILL.md` の自動生成表は `EXECUTE / Total` を数えており、
 > **`bugfix` を 7 / 33、`refactor` を 8 / 33** と書く（frontmatter 所属数はそれぞれ 9・10）。
-> 差の 2 はデプロイ段（5.1.1 で 2.6.70 に加わった分）で、グリッドには入るが既定では EXECUTE しない。
+> **差の原因は特定できていない。** 当初「デプロイ段はグリッドに入るが EXECUTE しない」と説明したが、
+> **`security-patch` は同じデプロイ 2 本を持ちながら出荷表でも 10 / 33 で所属数と一致する**ため、
+> その説明では `bugfix` / `refactor` だけがずれる理由にならない。
 > **この食い違いは本区間で生じたものではなく、2.8.1 でも同じである。**
 > 本区間で動いたのは `classic` だけで、**どちらの数え方でも 26 → 18** で一致する。
 > どちらが「正」かは本章では判定しない（→ 18.19）。
@@ -624,6 +633,7 @@ roadmap の更新コミット `d0c3094f`（#1144）は HEAD の 1 つ手前だ�
 | [17 章](./17-release-impact-2801.md) | 基準 `c03f9e28` はリリース版 v2.8.1 ではない（18.1）。続報ブロックの数値を訂正（18.18） |
 | [2 章](./02-architecture.md) | `core/tools/*.ts` が 69 → 71、CLI 39 → 40 |
 | [4 章](./04-agents.md) / [5 章](./05-scopes-depth-test.md) | エージェント 14・スコープ 11 は不変。**ただし `classic` のステージ数が 26 → 18** |
+| [7 章](./07-learning-loop-state.md) | 監査イベントが 91 種・22 分類 → **99 種・25 分類** |
 | [8 章](./08-v1-vs-v2.md) | 「動いたのは `core/tools` だけ」は**前区間までの話**。本区間は体系そのものが動いた |
 
 ---
@@ -649,12 +659,12 @@ git diff --name-only c03f9e28..be94bde7   → 473
 | 誤り | 実際 |
 |---|---|
 | `classic` から「Ideation が無くなった」 | **Ideation は 2.6.18 以来ずっと対象外。** 本区間で外れたのは CI Pipeline 1 本と Operation 7 本 |
-| レビュー記録の分離と `## Review` 廃止予告は 2.9.0 | **v2.8.1 で出荷済み**（#1000）。2.9.0 は置き場所の移設のみ、しかも #1160 ではなく **#1151** |
+| レビュー記録の分離と `## Review` 廃止予告は 2.9.0 | **v2.8.1 で出荷済み**（#1000）。2.9.0 は**移設と人間向けコピーの新設**で、しかも #1160 ではなく **#1151** |
 | `GUARD_DISABLED` / `PLAN_APPROVAL_OVERRIDDEN` は 2.9.0 の追加 | **どちらも v2.8.1**（#1000）。追加 8 件のうち統制に効く 4 件はすべて v2.8.1 側 |
 | 「2.8.1 は監査 91 種・22 分類」 | それは基準 `c03f9e28` の値。**タグ `v2.8.1` は 95 種・23 分類** |
 | 「`Interaction Events` は 2.8.1 が宣言 10 / 行 9」 | それも `c03f9e28` の値。**タグ `v2.8.1` 以降は一貫して 11 / 10** |
 | 期間 10 日（09-08 〜 09-17） | 区間内の最古コミットは **09-09**。09-08 は基準コミット自身の日付。**9 日** |
-| `/aidlc --change-control` が監査行を書く「唯一の経路」 | **3 つある**（`config-change` / `scope-change` / memory 編集の観測）。ただし行が無いレコードには `config-change` しか効かない |
+| `/aidlc --change-control` が監査行を書く「唯一の経路」 | **3 つある**（`config-change` / `scope-change` / memory 編集の観測）。ただし**行が無いレコードにスコープ既定が自動で入ることはない** |
 
 **教訓: 18.1 で「基準 `c03f9e28` はリリース版 v2.8.1 ではない」と自ら警告しながら、
 本章の別の箇所で同じ取り違えを 4 回作った。**
@@ -675,5 +685,7 @@ git diff --name-only c03f9e28..be94bde7   → 473
   既存の `aidlc-state.md` を用意して再現させてはいない
 - `docs/` の 20 行未満の変更 31 件は個別に読んでいない
 - **`bugfix` / `refactor` の frontmatter 所属数（9 / 10）と出荷表の EXECUTE 数（7 / 8）の
-  食い違いを解消していない。** 上流に照会もしていない。本区間で生じた差ではないため本章では
-  そのまま記録した（→ 18.12）
+  食い違いは、原因を特定できていない。**
+  「デプロイ段が EXECUTE しないため」という説明は成り立たない ——
+  **`security-patch` は同じデプロイ 2 本を持ちながら出荷表でも 10 / 33 で一致する。**
+  上流にも照会していない。本区間で生じた差ではないため、そのまま記録した（→ 18.12）
