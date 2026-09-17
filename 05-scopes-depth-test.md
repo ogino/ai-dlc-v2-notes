@@ -65,12 +65,13 @@ Environment Provisioning と残りの Operation は引き続き SKIP である�
 
 v2.9.0（`1b064585` / #1151、`feat!:`）で **暗黙の既定スコープ `classic` が 8 ステージ縮んだ。**
 
-| | 2.8.1 | 2.9.0 |
+| | タグ `v2.8.1` | **v2.9.0** |
 |---|---:|---:|
 | ステージ数 | 26/33 | **18/33** |
 | `skeleton` | `on` | **`off`** |
+| `sensors` / `learnings` | （キー無し） | **`on` / `on`** |
 | `summary_confirmation` | （キー無し） | **`off`** |
-| `change_control` | （キー無し。**ただしリリース版 `v2.8.1` では既に `relaxed`**） | `relaxed` |
+| `change_control` | `relaxed` | `relaxed`（**変化なし**） |
 
 外れた 8 本は **CI Pipeline 1 本と Operation 全 7 本**である。
 `scopes:` から `- classic` が消えたのはちょうどこの 8 ファイルで、

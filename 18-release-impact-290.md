@@ -74,13 +74,18 @@ v2.8.1 を導入した時点で、これらはすでに効いている。
 
 ### 何が変わったか
 
-| | 2.8.1 | 2.9.0 |
+**リリース間の比較**（`core/scopes/aidlc-classic.md` の frontmatter 実測）:
+
+| | タグ `v2.8.1` | **v2.9.0** |
 |---|---|---|
-| grid に入るステージ数 | **26 / 33** | **18 / 33** |
+| grid に入るステージ数 | 26 / 33 | **18 / 33** |
 | `skeleton` | `on` | **`off`** |
-| `change_control` | （`c03f9e28` にはキーが無い。**タグ `v2.8.1` では既に `relaxed`** → 18.3） | `relaxed` |
-| `sensors` / `learnings` | （無し） | `on` / `on` |
-| `summary_confirmation` | （無し） | **`off`** |
+| `sensors` / `learnings` | （キー無し） | **`on` / `on`** |
+| `summary_confirmation` | （キー無し） | **`off`** |
+| `change_control` | `relaxed` | `relaxed`（**変化なし**） |
+
+> **⚠ `change_control` は v2.9.0 の変化ではない。** タグ `v2.8.1` で既に `relaxed` である
+> （キーが無いのは本章の基準 `c03f9e28` だけ。→ 18.3）。
 
 外れた 8 ステージは **CI Pipeline 1 つと Operation 全 7 つ**である
 （`construction/ci-pipeline.md`、`operation/` の `deployment-execution` /
