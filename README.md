@@ -124,13 +124,13 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | エージェント | 14（ドメイン 11 + レビュア 2 + Composer 1） |
 | スコープ | 11 + 自動検出 + カスタム compose |
 | 深度 / テスト戦略 | 各 3 段階（独立） |
-| 監査イベント種別 | **99**（2.8.1 は 91）※ |
+| 監査イベント種別 | **99**（基準 `c03f9e28` は 91、タグ `v2.8.1` は 95）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
 | 実装バージョン | **2.9.0**（上流 `main` HEAD `2931ef02`。取得日 2026-09-17）※現 Latest は `v2.9.0` |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 
-※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準で **25**（2.8.1 は 22。追加は Change Control / Ceremony / Commit Provenance の 3 分類。形式見出し 3 本は分類に数えない）。
+※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準で **25**（形式見出し 3 本は分類に数えない）。**基準 `c03f9e28` は 22、タグ `v2.8.1` は 23**（Change Control が加わった）、**2.9.0 で 25**（Ceremony と Commit Provenance が加わった）。
 ※ **`Interaction Events` は見出しが宣言する件数と表の行数が 1 件ずれている**（基準 `c03f9e28`: 宣言 10 / 行 9、**タグ `v2.8.1` 以降は一貫して宣言 11 / 行 10**）。上流の既知の齟齬で、本区間でも解消していない。
 
 ---

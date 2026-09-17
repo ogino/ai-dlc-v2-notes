@@ -157,7 +157,7 @@
 - [ ] **`bugfix` / `refactor` の frontmatter 所属数（9 / 10）と出荷表の EXECUTE 数（7 / 8）の食い違い** —
       本区間で生じた差ではなく、2.8.1 でも同じ。上流へ照会していない（→ [18.12](../18-release-impact-290.md)）
 - [ ] **`audit-format.md` の宣言件数と表行数の不一致（継続）** —
-      `Interaction Events` は 2.8.1 が「宣言 10 / 行 9」、2.9.0 が「宣言 11 / 行 10」
+      `Interaction Events` は基準 `c03f9e28` が「宣言 10 / 行 9」、**タグ `v2.8.1` 以降（2.9.0 含む）は一貫して「宣言 11 / 行 10」**
 - [ ] **上流内に残る `dist/` 前提の記述** — `core/tools/aidlc-init.ts:6523,6531` と
       `docs/guide/12-cli-commands.md:1128` が旧手順を指示している。上流の同期漏れか意図的かは不明
 - [ ] **上流内のインストール手順の不一致** — `README.md:20` は `curl | sh`、

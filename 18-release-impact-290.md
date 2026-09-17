@@ -307,14 +307,21 @@ Testing Contract のハッシュ）／**place**（target, intent）／**attempt*
 
 追加 **8 件**、削除 **0 件**。うち 3 件が統制上の意味を持つ。
 
-| イベント | 意味 |
-|---|---|
-| **`GUARD_DISABLED`** | **Plan Approval ガードの無効化スイッチが立った状態でツール呼び出しが通った**ことを記録する。1 ストリークにつき 1 行 |
-| **`PLAN_APPROVAL_OVERRIDDEN`** | 人間による break-glass（18.9） |
-| **`SOURCE_COMMITTED`** | コミットの変更パスをレビュー済み Unit に帰属させた記録（18.10） |
+| イベント | 初出リリース | 意味 |
+|---|---|---|
+| **`GUARD_DISABLED`** | **v2.8.1**（#1000） | **Plan Approval ガードの無効化スイッチが立った状態でツール呼び出しが通った**ことを記録する。1 ストリークにつき 1 行 |
+| **`PLAN_APPROVAL_OVERRIDDEN`** | **v2.8.1**（#1000） | 人間による break-glass |
+| `CHANGE_CONTROL_SET` / `CHANGE_ACCEPTED` | **v2.8.1**（#1000） | Change Control の設定変更と、変更を受理した記録 |
+| **`SOURCE_COMMITTED`** | **v2.9.0**（#1052） | コミットの変更パスをレビュー済み Unit に帰属させた記録 |
+| `CEREMONY_SET` | **v2.9.0**（#1151） | ceremony スイッチの設定変更 |
+| `WORKFLOW_ARCHIVED` / `WORKFLOW_UNARCHIVED` | **v2.9.0**（#1033） | intent の archive / unarchive |
 
-残り 5 件は `CEREMONY_SET` / `CHANGE_CONTROL_SET` / `CHANGE_ACCEPTED` /
-`WORKFLOW_ARCHIVED` / `WORKFLOW_UNARCHIVED`。
+**⚠ 統制上の意味を持つ 4 件（`GUARD_DISABLED` / `PLAN_APPROVAL_OVERRIDDEN` /
+`CHANGE_CONTROL_SET` / `CHANGE_ACCEPTED`）は、すべて #1000 由来で v2.8.1 に含まれる。**
+**2.9.0 で新しく増えたのは残り 4 件だけである。**
+リリース版 `v2.8.1` 時点で既に 95 種・23 分類であり、
+「91 → 99」は本章の基準 `c03f9e28` から終点までの差である。
+
 
 **分類（カテゴリ）も 22 → 25 に増えた**（`Change Control Events` / `Ceremony Events` /
 `Commit Provenance` の 3 分類。`core/knowledge/aidlc-shared/audit-format.md` の
@@ -330,6 +337,9 @@ Event Registry 見出し基準。末尾の形式見出し 3 本は分類に数�
 `GUARD_DISABLED` により、**無効化したまま通った事実が監査に残る**ようになった。
 
 **注意側**: 同時に **`PLAN_APPROVAL_OVERRIDDEN` という明示的な迂回経路が用意された**（18.9）。
+
+**ただしこの 2 つはどちらも v2.8.1 で出荷済みである。**
+**v2.8.1 を導入していれば、評価の前提はすでに変わっている。**
 
 なお `RECORDABLE_PROJECT_BYPASSES`（設定ファイルに記録できるバイパス）は **9 → 12** に増えた
 （`AIDLC_DISABLE_SENSORS` / `AIDLC_DISABLE_LEARNINGS` / `AIDLC_DISABLE_SUMMARY_CONFIRMATION`）。
