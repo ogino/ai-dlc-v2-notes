@@ -238,7 +238,7 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 > **したがって本章が案内するソース生成の暫定回避策は、もはや不要である。**
 > **Copilot / Cursor を使うなら、v2.8.1 以降（推奨は Latest の v2.9.0）を導入すればよい。**
 >
-> 以下の本文は**測定時点の記録として保存する**。2.8.1 → 2.9.0 の差分は次回区間で扱う。
+> 以下の本文は**測定時点の記録として保存する**。2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md) で扱う。
 
 
 **本章でいちばん実務に効く注意点である。**
@@ -383,7 +383,7 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 > 内訳は #1064（Codex の pre-tool 入力書き換え許可）、
 > **#1000（Plan Approval の内容・試行への束縛、human-only exit、Kiro IDE の Windows シェル保護、Change Control）**、
 > **#1065（Copilot / Cursor のフック経路修正。下記）**。
-> **本章の測定値は `c03f9e28` 時点の記録として維持する。** 次回区間で扱う。
+> **本章の測定値は `c03f9e28` 時点の記録として維持する。** → [18 章](./18-release-impact-290.md)
 
 **実際に到達できる最大は 2.8.0 である。**
 **本章の基準 `c03f9e28` 時点での** 2.8.1 の 2 件の修正（`aidlc config` ウィザードで Enter が既定値として受理されない不具合、

@@ -95,7 +95,7 @@ v2.9.0（`1b064585` / #1151、`feat!:`）で **暗黙の既定スコープ `clas
 
 test strategy は depth から継承して **Standard**（`workshop` と違って Minimal 上書きを持たない）。
 
-> **`classic` と `workshop` のステージ集合は完全に同一である。** 実測すると両者とも 26 本で、
+> **`classic` と `workshop` のステージ集合は完全に同一だった（2.8.1 まで）。** 実測すると両者とも 26 本で、
 > 差集合は双方向とも空だった（`stage-graph.json` の `scopes` を集計）。
 > 違うのは**ステージの並びではなく、テスト戦略・キーワード・専用ランナーの有無**である。
 > `workshop` は Test=Minimal を上書き宣言し `workshop` / `lab` / `training` のキーワードを持つ。
@@ -272,7 +272,7 @@ aidlc-graph.ts ars --iae <s> --csu <s> --ve <s> --r <s> --ua <s> \
 /aidlc --depth standard --test-strategy minimal
 ```
 
-`workshop` だけ Depth=Standard でも Test=Minimal が既定（研修ペース維持）。**`classic` は `workshop` と同じ 26/33 だが Test 上書きを持たない**ため、depth から Standard を継承して本番級のテスト水準が効く。`express` は depth=Minimal を継承して Test=Minimal。
+`workshop` だけ Depth=Standard でも Test=Minimal が既定（研修ペース維持）。**`classic` は v2.9.0 以降 18/33（`workshop` は 26/33 のまま）で、Test 上書きを持たない**ため、depth から Standard を継承して本番級のテスト水準が効く。`express` は depth=Minimal を継承して Test=Minimal。
 
 ---
 
