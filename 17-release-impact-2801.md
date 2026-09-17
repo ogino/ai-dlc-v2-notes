@@ -498,6 +498,11 @@ project / local に書くと fail-closed で拒否される。未知キーも同
 
 ### ⚠ ガードレール 9 種を設定ファイルに記録して無効化できるようになった
 
+> **📌 続報（2026-09-17）: 対象は 2.9.0 で 9 → 12 種に増えた**
+> （追加は `AIDLC_DISABLE_SENSORS` / `AIDLC_DISABLE_LEARNINGS` / `AIDLC_DISABLE_SUMMARY_CONFIRMATION`）。
+> **あわせて `GUARD_DISABLED` 監査イベントが新設され、Plan Approval ガードを無効化したまま
+> ツール呼び出しが通った事実は監査に残るようになった。** → [18.8](./18-release-impact-290.md)
+
 `core/tools/aidlc-settings.ts` の `RECORDABLE_PROJECT_BYPASSES`（逐語）:
 
 ```
