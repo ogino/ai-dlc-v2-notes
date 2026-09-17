@@ -205,12 +205,31 @@ governed checkpoint が memory 編集による実効値の変化を観測した�
 
 v2.9.0 でリリース資産が **13 件 → 15 件**になり、**ランタイム tarball が 2 本に分かれた**。
 
-| 版 | ネイティブ用 | 手動コピー用 |
+| | v2.8.1 | **v2.9.0** |
 |---|---|---|
-| v2.8.1 | `aidlc-runtime-2.8.1.tar.gz` | **同じもの** |
-| **v2.9.0** | `aidlc-runtime-2.9.0.tar.gz` | **`aidlc-copy-runtime-2.9.0.tar.gz`** |
+| ネイティブ用 | `aidlc-runtime-2.8.1.tar.gz` | `aidlc-runtime-2.9.0.tar.gz`（`dist-release/<harness>`） |
+| **手動コピー用** | **同じもの** | **`aidlc-copy-runtime-2.9.0.tar.gz`**（**`dist/<harness>`**） |
+| 手動コピーの前提 | **ネイティブ `aidlc` が必須** | **Bun が必要。ネイティブ `aidlc` は不要** |
 
 `.sha256` を含めて 2 件増えている。
+
+### 🔴 アセット名だけでなく、前提が逆転している
+
+上流 `README.md` 逐語（2.9.0）:
+
+> Cannot install a native executable, or prefer to manage the project files
+> manually? Install Bun, download `aidlc-copy-runtime-X.Y.Z.tar.gz` from the
+> release, and copy the complete `runtime/<harness>/` directory into your project.
+> **This path does not require the native `aidlc` command.**
+
+2.8.x までは逆に **`Install the matching native aidlc command`** と書かれていた。
+
+`scripts/package-release.ts` でも、copy 用アーカイブは **`dist/<harness>`**（Bun 前提の投影）、
+ネイティブ用は `dist-release/<harness>` から作られている。
+
+**つまり手動コピーは「ネイティブ導入の代替」になった。**
+**2.8.x の「手動コピーでもバイナリは必須」という前提で読むと、不要なバイナリを入れ、
+必要な Bun を入れ損ねる。**
 
 **手動コピー運用をしている場合、`aidlc-runtime-2.9.0.tar.gz` を取っても目的のものではない。**
 CHANGELOG 逐語:
@@ -637,7 +656,8 @@ roadmap の更新コミット `d0c3094f`（#1144）は HEAD の 1 つ手前だ�
 | [6 章](./06-harnesses-install.md) | **手動コピー用アセット名が `aidlc-copy-runtime-X.Y.Z.tar.gz` に変わった**（18.4）。更新手順に `aidlc config --yes` が要る（18.5） |
 | [17 章](./17-release-impact-2801.md) | 基準 `c03f9e28` はリリース版 v2.8.1 ではない（18.1）。続報ブロックの数値を訂正（18.18） |
 | [2 章](./02-architecture.md) | `core/tools/*.ts` が 69 → 71、CLI 39 → 40 |
-| [4 章](./04-agents.md) / [5 章](./05-scopes-depth-test.md) | エージェント 14・スコープ 11 は不変。**ただし `classic` のステージ数が 26 → 18** |
+| [4 章](./04-agents.md) | エージェント 14 は不変。**ただしレビュアは `## Review` 節を書かなくなった**（v2.8.1 出荷済み。→ 18.11） |
+| [5 章](./05-scopes-depth-test.md) | スコープ 11 は不変。**ただし `classic` のステージ数が 26 → 18** |
 | [7 章](./07-learning-loop-state.md) | 監査イベントが 91 種・22 分類 → **99 種・25 分類** |
 | [8 章](./08-v1-vs-v2.md) | 「動いたのは `core/tools` だけ」は**前区間までの話**。本区間は体系そのものが動いた |
 

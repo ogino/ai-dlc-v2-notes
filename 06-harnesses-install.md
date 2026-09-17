@@ -205,25 +205,35 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 
 ### 手動でファイルを置きたい場合
 
-> **⚠ 手動コピー経路でも、ネイティブ `aidlc` バイナリの導入は必須である。**
-> `runtime/<harness>/` の投影は**ネイティブ `aidlc` を呼ぶ形**に書き換えられており、
-> **tar.gz にバイナリ本体は入っていない**。
-> 上流 `README.md:33-36` も「**Install the matching native `aidlc` command**, download
-> `aidlc-runtime-X.Y.Z.tar.gz` …, and copy `runtime/<harness>/` into your project」と
-> **バイナリ導入を先に置いている**。
-> **手動コピーは「ネイティブ導入の代替」ではなく「プロジェクト内ファイルを手で置く」という選択である。**
-> バイナリを入れずに `runtime/<harness>/` だけ置くと、フックもコマンドも起動できない。
-> **⚠ この前提が掛かるのは `runtime/<harness>/` と `dist-release/<harness>/` だけである。**
-> チェックアウトから生成する **`dist/<harness>/` は従来どおり Bun 前提の投影**で、
-> ネイティブ `aidlc` を呼ばない。**したがって、この経路には対応するネイティブバイナリが要らない**（代わりに bun が要る）。
-> **これは投影の呼び出し形からの読解であり、本調査では実機で確かめていない。**
+> **🔴 v2.9.0 で手動コピー経路の前提が逆転した。ネイティブ `aidlc` バイナリは不要になり、代わりに Bun が要る。**
+>
+> | | 2.8.x まで | **v2.9.0 以降** |
+> |---|---|---|
+> | 取得するアセット | `aidlc-runtime-X.Y.Z.tar.gz` | **`aidlc-copy-runtime-X.Y.Z.tar.gz`** |
+> | 前提 | **ネイティブ `aidlc` が必須** | **Bun が必要。ネイティブ `aidlc` は不要** |
+> | 中身の出どころ | `dist-release/<harness>`（ネイティブ投影） | **`dist/<harness>`（Bun 前提の投影）** |
+>
+> 上流 `README.md` 逐語（2.9.0）:
+> ```
+> Cannot install a native executable, or prefer to manage the project files
+> manually? Install Bun, download `aidlc-copy-runtime-X.Y.Z.tar.gz` from the
+> release, and copy the complete `runtime/<harness>/` directory into your
+> project. This path does not require the native `aidlc` command.
+> ```
+> 2.8.x までは逆に「**Install the matching native `aidlc` command**」と書かれていた。
+>
+> `scripts/package-release.ts` でも、copy 用アーカイブは `dist/<harness>`、
+> ネイティブ用は `dist-release/<harness>` から作られている。
+> **つまり手動コピー経路は「ネイティブ導入の代替」になった。**
+> **これは上流 README と `package-release.ts` の読解であり、本調査では実機で確かめていない。**
 > **📌 かつてここに「Copilot / Cursor のフック不具合を避けるソース生成経路」を記していたが、
 > その回避策はもう不要である。** 不具合は `52da70ad` で修正され、**v2.8.1 以降に含まれる**。
 > **素直に v2.8.1 以降（推奨は現 Latest の v2.9.0）を導入すればよい。**
 
-ネイティブ `aidlc` を導入したうえで、**導入したバイナリと同じ版**のリリース資産を展開し、
-**`runtime/<harness>/`** をプロジェクトへコピーする。
+**v2.9.0 以降**は、Bun を導入したうえで `aidlc-copy-runtime-X.Y.Z.tar.gz` を展開し、
+**`runtime/<harness>/` をディレクトリごと**プロジェクトへコピーする。
 これがプロジェクト内ファイルを手で管理する場合の正規経路である。
+**2.8.x までは、ネイティブ `aidlc` を導入したうえで `aidlc-runtime-X.Y.Z.tar.gz` を使う手順だった。**
 
 > **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
 >
@@ -240,11 +250,12 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > ```
 > （→ [18.4](./18-release-impact-290.md)）
 
-> **⚠ バイナリとアーカイブの版を揃えること。** 上流は 「Install the **matching** native `aidlc` command」と書いている。
-> 前節の `releases/latest` インストーラで入れたバイナリと、別リリースのアーカイブを組み合わせると版がずれる。
-> **版を固定するなら両方に同じ `X.Y.Z` を指定する**（`install.sh --version 2.9.0` と
-> **`aidlc-copy-runtime-2.9.0.tar.gz`**）。
+> **⚠ ネイティブ導入と併用する場合は、バイナリとアーカイブの版を揃えること。**
+> 前節の `releases/latest` インストーラで入れたバイナリと、別リリースのアーカイブを
+> 組み合わせると版がずれる。版を固定するなら両方に同じ `X.Y.Z` を指定する
+> （`install.sh --version 2.9.0` と `aidlc-runtime-2.9.0.tar.gz`）。
 > 導入済みの版は `aidlc version` で確認できる。
+> **手動コピー経路だけを使うなら、v2.9.0 以降はネイティブ導入自体が不要である。**
 
 **チェックアウトから `bun scripts/package.ts <harness>` で `dist/<harness>/` を生成することも今も可能**だが、
 上流はこれを利用者向けとは認めていない（`docs/guide/12-cli-commands.md:243-246` 逐語）:
