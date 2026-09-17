@@ -166,7 +166,9 @@ org → team → project → phase → (stage: 将来)
 ### Audit（**99** イベント種別・**25** 分類※）
 
 ※ 正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準。**基準 `c03f9e28` は 91 / 22、タグ `v2.8.1` は 95 / 23、2.9.0 で 99 / 25**（→ [18.8](./18-release-impact-290.md)）。
-`docs/reference/12-state-machine.md` 基準では 19 分類。上流自身が「グルーピングは表示上の分類であり、
+`docs/reference/12-state-machine.md` 基準では **20 分類**（基準 `c03f9e28` では 19。
+2.9.0 で `Commit provenance` が加わった。同ドキュメントの `### ` 見出しには
+`Authority invariants` などの**規則の見出しが混ざる**ので、それらは分類に数えない）。上流自身が「グルーピングは表示上の分類であり、
 イベント集合そのものが不変条件」と注記しており、出典によって分類数が違うのはこのため。
 どちらの数字を引用するかは出典を明記すること。
 
