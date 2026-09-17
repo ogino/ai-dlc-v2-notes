@@ -76,8 +76,23 @@ v2.8.1 を導入した時点で、これらはすでに効いている。
 `deployment-pipeline` / `environment-provisioning` / `feedback-optimization` /
 `incident-response` / `observability-setup` / `performance-validation`）。
 
-利用者から見ると、**Ideation・CI Pipeline・Operation・walking skeleton が無くなり、
+利用者から見ると、**CI Pipeline と Operation が無くなり、walking skeleton が off になり、
 成果物を生成する前の「これで合っていますか」サマリ確認チェックポイントが消える。**
+
+> **⚠ Ideation はこの区間の変化ではない。** `classic` は **2.6.18 の追加当初から Ideation 全 7 本を
+> スキップしている**（始点 `c03f9e28` で Ideation 所属は 0 本）。本区間で新たに外れたのは
+> **CI Pipeline 1 本と Operation 7 本だけ**である。
+
+フェーズ別の内訳（`scopes:` 所属の実測）:
+
+| フェーズ | 2.8.1 | 2.9.0 |
+|---|---:|---:|
+| Initialization | 3 | 3 |
+| Ideation | **0**（2.6.18 以来） | **0** |
+| Inception | 9 | 9 |
+| Construction | 7 | **6**（CI Pipeline が外れた） |
+| Operation | 7 | **0** |
+| 合計 | 26 | **18** |
 
 ### 進行中の intent は影響を受けない
 
