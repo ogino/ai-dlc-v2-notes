@@ -264,8 +264,11 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > `bun scripts/package.ts`; **release users should not copy from a checkout.**
 
 なお `bun scripts/package.ts <harness>` は `dist/<harness>/` と `dist-release/<harness>/` の
-**両方**を生成する。前者は従来どおり `bun …` を呼ぶ Bun 前提の投影、
-後者はネイティブ `aidlc` を呼ぶ形で、**リリース資産に入るのは後者**である。
+**両方**を生成する。前者は `bun …` を呼ぶ Bun 前提の投影、後者はネイティブ `aidlc` を呼ぶ形である。
+**v2.9.0 以降はどちらもリリース資産になる** —— `dist/<harness>/` は
+`aidlc-copy-runtime-X.Y.Z.tar.gz`、`dist-release/<harness>/` は `aidlc-runtime-X.Y.Z.tar.gz`
+の中身である（`scripts/package-release.ts` 実測）。
+**2.8.x までは後者だけがリリース資産だった。**
 
 ### 初回実行ウィザード
 

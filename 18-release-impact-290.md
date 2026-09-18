@@ -251,7 +251,8 @@ CHANGELOG 逐語:
 > Manual-copy users must replace the complete `runtime/<harness>/` tree from
 > **`aidlc-copy-runtime-2.9.0.tar.gz`**.
 
-→ **6 章・17 章が案内している `aidlc-runtime-X.Y.Z.tar.gz` は、手動コピー用としては誤りになった。**
+→ **17 章（2.8.1 区間）の手動コピー案内は、v2.9.0 以降の手順としてはそのまま使えない。**
+**6 章は本 PR で `aidlc-copy-runtime-` と Bun 前提に更新済みである。**
 
 ---
 

@@ -24,7 +24,7 @@
 |--------|------|
 | **core/** | エンジン・33 ステージ・14 エージェント・スコープ・センサー・知識・hooks |
 | **harness/** | 各 CLI への薄いアダプタ（manifest, settings, orchestrator skill） |
-| **dist/** / **dist-release/** | ローカル生成物（版管理されない）。前者は Bun 前提の開発用投影、後者はリリース資産の中身 |
+| **dist/** / **dist-release/** | ローカル生成物（版管理されない）。前者は Bun 前提の投影、後者はネイティブ `aidlc` 前提の投影。**v2.9.0 以降はどちらもリリース資産になる**（前者＝`aidlc-copy-runtime-*.tar.gz`、後者＝`aidlc-runtime-*.tar.gz`。2.8.x までは後者だけ） |
 | **docs/** | User Guide / Harness Engineer Guide / Developer Reference |
 | **plugins/** | 任意の追加ステージ等（例: `test-pro`） |
 
