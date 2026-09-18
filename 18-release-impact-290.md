@@ -339,7 +339,9 @@ core/tools/aidlc-state.ts:3039 (v2.9.0)
 
 1. **そのプロジェクトだけ手動コピー経路で導入する**（今日できる）
 2. 次のリリースを待つ（`git fetch origin --tags` の後に
-   `git merge-base --is-ancestor c97fa7ba <tag>` で判定）
+   **`git merge-base --is-ancestor be94bde7 <tag>`** で判定。
+   **`be94bde7`（#1070 の修正）は `c97fa7ba`（#1166 の修正）より後**なので、これ 1 つで両方を見られる。
+   **`c97fa7ba` で判定すると #1070 を取りこぼす**）
 3. 影響を許容する（`blocking` はゲートを拒否し、`advisory` は黙って捨てられる）
 
 **⚠ 経路の切り替え自体は本調査では実機で試していない。**

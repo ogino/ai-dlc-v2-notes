@@ -151,7 +151,9 @@
 - [ ] **🔴 現 Latest の v2.9.0 に残るネイティブ限定の不具合 2 件を追跡する** —
       **#1070（ゲートの Review brief が動かない）と #1166（ゲートのセンサーが発火しない）**。
       どちらも `main` では修正済みだがリリース未収録。
-      `git fetch origin --tags` の後に `git merge-base --is-ancestor c97fa7ba <tag>` で判定する（→ [18.6](../18-release-impact-290.md)）
+      `git fetch origin --tags` の後に **`git merge-base --is-ancestor be94bde7 <tag>`** で判定する
+      （`be94bde7`＝#1070 の修正は `c97fa7ba`＝#1166 の修正より後なので、これ 1 つで両方を見られる。
+      **`c97fa7ba` で判定すると #1070 を取りこぼす**。→ [18.6](../18-release-impact-290.md)）
 - [ ] **上流 open PR #1157（Kiro IDE と Kiro CLI の配布統合）を追跡する** —
       マージされると**ハーネスが 7 → 6 になりうる**
 - [ ] **`bugfix` / `refactor` の frontmatter 所属数（9 / 10）と出荷表の EXECUTE 数（7 / 8）の食い違い** —
