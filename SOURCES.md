@@ -40,7 +40,9 @@
    > ※ **`dist/` 配下のパスは取得当時のものである。**
    > 2.8.x で `dist/` は上流リポジトリから削除されたため、**clone しただけでは解決できない**。
    > 同じ内容を見るには `bun scripts/package.ts <harness>` でローカル生成するか、
-   > リリース資産 `aidlc-runtime-X.Y.Z.tar.gz` の `runtime/<harness>/` を展開する。
+   > **リリース資産 `aidlc-copy-runtime-X.Y.Z.tar.gz`**（v2.9.0 以降）の `runtime/<harness>/` を展開する。
+   > **`aidlc-runtime-X.Y.Z.tar.gz` は `dist-release/` 由来の別物**なので、ここでは使えない
+   > （上の測定対象は `dist/` 配下である。→ [18.4](./18-release-impact-290.md)）。
    > とくに「全 7 ハーネスの `dist/*/…/agents/` を機械的に集計」した測定は、
    > **clone だけでは再現できない**（→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
    - `docs/guide/glossary.md`（2026-08-29 に再読。**2.6.86 で Bolt の定義が書き換わっている**）

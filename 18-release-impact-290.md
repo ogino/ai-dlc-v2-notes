@@ -318,8 +318,31 @@ origin/main core/tools/aidlc-state.ts:3040  ? [executable, "engine", "sensor", .
 
 修正（`c97fa7ba` / #1166）も**未リリース**である。
 
-> **社内でセンサーを使う予定があるなら、ネイティブ v2.9.0 では期待どおりに動かない。**
-> 次のリリースを待つか、影響を許容できるか確認すること。
+### ✅ 今日使える回避策 —— 手動コピー経路なら 2 件とも踏まない
+
+**どちらの不具合も、コンパイル済みバイナリを通る経路にしか無い。**
+
+```
+core/tools/aidlc.ts (v2.9.0)
+  isCompiled ? runDelegateInProcess(...)   ← #1070 の switch はここ
+             : runDelegateDev(...)          ← Bun 経路。bun <tool> を spawn するので無傷
+
+core/tools/aidlc-state.ts:3039 (v2.9.0)
+  executable ? [executable, "sensor", ...]            ← #1166。native で unknown command
+             : [process.execPath, sensorTool, ...]    ← Bun 経路。直接起動するので無傷
+```
+
+**したがって手動コピー経路（`aidlc-copy-runtime-2.9.0.tar.gz`、Bun 前提）で導入すれば
+2 件とも踏まない。** これは上流が公認する正規経路である（→ 18.4）。
+
+**センサーを使う予定があるなら、選択肢は 3 つある。**
+
+1. **そのプロジェクトだけ手動コピー経路で導入する**（今日できる）
+2. 次のリリースを待つ（`git fetch origin --tags` の後に
+   `git merge-base --is-ancestor c97fa7ba <tag>` で判定）
+3. 影響を許容する（`blocking` はゲートを拒否し、`advisory` は黙って捨てられる）
+
+**⚠ 経路の切り替え自体は本調査では実機で試していない。**
 
 ---
 
@@ -670,7 +693,7 @@ roadmap の更新コミット `d0c3094f`（#1144）は HEAD の 1 つ手前だ�
 |---|---|
 | [6 章](./06-harnesses-install.md) | **手動コピー用アセット名が `aidlc-copy-runtime-X.Y.Z.tar.gz` に変わった**（18.4）。更新手順に `aidlc config --yes` が要る（18.5） |
 | [17 章](./17-release-impact-2801.md) | 基準 `c03f9e28` はリリース版 v2.8.1 ではない（18.1）。続報ブロックの数値を訂正（18.18） |
-| [2 章](./02-architecture.md) | `core/tools/*.ts` が 69 → 71、CLI 39 → 40 |
+| [2 章](./02-architecture.md) | `core/tools/*.ts` が 69 → 71、CLI 39 → 40。**配布図も更新が要る** —— `dist/` が `aidlc-copy-runtime-*.tar.gz` としてリリース資産になった（→ 18.4） |
 | [4 章](./04-agents.md) | エージェント 14 は不変。**ただしレビュアは `## Review` 節を書かなくなった**（v2.8.1 出荷済み。→ 18.11） |
 | [5 章](./05-scopes-depth-test.md) | スコープ 11 は不変。**ただし `classic` のステージ数が 26 → 18** |
 | [7 章](./07-learning-loop-state.md) | 監査イベントが 91 種・22 分類 → **99 種・25 分類** |

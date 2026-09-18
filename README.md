@@ -36,12 +36,19 @@
 > - **ゲートのセンサーが発火しない**（#1166）—— `blocking` はゲートを拒否し、`advisory` は黙って捨てられる
 >
 > **社内でセンサーを使う予定があるなら、ネイティブ v2.9.0 では期待どおりに動かない。**
+> **✅ 回避策: そのプロジェクトだけ手動コピー経路（`aidlc-copy-runtime-2.9.0.tar.gz`、Bun 前提）で導入すれば、2 件とも踏まない。**
+> **どちらもコンパイル済みバイナリを通る経路にしか無いためである**（上流が公認する正規経路）。
 > 詳細は [18.6](./18-release-impact-290.md)。
 
-> **🔴 2.9.0 への更新は全プロジェクトで作業が要る。** `aidlc update` の後、
-> **プロジェクトごとに `aidlc config --yes`** を実行する。
-> **手動コピー運用なら、取得するアセットは `aidlc-copy-runtime-2.9.0.tar.gz` である**
-> （`aidlc-runtime-2.9.0.tar.gz` とは別物。→ [18.4](./18-release-impact-290.md)）。
+> **🔴 2.9.0 への更新は作業が要る。導入経路によって手順が違う。**
+>
+> | 導入経路 | 手順 |
+> |---|---|
+> | **ネイティブ導入** | `aidlc update` の後、**プロジェクトごとに `aidlc config --yes`** |
+> | **手動コピー運用** | **`aidlc-copy-runtime-2.9.0.tar.gz`** を取得し、`runtime/<harness>/` ツリーを丸ごと置換。**`aidlc` コマンドは使わない**（そもそも存在しない） |
+>
+> **手動コピー運用者は `aidlc update` も `aidlc config --yes` も実行できない。**
+> ネイティブバイナリを入れていないためである（→ [18.4](./18-release-impact-290.md) / [18.5](./18-release-impact-290.md)）。
 
 > **🔴 既存ワークフローは Change Control が暗黙に `strict` になる。**
 > `Change Control` 行を持たない既存の `aidlc-state.md` は、スコープ既定ではなく **`strict`** として扱われる。
@@ -144,6 +151,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh | sh
 #    Windows PowerShell
 #    irm https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.ps1 | iex
+#    版を固定する場合は install.ps1 を保存してから: .\install.ps1 -Version 2.9.0
 
 # 2. PATH を通す（インストーラは子シェルで走るため、親シェルには反映されない）
 #    インストーラが表示する手順に従うか、新しいシェルを開く

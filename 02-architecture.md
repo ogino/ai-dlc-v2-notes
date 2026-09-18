@@ -5,11 +5,15 @@
 ```
   手書きソース（編集する）        生成物（版管理されない・手編集禁止）
   ─────────────────────        ──────────────────────────────
-  core/          方法論の正本  ──►  dist/<harness>/         Bun 前提の投影（開発用）
+  core/          方法論の正本  ──►  dist/<harness>/         Bun 前提の投影
   harness/<name>/ 薄い表面     ──►  dist-release/<harness>/ ネイティブ aidlc 呼び出し形
   plugins/       拡張                    │
-  scripts/package.ts ビルド              └─► aidlc-runtime-X.Y.Z.tar.gz の
-                                             runtime/<harness>/ としてリリースへ
+  scripts/package.ts ビルド              ├─► dist/<harness>/ は
+                                         │     aidlc-copy-runtime-X.Y.Z.tar.gz（手動コピー用・Bun 前提）
+                                         └─► dist-release/<harness>/ は
+                                               aidlc-runtime-X.Y.Z.tar.gz（ネイティブ用）
+                                         どちらも runtime/<harness>/ として入る
+                                         ※ 2 本に分かれたのは v2.9.0 から。2.8.x は後者のみ
 
   ハーネスは 7 種（claude / codex / copilot / cursor / kiro / kiro-ide / opencode）
 ```

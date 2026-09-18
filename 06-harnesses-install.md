@@ -29,6 +29,8 @@
 > | **ゲートのセンサーが発火しない**（#1166） | `aidlc sensor …` が `unknown command 'sensor'` になる。**`blocking` はゲートを拒否し、`advisory` は黙って捨てられる** |
 >
 > **センサーを使う予定があるなら、ネイティブ v2.9.0 では期待どおりに動かない。**
+> **✅ 回避策: そのプロジェクトだけ手動コピー経路（`aidlc-copy-runtime-2.9.0.tar.gz`、Bun 前提）で導入すれば、2 件とも踏まない。**
+> **どちらもコンパイル済みバイナリを通る経路にしか無いためである**（上流が公認する正規経路）。
 > 詳細と根拠は [18.6](./18-release-impact-290.md)。
 >
 > **⚠ v2.8.0 に限り、GitHub Copilot と Cursor のフックが動作しない。**
@@ -46,7 +48,7 @@
 
 ## 6.1 対応ハーネス（2.x）
 
-| Harness | 最低バージョン目安 | 導入コマンド（2.8.x） | 起動 |
+| Harness | 最低バージョン目安 | 導入コマンド（v2.8.0 以降。v2.9.0 でも同じ） | 起動 |
 |---------|-------------------|--------|------|
 | **Claude Code** | 最新推奨 | `aidlc config --harness claude` | `/aidlc` |
 | **Kiro IDE** | hooks v2 対応含む | `aidlc config --harness kiro-ide` | `/aidlc` |
@@ -81,14 +83,15 @@
 ### 全ハーネス共通
 
 1. **ネイティブ導入なら bun は要らない**（2.7.2 以降。リリースは v2.8.0 以降）。配布されるのは単一バイナリで、
-   Bun / Node.js のいずれも前提にしない
+   Bun / Node.js のいずれも前提にしない。
+   **⚠ ただし v2.9.0 以降、手動コピー経路を選ぶ場合は逆に Bun が必須でネイティブ `aidlc` が不要になった**（下記 4.）
 2. 推奨モデル: **Claude Opus 4.8**（公式 README。Kiro では有料プランが必要な場合あり）
 
 ```bash
 curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh | sh
 ```
 
-> **bun が要るのは、本章に出てくる範囲では次の 3 つの場合である。**
+> **bun が要るのは、本章に出てくる範囲では次の 4 つの場合である。**
 > 1. 上流リポジトリを clone してソースから生成する場合（`bun scripts/package.ts`。開発者向け経路。→ [6.3](#63-インストール要点)）
 > 2. **`codekb-scope-diff` を使う場合** —— 上流はこの診断コマンドを今も
 >    `bun <harness-dir>/tools/aidlc-utility.ts codekb-scope-diff` の形でしか案内しておらず、
@@ -97,6 +100,11 @@ curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/i
 > 3. **Codex の trust エントリをチェックアウトから生成する場合**
 >    （`bun install --frozen-lockfile` → `bun scripts/package.ts codex trust --project <path>`。
 >    → [6.3 の Codex CLI 節](#codex-cli)）。**TUI の "Trust all" を使うなら bun は要らない。**
+> 4. **手動コピー経路で導入・更新する場合（v2.9.0 以降）** —— `aidlc-copy-runtime-X.Y.Z.tar.gz` は
+>    **Bun 前提の投影**であり、**Bun が無いとフックもツールも起動しない**。
+>    上流ガイド逐語: `Bun is the runtime prerequisite; the native aidlc executable is not required`
+>    （→ [6.3 の手動コピー節](#手動でファイルを置きたい場合)）。
+>    **2.8.x までは逆に、手動コピーでもネイティブ `aidlc` が必須だった。**
 > その場合は非対話シェルからも見える PATH に入れること
 > （zsh なら `~/.zshenv` にも `BUN_INSTALL` / `PATH` を書く必要がある場合あり）。
 >
@@ -193,10 +201,22 @@ root での実行は拒否される。Homebrew / Nix 管理の既存 `aidlc` が
 >
 > **確認を挟まずに `sh` するなら、パイプ直結版と実質同じである。**
 
-`install.sh` のオプション（逐語）:
+`install.sh` のオプション（**v2.9.0 実測・逐語**）:
 
 ```
-Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <startup-file>] [--json|--quiet] [--no-color] [--yes]
+Usage: install.sh [--version <x.y.z|x.y.z-preview.YYYYMMDD.N>] [--from <dir>] [--offline] [--profile <startup-file>] [--json|--quiet] [--no-color] [--yes]
+```
+
+> **基準 `c03f9e28` では `--version <x.y.z>` のみだった。**
+> v2.9.0 で **preview id の構文が追加**され、`--version 2.9.1-preview.20260915.1` のような
+> 指定が通るようになっている（→ [18.13](./18-release-impact-290.md)）。
+
+**Windows（`install.ps1`）も同じ版指定ができる。** パラメータ名は `-Version` で、
+文法は `install.sh --version` と同じ（stable の `x.y.z` と preview id を受理する）:
+
+```powershell
+# 版を固定して導入する場合（既定は latest）
+.\install.ps1 -Version 2.9.0
 ```
 
 > **⚠ 版を固定するなら `--version 2.9.0`（現 Latest）を使う。**
@@ -235,6 +255,89 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 これがプロジェクト内ファイルを手で管理する場合の正規経路である。
 **2.8.x までは、ネイティブ `aidlc` を導入したうえで `aidlc-runtime-X.Y.Z.tar.gz` を使う手順だった。**
 
+#### 上流が案内している手順（逐語ベース）
+
+上流ガイド `docs/guide/18-install-and-lifecycle.md` の Copy Channel 節は、
+**署名検証とチェックサム照合を手順に含めている**。社内導入で供給元検証が要件なら、ここを落とさないこと。
+
+```bash
+tag=vX.Y.Z
+tmp="$(mktemp -d)"
+runtime_asset="aidlc-copy-runtime-${tag#v}.tar.gz"
+runtime_checksum="${runtime_asset}.sha256"
+source_repo="${AIDLC_RELEASE_REPOSITORY:-awslabs/aidlc-workflows}"
+release_workflow="${AIDLC_RELEASE_WORKFLOW:-$source_repo/.github/workflows/release.yml}"
+
+gh release download "$tag" --repo "$source_repo" --dir "$tmp" \
+  --pattern "$runtime_asset" \
+  --pattern "$runtime_checksum" \
+  --pattern aidlc-release.intoto.jsonl
+
+gh attestation verify "$tmp/$runtime_asset" \
+  --bundle "$tmp/aidlc-release.intoto.jsonl" \
+  --repo "$source_repo" \
+  --signer-workflow "$release_workflow" \
+  --source-ref "refs/tags/$tag"
+
+(cd "$tmp" && sha256sum -c "$runtime_checksum")
+tar -xzf "$tmp/$runtime_asset" -C "$tmp"
+RUNTIME_ROOT="$tmp/runtime"
+```
+
+> **⚠ copy 用アーカイブは `version.json` / `checksums.txt` の外にある。**
+> 上流逐語: `The copy archive stays outside version.json and checksums.txt so existing
+> 2.8.x native clients can continue to parse release metadata and self-update.`
+> **検証は専用の `.sha256` サイドカーと provenance で行う。**
+
+#### 🔴 既存プロジェクトへの適用は、そのままコピーしてはいけない
+
+上流の最後の 1 行は次の形である:
+
+```bash
+cp -R "$RUNTIME_ROOT/claude/." your-project/
+```
+
+**`runtime/<harness>/` には、ハーネスのツリーだけでなく `aidlc/` ワークスペースの殻と
+プロジェクトルートのファイル（`AGENTS.md` 等）が同梱されている**（上流逐語:
+`so the harness tree, aidlc/ workspace shell, and project-root files stay together`）。
+
+**既存プロジェクトにそのまま `cp -R` すると、次を潰しうる。**
+
+- `aidlc/spaces/<space>/memory/` —— **利用者が積み上げた記憶**
+- `aidlc/knowledge/` —— **取り込んだ知識**
+- ルートの `AGENTS.md` —— **プロジェクト固有の指示**
+
+新規プロジェクトなら上流の手順でよい。**既存プロジェクトでは退避してから入れること。**
+
+```bash
+dest=your-project
+
+# 1) 既存の作業領域があれば、まず退避する（mkdir より前に判定する）
+if [ -d "$dest/aidlc" ]; then
+  if ! contents=$(ls -A "$dest/aidlc"); then
+    echo "aidlc/ を読めません。中止します。" >&2; exit 1
+  fi
+  if [ -n "$contents" ]; then
+    cp -R "$dest/aidlc" "$dest/aidlc.bak-$(date +%Y%m%d%H%M%S)" || exit 1
+  fi
+fi
+
+# 2) AGENTS.md は上書きせず、差分を見てから手でマージする
+if [ -f "$dest/AGENTS.md" ]; then
+  diff -u "$dest/AGENTS.md" "$RUNTIME_ROOT/claude/AGENTS.md" > agents-md.diff || true
+  echo "agents-md.diff を確認し、手でマージすること（自動上書きはしない）"
+fi
+
+# 3) 既存を壊さずに配置する（-n = 既存ファイルは上書きしない）
+cp -Rn "$RUNTIME_ROOT/claude/." "$dest/"
+```
+
+> **⚠ `cp -Rn` は既存ファイルを残すため、更新したいハーネスファイルも据え置かれる。**
+> **ハーネスのツリー（`.claude/` 等）だけは意図的に置き換える必要がある。**
+> どのパスが「管理対象」でどれが「利用者の資産」かは、17 章 17.9 の
+> `managedDirectories` の考え方が参考になる。
+> **本調査では実機で流していない。社内で 1 度、使い捨てのコピーで確かめてから手順書に採ること。**
+
 > **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
 >
 > | 版 | ネイティブ用 | **手動コピー用** |
@@ -250,12 +353,15 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > ```
 > （→ [18.4](./18-release-impact-290.md)）
 
-> **⚠ ネイティブ導入と併用する場合は、バイナリとアーカイブの版を揃えること。**
-> 前節の `releases/latest` インストーラで入れたバイナリと、別リリースのアーカイブを
-> 組み合わせると版がずれる。版を固定するなら両方に同じ `X.Y.Z` を指定する
-> （`install.sh --version 2.9.0` と `aidlc-runtime-2.9.0.tar.gz`）。
-> 導入済みの版は `aidlc version` で確認できる。
-> **手動コピー経路だけを使うなら、v2.9.0 以降はネイティブ導入自体が不要である。**
+> **⚠ 版の固定は、経路ごとに対象が違う。**
+>
+> | 経路 | 固定するもの |
+> |---|---|
+> | **手動コピーのみ**（v2.9.0 以降の既定） | **`aidlc-copy-runtime-X.Y.Z.tar.gz` だけ**。ネイティブ導入は不要 |
+> | **ネイティブ導入のみ** | `install.sh --version X.Y.Z`（資産は `aidlc-runtime-X.Y.Z.tar.gz`） |
+> | 両方を併用する場合 | **両方に同じ `X.Y.Z` を指定する。** `releases/latest` で入れたバイナリと別リリースのアーカイブを混ぜない |
+>
+> 導入済みの版は `aidlc version` で確認できる（ネイティブ導入時のみ）。
 
 **チェックアウトから `bun scripts/package.ts <harness>` で `dist/<harness>/` を生成することも今も可能**だが、
 上流はこれを利用者向けとは認めていない（`docs/guide/12-cli-commands.md:243-246` 逐語）:
