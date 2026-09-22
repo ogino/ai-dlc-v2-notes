@@ -19,7 +19,9 @@
 > | `main` の到達点 | **`3c54ec1a`**。本章の終点から **41 コミット** |
 > | 新規の安定版リリース | **無し。`v2.9.0` が引き続き Latest** |
 > | **#1070・#1166 の修正** | **preview には入った** —— `v2.9.1-preview.20260920.1` / `.20260921.1`。**安定版には依然として未収録** |
-> | preview タグ | 3 本に増えた（`20260915.1` / `20260920.1` / `20260921.1`） |
+> | **🔴 3 件目の不具合 #1249 が開示された** | **v2.9.0 にも、どの preview にも未修正**（→ 18.6 ③） |
+> | preview タグ | **計 4 本**（`v2.8.3-preview.20260914.1` ＋ `v2.9.1-preview` 3 本） |
+> | **⚠ preview は「不具合だけ取りにいく」手段ではない** | 出荷既定からの Bedrock 撤去・Construction 既定 walk の変更などを同梱する（→ 18.6 / 18.13） |
 > | `main` 上の指標 | `core/tools/*.ts` **71 → 74**、監査イベント **99 → 102**（いずれも**未リリース**） |
 > | ステージ / スコープ / ハーネス / バイパス | **不変**（33 / 11 / 7 / 12） |
 >
@@ -280,7 +282,7 @@ CI などで `config-change` を呼んでいる場合、これまで効いてい
 
 ---
 
-## 18.6 🔴 現在の Latest（v2.9.0）に残っている不具合 2 件
+## 18.6 🔴 現在の Latest（v2.9.0）に残っているネイティブ限定の不具合 3 件
 
 **どちらもネイティブ（コンパイル済みバイナリ）インストール限定で、`bun` 実行では再現しない。**
 **`main` では修正済み。**安定版（Latest `v2.9.0`）には未収録。preview `v2.9.1-preview.20260920.1` 以降には収録済み**（2026-09-23 実測）。**
@@ -335,17 +337,75 @@ core/tools/aidlc-state.ts:3039 (v2.9.0)
 **したがって手動コピー経路（`aidlc-copy-runtime-2.9.0.tar.gz`、Bun 前提）で導入すれば
 2 件とも踏まない。** これは上流が公認する正規経路である（→ 18.4）。
 
-**センサーを使う予定があるなら、選択肢は 4 つある。**
+### 🔴 ③ 3 つのコアフックが `bun` を直接名指ししている（#1249）
 
-1. **そのプロジェクトだけ手動コピー経路で導入する**（Bun 前提。今日できる）
-2. **preview チャネルに切り替える**（`aidlc config --channel preview` → `aidlc update`）——
-   **2026-09-23 時点で `v2.9.1-preview.20260920.1` 以降が両方の修正を含む**。
-   ただし preview は **never marked latest** の prerelease であり、保持は新しい 2 件のみ（→ 18.13）
-3. 安定版リリースを待つ（`git fetch origin --tags` の後に
-   **`git merge-base --is-ancestor be94bde7 <tag>`** で判定。
-   **`be94bde7`（#1070 の修正）は `c97fa7ba`（#1166 の修正）より後**なので、これ 1 つで両方を見られる。
-   **`c97fa7ba` で判定すると #1070 を取りこぼす**）
-4. 影響を許容する（`blocking` はゲートを拒否し、`advisory` は黙って捨てられる）
+**2026-09-23 追記。これが 3 件のうち最も広く効く。**
+
+`core/hooks/` の 3 本（`aidlc-continue-workflow.ts` / `aidlc-rebuild-stage-graph.ts` /
+`aidlc-run-sensors.ts`）が、子プロセスの実行体として **`"bun"` という文字列を直接名指し**している。
+**ネイティブ導入には Bun が無い**が、投影には `.ts` が同梱されるため `existsSync` の前提は通り、
+**spawn が実際に試みられて失敗する。**
+
+上流 `f79e321b`（#1250）の本文にある**実測**（逐語）:
+
+> Measured on a native install with no Bun on the hook PATH: the Stop hook
+> threw ENOENT before its documented null-means-allow branch, exiting 1
+> with a stack trace and emitting no decision at all, so forwarding-loop
+> enforcement was silently dead; the graph rebuild recorded the drop
+> "exit undefined:" and never recompiled runtime-graph.json; **no sensor fired**.
+
+**⚠ doctor は警告できない**（逐語）:
+
+> The doctor cannot warn either: its Bun-requirement probe matches `bun <path>.ts`
+> command lines, never a "bun" argument literal, so such a project reports bun as
+> not required.
+
+**⚠ この修正はどの preview にも入っていない**（`v2.9.1-preview.20260921.1` でも未収録）。
+
+### 参考: 安定版 v2.9.0 に残るもう 1 件（ネイティブ限定ではない）
+
+`aidlc-worktree info` が、直近の `WORKTREE_CREATED` 行の Branch 名と Worktree パスを
+**そのまま返し**、Construction プロトコルがそれを halt-and-ask のプロンプトへ埋め込んでいた。
+**コミット済みの監査シャードはリポジトリの内容である**ため、
+偽造した行で**指示の形をしたテキストを導体のプロンプトに置ける**（上流 `4173be2c` / #1281・#1284）。
+
+| 版 | 状態 |
+|---|---|
+| `v2.9.0` | **未修正** |
+| `v2.9.1-preview.20260920.1` | 未修正 |
+| `v2.9.1-preview.20260921.1` | **修正済み** |
+
+**適用条件は限定的である** —— Bolt worktree を使う運用で、かつ監査シャードを書ける主体がいる場合。
+18.8 の「評価は両方向に動く」を読む際の材料として挙げておく。
+
+**⚠ 手動コピー経路も無条件に安全ではない。** 同コミット本文は
+`The absolute path also fixes the source-mode case where Bun is installed but its
+directory is off the hook's PATH` と書いており、
+**Bun を入れていても、非対話フックの PATH 上に無ければ同じ無言死が起きる。**
+
+### センサーを使う予定があるときの選択肢
+
+**⚠ 「preview に切り替えればセンサーが直る」は誤りである。**
+preview が直すのは **①②（ゲート発火センサー）だけ**で、
+**③ の Write 契機センサーは preview でも死んだままである。**
+
+| 選択肢 | ① #1070 | ② #1166 | ③ #1249 |
+|---|:---:|:---:|:---:|
+| **手動コピー経路（Bun 前提）** | 回避 | 回避 | **条件付き**（Bun がフックの PATH 上にあること） |
+| preview チャネル（`.20260920.1` 以降） | 修正済み | 修正済み | **未修正** |
+| 安定版 `v2.9.0` のまま | 影響あり | 影響あり | 影響あり |
+
+**したがって、センサーを使うなら実質的な選択肢は次のいずれかである。**
+
+1. **そのプロジェクトだけ手動コピー経路で導入し、非対話シェルから見える PATH に `bun` を置く**
+2. **`f79e321b` を含む版を待つ**（`git fetch origin --tags` の後に
+   **`git merge-base --is-ancestor f79e321b <tag>`**。
+   **これが 3 件のうち最も新しい修正**なので、現時点ではこれ 1 つで 3 件とも判定できる。
+   **`be94bde7` や `c97fa7ba` で判定すると ③ を取りこぼす**）
+3. 影響を許容する
+
+**⚠ 判定の基準コミットは、修正が増えるたびに見直すこと。**
+「1 つで足りる」のは、たまたまそれが最新の修正だからにすぎない。
 
 **⚠ 経路の切り替え自体は本調査では実機で試していない。**
 
@@ -401,7 +461,7 @@ Event Registry 見出し基準。末尾の形式見出し 3 本は分類に数�
 
 > **⚠ `Interaction Events` は見出しの宣言件数と表の行数が 1 件ずれている。**
 > 基準 `c03f9e28` は「宣言 10 / 行 9」、**タグ `v2.8.1` 以降は一貫して「宣言 11 / 行 10」**。
-> **ずれが 1 件という性質は変わっておらず、本区間でも解消していない**（申し送り事項として継続）。
+> **⚠ この齟齬は上流 `main` で解消された**（`261083ce` / #1150 で宣言 13 / 行 13 に是正）。**安定版 `v2.9.0` には未収録で、そちらは 11 / 10 のままである。**
 
 ### 評価は両方向に動く
 
@@ -616,6 +676,25 @@ aidlc config --channel stable     # 戻す
 
 **preview は「never marked latest」の prerelease である。** 社内で追う場合は
 更新検知の対象が増える点に注意（申し送り: 「エンジン更新必須」の検知手段）。
+
+> **⚠ 「保持は新しい 2 件のみ」はマシン上の保持版の話で、タグは剪定されない。**
+> 上流逐語: `after an update the two newest complete previews stay, and every older
+> preview without its own protection is pruned`。
+> **GitHub 上のタグは 2026-09-23 時点で 4 本残っている。**
+
+> **🔴 preview への切り替えは「特定の不具合だけを取りにいく」手段ではない。**
+> preview は **`main` の現状そのもの**であり、安定版に未収録の挙動変更をすべて同梱する。
+> 2026-09-23 時点の `v2.9.1-preview.20260921.1` が持ち込む主なもの:
+>
+> | 変更 | 影響 |
+> |---|---|
+> | **出荷設定から Bedrock 指定とモデル pin が撤去**（#1101） | `aidlc config` を回すと `.claude/settings.json` から AI-DLC 出荷の Bedrock 環境変数が消える |
+> | **Construction の既定 walk が変わった**（#1150） | stage-major + ladder → **unit-major + 検証済み Unit チェックポイント**。人間が事前承認した `Construction Verification Command` が要る |
+> | マルチハーネス共存（#1199） | `aidlc config` の作法が変わる |
+>
+> **さらに上流は、preview が持ち込む project state-schema の変更について
+> 「同じスキーマを載せた安定版が出るまで、そのプロジェクトは安定版へ戻せない」**と書いている。
+> **試すなら使い捨てのプロジェクトで。**
 
 ---
 

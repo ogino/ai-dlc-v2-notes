@@ -241,15 +241,16 @@ your-project/
 | ランタイム | **ビルド時は bun**（`scripts/package.ts` / テスト）。**配布版の実行には不要**（2.8.x のネイティブ `aidlc` は単一バイナリで Bun / Node.js を要求しない） |
 | 言語 | TypeScript（core tools / hooks / tests） |
 | リント | Biome |
-| モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**。必須ではない（下表） |
+| モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**（**安定版 `v2.9.0` 時点**。`main` では撤去済み → 下記 ⚠）。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
 | バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.9.0"`（本ノート整理時点。上流 `main` HEAD `2931ef02` / 取得日 2026-09-17。**現 Latest は `v2.9.0`**。2.8.1 → 2.9.0 の差分は [18-release-impact-290.md](./18-release-impact-290.md)、2.7.0 → 2.8.1 は [17-release-impact-2801.md](./17-release-impact-2801.md)、2.6.123 → 2.7.0 は [16-release-impact-2700.md](./16-release-impact-2700.md)、2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|
-| Claude Code | 出荷 `settings.json` は Bedrock（region）。AWS 資格情報とモデル有効化が実質必要。**2.7.2（`12b8d6e0`）でトップレベルのモデル pin（`model: opus[1m]` / `effortLevel: xhigh`）は削除され、セッション設定を継承する。2.7.2 は公開済みの v2.8.0 に含まれるため、2.8.0 を使っていればすでに効いている。ただし `balanced` tier（レビュー専用エージェント 2 体）は今も `sonnet` / `medium` に固定されたままである**（→ [17.6](./17-release-impact-2801.md#176-claude-code-出荷設定からモデル固定と無制限-bash-許可が消えた)） |
+| Claude Code | 出荷 `settings.json` は Bedrock（region）。AWS 資格情報とモデル有効化が実質必要。**2.7.2（`12b8d6e0`）でトップレベルのモデル pin（`model: opus[1m]` / `effortLevel: xhigh`）は削除され、セッション設定を継承する。2.7.2 は公開済みの v2.8.0 に含まれるため、2.8.0 を使っていればすでに効いている。ただし `balanced` tier（レビュー専用エージェント 2 体）は安定版 `v2.9.0` では今も `sonnet` / `medium` に固定されたままである（**`main` ではモデル pin が消え、medium の effort cap だけが残る**）**（→ [17.6](./17-release-impact-2801.md#176-claude-code-出荷設定からモデル固定と無制限-bash-許可が消えた)） |
 | Codex CLI | 出荷 `config.toml` は Bedrock ブロック。OpenAI 認証等への差し替え余地あり（ガイド参照） |
 | Kiro IDE / CLI | **Kiro サインイン + セッションモデル**が中心。2.5.6 以降エージェントはセッションモデル継承 |
 | opencode | プロジェクト `opencode.json` はセッションモデルを固定しない。**グローバル opencode 設定のプロバイダ** |
 | GitHub Copilot | GitHub Copilot の認証を使用。**folder trust が前提**（`~/.copilot/config.json` の `trustedFolders`）。2.5.60 で追加 |
 | Cursor | Cursor 自身のランタイムに設定したプロバイダ／認証を使用。**出荷ペルソナにモデル pin が無く、セッションモデルを継承**。named model（`--model` やペルソナ pin）は有料プラン必須で、Free は `Auto`。導入は 2.8.x で他ハーネスと同じ `aidlc config --harness cursor` に統一された（2.7.0 までは専用インストーラ実行）。2.5.63 で追加 |
+> **⚠ 上流 `main` では、出荷既定から Bedrock 指定とモデル pin が全面的に撤去された**（`c8ad4116` / #1101。preview `v2.9.1-preview.20260921.1` 以降に収録）。`harness/claude/settings.json` の `env` は `AWS_AIDLC_DEFAULT_SCOPE` のみになり、Codex / opencode のモデル pin も消えた。**安定版 `v2.9.0` にはまだ入っていない。**以下・以上は安定版 `v2.9.0` 時点の記述である。
