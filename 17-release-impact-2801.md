@@ -245,7 +245,7 @@ aidlc-transaction      aidlc-update            aidlc-windows-uninstall
 > | **`v2.8.1` はリリースされた** | 2026-09-09 20:12 UTC（本章の測定の数時間後）。資産 13 件 |
 > | **Copilot / Cursor のフック不具合は解消** | `52da70ad` は **v2.8.1 に含まれる**（`git merge-base --is-ancestor` で確認） |
 > | **その後 v2.8.2（09-11）と v2.9.0（09-15）が公開** | **v2.9.0 が現在の Latest**（資産 15 件） |
-> | preview チャネルが稼働 | `v2.8.3-preview.20260914.1` / `v2.9.1-preview.20260915.1` |
+> | preview チャネルが稼働 | `v2.8.3-preview.20260914.1` / `v2.9.1-preview.20260915.1`（**2026-09-23 時点では 4 本**） |
 > | `main` の到達点 | `2931ef02` / `AIDLC_VERSION` = **2.9.0**。本章の基準から **50 コミット / 473 ファイル** |
 >
 > **したがって本章が案内するソース生成の暫定回避策は、もはや不要である。**
@@ -520,8 +520,10 @@ project / local に書くと fail-closed で拒否される。未知キーも同
 
 > **📌 続報（2026-09-17）: 対象は 2.9.0 で 9 → 12 種に増えた**
 > （追加は `AIDLC_DISABLE_SENSORS` / `AIDLC_DISABLE_LEARNINGS` / `AIDLC_DISABLE_SUMMARY_CONFIRMATION`）。
-> **あわせて `GUARD_DISABLED` 監査イベントが新設され、Plan Approval ガードを無効化したまま
-> ツール呼び出しが通った事実は監査に残るようになった。** → [18.8](./18-release-impact-290.md)
+> **⚠ `GUARD_DISABLED` 監査イベント自体は 2.9.0 ではなく、リリース版 `v2.8.1`（#1000）で出荷済みである。**
+> Plan Approval ガードを無効化したまま通った事実は監査に残る（1 ストリークにつき 1 行）。
+> **記録されるのは Plan Approval ガードの分だけ**で、他のバイパスは対象外。
+> → [18.8](./18-release-impact-290.md)
 
 `core/tools/aidlc-settings.ts` の `RECORDABLE_PROJECT_BYPASSES`（逐語）:
 

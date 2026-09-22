@@ -62,7 +62,7 @@
      33 ステージ frontmatter の全数抽出と diff（差分は `- classic` 8 行のみ）/
      `core/tools/aidlc-audit.ts` の `VALID_EVENT_TYPES`（91 → 99）/
      `core/tools/aidlc-lib.ts` の Change Control 解決順 / `core/scopes/*.md` の新 frontmatter キー /
-     `core/tools/aidlc.ts` の `loadDelegate` と `core/tools/aidlc-state.ts:3040`（未リリースの不具合 2 件）/
+     `core/tools/aidlc.ts` の `loadDelegate` と `core/tools/aidlc-state.ts:3040`（安定版未収録の不具合 2 件）/
      `gh release view` によるリリース資産一覧（13 → 15 件）— 詳細は
      [18-release-impact-290.md](./18-release-impact-290.md)
    - 2.7.0 → 2.8.1 区間（2026-09-09 実測。branch `main` HEAD `c03f9e28`）:
