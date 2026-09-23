@@ -370,10 +370,18 @@ work=$(mktemp -d) || exit 1          # 差分や一覧はここに書く（既�
 #    機械的に区別できない。そこで旧版にだけあったファイルは消さずに一覧にし、人が判断する
 keep="settings.local.json"           # 旧ディレクトリから自動で戻す利用者ファイル（管理ディレクトリ直下からの相対）
 for d in $managed; do
-  if [ -e "$dest/$d" ]; then
-    mv "$dest/$d" "$dest/$d.bak-$ts" || exit 1
+  if [ -L "$dest/$d" ]; then
+    echo "$d はシンボリックリンクです（dotfiles 管理など）。自動では置き換えないので、リンク先で手動更新してください" >&2
+    exit 1
   fi
-  cp -R "$R/$d" "$dest/$d" || exit 1
+  # 新版はまず別名に作り、成功してから入れ替える（途中で失敗しても旧版は元の場所に残る）
+  stage="$dest/$d.new-$ts"
+  [ -e "$stage" ] && { echo "$stage が既にあります。中止します" >&2; exit 1; }
+  cp -R "$R/$d" "$stage" || { rm -rf "$stage"; echo "$d の新版を用意できませんでした（旧版はそのまま）" >&2; exit 1; }
+  if [ -e "$dest/$d" ]; then
+    mv "$dest/$d" "$dest/$d.bak-$ts" || { rm -rf "$stage"; exit 1; }
+  fi
+  mv "$stage" "$dest/$d" || { [ -e "$dest/$d.bak-$ts" ] && mv "$dest/$d.bak-$ts" "$dest/$d"; exit 1; }
   if [ -d "$dest/$d.bak-$ts" ]; then
     for k in $keep; do
       if [ -f "$dest/$d.bak-$ts/$k" ] || [ -L "$dest/$d.bak-$ts/$k" ]; then
