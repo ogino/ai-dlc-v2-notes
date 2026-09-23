@@ -381,8 +381,9 @@ for d in $managed; do
     echo "$d はシンボリックリンクです（dotfiles 管理など）。自動では置き換えないので、リンク先で手動更新してください" >&2
     exit 1
   fi
-  if [ -e "$dest/$d.new-$ts" ] || [ -e "$dest/$d.bak-$ts" ]; then
-    echo "$d.new-$ts か $d.bak-$ts が既にあります。中止します" >&2; exit 1
+  if [ -e "$dest/$d.new-$ts" ] || [ -e "$dest/$d.bak-$ts" ] || [ -e "$dest/$d.failed-$ts" ] ||
+     [ -L "$dest/$d.new-$ts" ] || [ -L "$dest/$d.bak-$ts" ] || [ -L "$dest/$d.failed-$ts" ]; then
+    echo "$d.new-$ts / $d.bak-$ts / $d.failed-$ts のいずれかが既にあります。中止します" >&2; exit 1
   fi
 done
 for f in .gitignore AGENTS.md .mcp.json opencode.json; do     # 手順 3 で読むルートのファイルも先に確かめる
@@ -407,7 +408,7 @@ for d in $managed; do
   else
     for x in $swapped $d; do
       [ -e "$dest/$x.bak-$ts" ] || continue
-      rm -rf "$dest/$x.failed-$ts"; [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts"
+      [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts"   # 事前検査で空いていることを確かめた名前
       mv "$dest/$x.bak-$ts" "$dest/$x"
     done
     for x in $managed; do rm -rf "$dest/$x.new-$ts"; done
