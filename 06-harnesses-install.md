@@ -351,7 +351,13 @@ h=claude                         # ハーネス名
 managed=".claude"                # 上表の管理ディレクトリ（複数ならスペース区切り）
 R="$RUNTIME_ROOT/$h"
 
-# 0) aidlc/ 自体がリンクなら、何も変更する前に止める（プロジェクト外に書かないため）
+ts=$(date +%Y%m%d%H%M%S)
+work=$(mktemp -d) || exit 1          # 差分や一覧はここに書く（既存のファイルを消さずに済む）
+
+# 0) aidlc/ 自体がリンク、または退避先の名前が埋まっていたら、何も変更する前に止める
+if [ -e "$dest/aidlc.bak-$ts" ] || [ -L "$dest/aidlc.bak-$ts" ]; then
+  echo "aidlc.bak-$ts が既にあります。中止します" >&2; exit 1
+fi
 if [ -L "$dest/aidlc" ]; then
   echo "aidlc/ がシンボリックリンクです。プロジェクト外に書かないよう中止します" >&2; exit 1
 fi
@@ -362,12 +368,10 @@ if [ -d "$dest/aidlc" ]; then
     echo "aidlc/ を読めません。中止します。" >&2; exit 1
   fi
   if [ -n "$contents" ]; then
-    cp -R "$dest/aidlc" "$dest/aidlc.bak-$(date +%Y%m%d%H%M%S)" || exit 1
+    cp -R "$dest/aidlc" "$dest/aidlc.bak-$ts" || exit 1
   fi
 fi
 
-ts=$(date +%Y%m%d%H%M%S)
-work=$(mktemp -d) || exit 1          # 差分や一覧はここに書く（既存のファイルを消さずに済む）
 
 # 2) ハーネス管理ディレクトリは「退避して新しいものを丸ごと置く」
 #    上書きだけだと、上流が新版で消したファイルが残り、新旧が混ざる。
@@ -401,15 +405,21 @@ for d in $managed; do
 done
 
 # 2b) 全部そろってから一括で入れ替える。途中で失敗したら入れ替え済みの分を元に戻す
-swapped=""
+swapped=""; wasabsent=""
 for d in $managed; do
+  [ -e "$dest/$d" ] || wasabsent="$wasabsent $d"   # 実行前に無かったもの（巻き戻しでは退ける）
   if { [ ! -e "$dest/$d" ] || mv "$dest/$d" "$dest/$d.bak-$ts"; } && mv "$dest/$d.new-$ts" "$dest/$d"; then
     swapped="$swapped $d"
   else
     for x in $swapped $d; do
-      [ -e "$dest/$x.bak-$ts" ] || continue
-      [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts"   # 事前検査で空いていることを確かめた名前
-      mv "$dest/$x.bak-$ts" "$dest/$x"
+      if [ -e "$dest/$x.bak-$ts" ]; then
+        [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts"   # 事前検査で空いていることを確かめた名前
+        mv "$dest/$x.bak-$ts" "$dest/$x"
+      else
+        case " $wasabsent " in
+          *" $x "*) [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts" ;;   # 新設した分も退ける
+        esac
+      fi
     done
     for x in $managed; do rm -rf "$dest/$x.new-$ts"; done
     echo "$d の入れ替えに失敗したため、すべて元に戻しました" >&2; exit 1
@@ -512,7 +522,8 @@ fi
 > **失敗側も確かめた** —— 書き込み不能なディレクトリと、ファイルサイズ制限による途中切れ（1024 バイトで切れた `project.md`）の
 > どちらでも手順 4 が exit 1 とファイル名を出して止まり、既存の記憶ファイルは無傷だった。
 > **codex（管理ディレクトリ 2 つ）でも、2 つ目がリンク／2 つ目のコピー失敗／ルートのファイルが読めない、の各場合に何も変更せず残骸も残さずに止まることを確かめた。**
-> **入れ替えの途中で `mv` が失敗した場合の巻き戻し（手順 2b）は再現できておらず、未検証である。**
+> **入れ替えの途中で失敗した場合の巻き戻し（手順 2b）は、2 つ目の入れ替えを故意に失敗させた写しで確かめた** ——
+> 既存の管理ディレクトリは旧版に戻り、実行前に無かったものは稼働位置から `*.failed-*` へ退けられた。
 > **他のハーネス・Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
 
 > **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
