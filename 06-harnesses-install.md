@@ -374,40 +374,69 @@ work=$(mktemp -d) || exit 1          # 差分や一覧はここに書く（既�
 #    ただしアーカイブにはファイル単位の所有台帳が無く、上流が消したものと利用者が足したものを
 #    機械的に区別できない。そこで旧版にだけあったファイルは消さずに一覧にし、人が判断する
 keep="settings.local.json"           # 旧ディレクトリから自動で戻す利用者ファイル（管理ディレクトリ直下からの相対）
+
+# 2a) 何も変える前に、全管理ディレクトリを検査し、新版を別名で用意する
 for d in $managed; do
   if [ -L "$dest/$d" ]; then
     echo "$d はシンボリックリンクです（dotfiles 管理など）。自動では置き換えないので、リンク先で手動更新してください" >&2
     exit 1
   fi
-  # 新版はまず別名に作り、成功してから入れ替える（途中で失敗しても旧版は元の場所に残る）
-  stage="$dest/$d.new-$ts"
-  [ -e "$stage" ] && { echo "$stage が既にあります。中止します" >&2; exit 1; }
-  cp -R "$R/$d" "$stage" || { rm -rf "$stage"; echo "$d の新版を用意できませんでした（旧版はそのまま）" >&2; exit 1; }
-  if [ -e "$dest/$d" ]; then
-    mv "$dest/$d" "$dest/$d.bak-$ts" || { rm -rf "$stage"; exit 1; }
+  if [ -e "$dest/$d.new-$ts" ] || [ -e "$dest/$d.bak-$ts" ]; then
+    echo "$d.new-$ts か $d.bak-$ts が既にあります。中止します" >&2; exit 1
   fi
-  mv "$stage" "$dest/$d" || { [ -e "$dest/$d.bak-$ts" ] && mv "$dest/$d.bak-$ts" "$dest/$d"; exit 1; }
-  if [ -d "$dest/$d.bak-$ts" ]; then
-    for k in $keep; do
-      if [ -f "$dest/$d.bak-$ts/$k" ] || [ -L "$dest/$d.bak-$ts/$k" ]; then
-        cp -pRP "$dest/$d.bak-$ts/$k" "$dest/$d/$k" || exit 1   # -P: シンボリックリンクはリンクのまま戻す
-      fi
-    done
-    old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)) || exit 1   # シンボリックリンクも含める
-    printf '%s\n' "$old" | while IFS= read -r f; do
-      [ -n "$f" ] || continue
-      if [ ! -e "$dest/$d/$f" ]; then
-        printf '%s/%s\n' "$d" "${f#./}" >> "$work/restore-candidates.txt"   # 旧版にだけある
-      elif [ -L "$dest/$d.bak-$ts/$f" ] || [ -L "$dest/$d/$f" ]; then
-        # リンクが絡む場合は中身ではなく「種別とリンク先」で比べる（中身が同じでもリンクが消えるため）
-        [ -L "$dest/$d.bak-$ts/$f" ] && [ -L "$dest/$d/$f" ] &&
-          [ "$(readlink "$dest/$d.bak-$ts/$f")" = "$(readlink "$dest/$d/$f")" ] ||
-          printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"
-      elif ! cmp -s "$dest/$d.bak-$ts/$f" "$dest/$d/$f"; then
-        printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"        # 両方にあり内容が違う
-      fi
-    done
+done
+for f in .gitignore AGENTS.md .mcp.json opencode.json; do     # 手順 3 で読むルートのファイルも先に確かめる
+  if [ -e "$dest/$f" ] && [ ! -r "$dest/$f" ]; then
+    echo "$f を読めません。中止します（まだ何も変更していません）" >&2; exit 1
   fi
+done
+staged=""
+for d in $managed; do
+  if ! cp -R "$R/$d" "$dest/$d.new-$ts"; then
+    for x in $staged $d; do rm -rf "$dest/$x.new-$ts"; done   # 用意した分を片付ける（旧版には触れていない）
+    echo "$d の新版を用意できませんでした（旧版はそのまま）" >&2; exit 1
+  fi
+  staged="$staged $d"
+done
+
+# 2b) 全部そろってから一括で入れ替える。途中で失敗したら入れ替え済みの分を元に戻す
+swapped=""
+for d in $managed; do
+  if { [ ! -e "$dest/$d" ] || mv "$dest/$d" "$dest/$d.bak-$ts"; } && mv "$dest/$d.new-$ts" "$dest/$d"; then
+    swapped="$swapped $d"
+  else
+    for x in $swapped $d; do
+      [ -e "$dest/$x.bak-$ts" ] || continue
+      rm -rf "$dest/$x.failed-$ts"; [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts"
+      mv "$dest/$x.bak-$ts" "$dest/$x"
+    done
+    for x in $managed; do rm -rf "$dest/$x.new-$ts"; done
+    echo "$d の入れ替えに失敗したため、すべて元に戻しました" >&2; exit 1
+  fi
+done
+
+# 2c) 利用者ファイルを戻し、旧版との違いを一覧にする
+for d in $managed; do
+  [ -d "$dest/$d.bak-$ts" ] || continue
+  for k in $keep; do
+    if [ -f "$dest/$d.bak-$ts/$k" ] || [ -L "$dest/$d.bak-$ts/$k" ]; then
+      cp -pRP "$dest/$d.bak-$ts/$k" "$dest/$d/$k" || exit 1   # -P: シンボリックリンクはリンクのまま戻す
+    fi
+  done
+  old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)) || exit 1   # シンボリックリンクも含める
+  printf '%s\n' "$old" | while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    if [ ! -e "$dest/$d/$f" ] && [ ! -L "$dest/$d/$f" ]; then
+      printf '%s/%s\n' "$d" "${f#./}" >> "$work/restore-candidates.txt"   # 旧版にだけある
+    elif [ -L "$dest/$d.bak-$ts/$f" ] || [ -L "$dest/$d/$f" ]; then
+      # リンクが絡む場合は中身ではなく「種別とリンク先」で比べる（中身が同じでもリンクが消えるため）
+      [ -L "$dest/$d.bak-$ts/$f" ] && [ -L "$dest/$d/$f" ] &&
+        [ "$(readlink "$dest/$d.bak-$ts/$f")" = "$(readlink "$dest/$d/$f")" ] ||
+        printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"
+    elif ! cmp -s "$dest/$d.bak-$ts/$f" "$dest/$d/$f"; then
+      printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"        # 両方にあり内容が違う
+    fi
+  done
 done
 if [ -s "$work/restore-candidates.txt" ]; then
   echo "旧版にだけあったファイルを $work/restore-candidates.txt に列挙した。"
@@ -421,6 +450,9 @@ fi
 # 3) ルートのファイルは上書きしない。既存があれば差分を出し、無ければ置く
 for f in .gitignore AGENTS.md .mcp.json opencode.json; do
   [ -e "$R/$f" ] || continue
+  if [ -L "$dest/$f" ] && [ ! -e "$dest/$f" ]; then
+    echo "$f は壊れたシンボリックリンクです。触らずに残します（必要なら手で直すこと）"; continue
+  fi
   if [ -e "$dest/$f" ]; then
     out="$work/upgrade-$(echo "$f" | tr -d .).diff"
     # diff の終了コードは 0 = 同一 / 1 = 差分あり / 2 = 読めない等のエラー。2 とリダイレクト失敗だけを止める
@@ -478,7 +510,9 @@ fi
 > 利用者の独自エージェントは `restore-candidates.txt` に挙がって `*.bak-*` 側に保全された。
 > **失敗側も確かめた** —— 書き込み不能なディレクトリと、ファイルサイズ制限による途中切れ（1024 バイトで切れた `project.md`）の
 > どちらでも手順 4 が exit 1 とファイル名を出して止まり、既存の記憶ファイルは無傷だった。
-> **他ハーネス・Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
+> **codex（管理ディレクトリ 2 つ）でも、2 つ目がリンク／2 つ目のコピー失敗／ルートのファイルが読めない、の各場合に何も変更せず残骸も残さずに止まることを確かめた。**
+> **入れ替えの途中で `mv` が失敗した場合の巻き戻し（手順 2b）は再現できておらず、未検証である。**
+> **他のハーネス・Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
 
 > **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
 >
