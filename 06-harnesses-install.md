@@ -385,6 +385,11 @@ for d in $managed; do
       [ -n "$f" ] || continue
       if [ ! -e "$dest/$d/$f" ]; then
         printf '%s/%s\n' "$d" "${f#./}" >> "$work/restore-candidates.txt"   # 旧版にだけある
+      elif [ -L "$dest/$d.bak-$ts/$f" ] || [ -L "$dest/$d/$f" ]; then
+        # リンクが絡む場合は中身ではなく「種別とリンク先」で比べる（中身が同じでもリンクが消えるため）
+        [ -L "$dest/$d.bak-$ts/$f" ] && [ -L "$dest/$d/$f" ] &&
+          [ "$(readlink "$dest/$d.bak-$ts/$f")" = "$(readlink "$dest/$d/$f")" ] ||
+          printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"
       elif ! cmp -s "$dest/$d.bak-$ts/$f" "$dest/$d/$f"; then
         printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"        # 両方にあり内容が違う
       fi
