@@ -397,7 +397,16 @@ for f in .gitignore AGENTS.md .mcp.json opencode.json; do     # 手順 3 で読�
 done
 staged=""
 for d in $managed; do
-  if ! cp -R "$R/$d" "$dest/$d.new-$ts"; then
+  ok=1
+  cp -R "$R/$d" "$dest/$d.new-$ts" || ok=
+  # 利用者ファイルは入れ替え前に新版側へ戻しておく（入れ替え後に失敗しても設定が欠けないように）
+  for k in $keep; do
+    [ -n "$ok" ] || break
+    if [ -f "$dest/$d/$k" ] || [ -L "$dest/$d/$k" ]; then
+      cp -pRP "$dest/$d/$k" "$dest/$d.new-$ts/$k" || ok=   # -P: シンボリックリンクはリンクのまま戻す
+    fi
+  done
+  if [ -z "$ok" ]; then
     for x in $staged $d; do rm -rf "$dest/$x.new-$ts"; done   # 用意した分を片付ける（旧版には触れていない）
     echo "$d の新版を用意できませんでした（旧版はそのまま）" >&2; exit 1
   fi
@@ -426,14 +435,9 @@ for d in $managed; do
   fi
 done
 
-# 2c) 利用者ファイルを戻し、旧版との違いを一覧にする
+# 2c) 旧版との違いを一覧にする（利用者ファイルは 2a で戻し済み）
 for d in $managed; do
   [ -d "$dest/$d.bak-$ts" ] || continue
-  for k in $keep; do
-    if [ -f "$dest/$d.bak-$ts/$k" ] || [ -L "$dest/$d.bak-$ts/$k" ]; then
-      cp -pRP "$dest/$d.bak-$ts/$k" "$dest/$d/$k" || exit 1   # -P: シンボリックリンクはリンクのまま戻す
-    fi
-  done
   old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)) || exit 1   # シンボリックリンクも含める
   printf '%s\n' "$old" | while IFS= read -r f; do
     [ -n "$f" ] || continue
