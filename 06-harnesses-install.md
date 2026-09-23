@@ -378,7 +378,7 @@ for d in $managed; do
     for k in $keep; do
       [ -f "$dest/$d.bak-$ts/$k" ] && { cp -p "$dest/$d.bak-$ts/$k" "$dest/$d/$k" || exit 1; }
     done
-    old=$(cd "$dest/$d.bak-$ts" && find . -type f) || exit 1
+    old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)) || exit 1   # シンボリックリンクも含める
     printf '%s\n' "$old" | while IFS= read -r f; do
       [ -n "$f" ] || continue
       if [ ! -e "$dest/$d/$f" ]; then
