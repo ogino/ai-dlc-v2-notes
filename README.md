@@ -60,7 +60,9 @@
 > 既存 intent には一度 `/aidlc --change-control <strict|relaxed>` を実行して意図を固定すること（→ [18.3.1](./18-release-impact-290.md)）。
 
 > **🔴 既定スコープ `classic` が 26 → 18 ステージに縮小した（v2.9.0、破壊的）。**
-> スコープ名を指定しない利用者に効く。旧 classic の形が要るなら **`workshop`** を使う（→ [18.2](./18-release-impact-290.md)）。
+> **効くのは、実際に `classic` に解決される intent である** —— `/aidlc-init` や `--scope` 無しの `intent-create` などのフォールバック経路と、`classic` を明示した場合。
+> 対話的な `/aidlc <説明文>` でキーワードに当たらなければ compose 提案が先に出るので、黙って `classic` が始まるわけではない（→ [5.2.1](./05-scopes-depth-test.md)）。
+> 旧 classic の形が要るなら **`workshop`** を使う（→ [18.2](./18-release-impact-290.md)）。
 >
 > **⚠ 上流の `v2` ブランチは 2026-09-01 に削除された。**`main` が 2.x の正本である（旧 1.x は新設の `v1` ブランチへ移動）。
 > 経緯と影響は [16-release-impact-2700.md](./16-release-impact-2700.md) を参照。

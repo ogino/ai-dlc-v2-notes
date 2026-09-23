@@ -371,8 +371,15 @@ done
 for f in .gitignore AGENTS.md .mcp.json opencode.json; do
   [ -e "$R/$f" ] || continue
   if [ -e "$dest/$f" ]; then
-    diff -u "$dest/$f" "$R/$f" > "upgrade-$(echo "$f" | tr -d .).diff" || true
-    echo "upgrade-*.diff を確認し、$f を手でマージすること"
+    out="upgrade-$(echo "$f" | tr -d .).diff"
+    # diff の終了コードは 0 = 同一 / 1 = 差分あり / 2 = 読めない等のエラー。2 とリダイレクト失敗だけを止める
+    #   リダイレクトに失敗した場合も 1 になるので、差分ファイルが空でないことも確かめる
+    if diff -u "$dest/$f" "$R/$f" > "$out"; then rm -f "$out"
+    else
+      rc=$?
+      { [ "$rc" -eq 1 ] && [ -s "$out" ]; } || { echo "$f の差分を作れませんでした" >&2; exit 1; }
+      echo "$out を確認し、$f を手でマージすること"
+    fi
   else
     cp "$R/$f" "$dest/$f" || exit 1
   fi
