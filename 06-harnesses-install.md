@@ -346,188 +346,170 @@ cp -R "$RUNTIME_ROOT/claude/." your-project/
 | opencode | `.opencode/`、`.aidlc/` |
 
 ```bash
+# bash で実行すること（zsh では $managed が単語に分割されず、複数の管理ディレクトリを扱えない）
 dest=$(cd your-project && pwd) || exit 1   # 絶対パスにする（下の検査で cd するため）
 h=claude                         # ハーネス名
 managed=".claude"                # 上表の管理ディレクトリ（複数ならスペース区切り）
+keep="settings.local.json"       # 旧ディレクトリから引き継ぐ利用者ファイル（管理ディレクトリ直下からの相対）
 R="$RUNTIME_ROOT/$h"
-
 ts=$(date +%Y%m%d%H%M%S)
-work=$(mktemp -d) || exit 1          # 差分や一覧はここに書く（既存のファイルを消さずに済む）
+work=$(mktemp -d) || exit 1      # 差分や一覧はここに書く（既存のファイルを消さずに済む）
+added="$work/added.txt"; : > "$added"
 
-# 0) aidlc/ 自体がリンク、または退避先の名前が埋まっていたら、何も変更する前に止める
-if [ -e "$dest/aidlc.bak-$ts" ] || [ -L "$dest/aidlc.bak-$ts" ]; then
-  echo "aidlc.bak-$ts が既にあります。中止します" >&2; exit 1
-fi
+# 失敗時の後始末: この実行で足したファイルと、用意した新版だけを消す（旧版・利用者のファイルには触れない）
+undo() {
+  while IFS= read -r a; do [ -n "$a" ] && rm -f "$a"; done < "$added"
+  for x in $managed; do rm -rf "$dest/$x.new-$ts"; done   # 名前が空いていることは手順 0 で確かめてある
+}
+
+# 0) 事前検査。ここで止まる場合は何も変更していない
 if [ -L "$dest/aidlc" ]; then
   echo "aidlc/ がシンボリックリンクです。プロジェクト外に書かないよう中止します" >&2; exit 1
 fi
-
-# 1) aidlc/ に中身があれば、まず退避する（mkdir より前に判定する）
-if [ -d "$dest/aidlc" ]; then
-  if ! contents=$(ls -A "$dest/aidlc"); then
-    echo "aidlc/ を読めません。中止します。" >&2; exit 1
-  fi
-  if [ -n "$contents" ]; then
-    cp -R "$dest/aidlc" "$dest/aidlc.bak-$ts" || exit 1
-  fi
-fi
-
-
-# 2) ハーネス管理ディレクトリは「退避して新しいものを丸ごと置く」
-#    上書きだけだと、上流が新版で消したファイルが残り、新旧が混ざる。
-#    ただしアーカイブにはファイル単位の所有台帳が無く、上流が消したものと利用者が足したものを
-#    機械的に区別できない。そこで旧版にだけあったファイルは消さずに一覧にし、人が判断する
-keep="settings.local.json"           # 旧ディレクトリから自動で戻す利用者ファイル（管理ディレクトリ直下からの相対）
-
-# 2a) 何も変える前に、全管理ディレクトリを検査し、新版を別名で用意する
+for n in "aidlc.bak-$ts" $(for d in $managed; do echo "$d.new-$ts $d.bak-$ts $d.failed-$ts"; done); do
+  if [ -e "$dest/$n" ] || [ -L "$dest/$n" ]; then echo "$n が既にあります。中止します" >&2; exit 1; fi
+done
 for d in $managed; do
   if [ -L "$dest/$d" ]; then
     echo "$d はシンボリックリンクです（dotfiles 管理など）。自動では置き換えないので、リンク先で手動更新してください" >&2
     exit 1
   fi
-  if [ -e "$dest/$d.new-$ts" ] || [ -e "$dest/$d.bak-$ts" ] || [ -e "$dest/$d.failed-$ts" ] ||
-     [ -L "$dest/$d.new-$ts" ] || [ -L "$dest/$d.bak-$ts" ] || [ -L "$dest/$d.failed-$ts" ]; then
-    echo "$d.new-$ts / $d.bak-$ts / $d.failed-$ts のいずれかが既にあります。中止します" >&2; exit 1
-  fi
 done
-for f in .gitignore AGENTS.md .mcp.json opencode.json; do     # 手順 3 で読むルートのファイルも先に確かめる
-  if [ -e "$dest/$f" ] && [ ! -r "$dest/$f" ]; then
-    echo "$f を読めません。中止します（まだ何も変更していません）" >&2; exit 1
-  fi
+for f in .gitignore AGENTS.md .mcp.json opencode.json; do
+  if [ -e "$dest/$f" ] && [ ! -r "$dest/$f" ]; then echo "$f を読めません。中止します" >&2; exit 1; fi
 done
-staged=""
+list=$(cd "$R/aidlc" && find . -type f) || { echo "展開したアーカイブの aidlc/ を読めません" >&2; exit 1; }
+[ -n "$list" ] || { echo "展開したアーカイブの aidlc/ が空です" >&2; exit 1; }
+
+# 1) aidlc/ に中身があれば退避する（この退避は失敗時も残す）
+if [ -d "$dest/aidlc" ]; then
+  if ! contents=$(ls -A "$dest/aidlc"); then echo "aidlc/ を読めません。中止します" >&2; exit 1; fi
+  if [ -n "$contents" ]; then cp -R "$dest/aidlc" "$dest/aidlc.bak-$ts" || exit 1; fi
+fi
+
+# 2) 管理ディレクトリの新版を別名で用意し、利用者ファイルもそこへ引き継ぐ（稼働中のものには触れない）
 for d in $managed; do
   ok=1
   cp -R "$R/$d" "$dest/$d.new-$ts" || ok=
-  # 利用者ファイルは入れ替え前に新版側へ戻しておく（入れ替え後に失敗しても設定が欠けないように）
   for k in $keep; do
     [ -n "$ok" ] || break
     if [ -f "$dest/$d/$k" ] || [ -L "$dest/$d/$k" ]; then
-      cp -pRP "$dest/$d/$k" "$dest/$d.new-$ts/$k" || ok=   # -P: シンボリックリンクはリンクのまま戻す
+      cp -pRP "$dest/$d/$k" "$dest/$d.new-$ts/$k" || ok=   # -P: シンボリックリンクはリンクのまま
     fi
   done
-  if [ -z "$ok" ]; then
-    for x in $staged $d; do rm -rf "$dest/$x.new-$ts"; done   # 用意した分を片付ける（旧版には触れていない）
-    echo "$d の新版を用意できませんでした（旧版はそのまま）" >&2; exit 1
-  fi
-  staged="$staged $d"
+  [ -n "$ok" ] || { undo; echo "$d の新版を用意できませんでした（何も変更していません）" >&2; exit 1; }
 done
 
-# 2b) 全部そろってから一括で入れ替える。途中で失敗したら入れ替え済みの分を元に戻す
-swapped=""; wasabsent=""
-for d in $managed; do
-  [ -e "$dest/$d" ] || wasabsent="$wasabsent $d"   # 実行前に無かったもの（巻き戻しでは退ける）
-  if { [ ! -e "$dest/$d" ] || mv "$dest/$d" "$dest/$d.bak-$ts"; } && mv "$dest/$d.new-$ts" "$dest/$d"; then
-    swapped="$swapped $d"
-  else
-    for x in $swapped $d; do
-      if [ -e "$dest/$x.bak-$ts" ]; then
-        [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts"   # 事前検査で空いていることを確かめた名前
-        mv "$dest/$x.bak-$ts" "$dest/$x"
-      else
-        case " $wasabsent " in
-          *" $x "*) [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts" ;;   # 新設した分も退ける
-        esac
-      fi
-    done
-    for x in $managed; do rm -rf "$dest/$x.new-$ts"; done
-    echo "$d の入れ替えに失敗したため、すべて元に戻しました" >&2; exit 1
-  fi
-done
-
-# 2c) 旧版との違いを一覧にする（利用者ファイルは 2a で戻し済み）
-for d in $managed; do
-  [ -d "$dest/$d.bak-$ts" ] || continue
-  old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)) || exit 1   # シンボリックリンクも含める
-  printf '%s\n' "$old" | while IFS= read -r f; do
-    [ -n "$f" ] || continue
-    if [ ! -e "$dest/$d/$f" ] && [ ! -L "$dest/$d/$f" ]; then
-      printf '%s/%s\n' "$d" "${f#./}" >> "$work/restore-candidates.txt"   # 旧版にだけある
-    elif [ -L "$dest/$d.bak-$ts/$f" ] || [ -L "$dest/$d/$f" ]; then
-      # リンクが絡む場合は中身ではなく「種別とリンク先」で比べる（中身が同じでもリンクが消えるため）
-      [ -L "$dest/$d.bak-$ts/$f" ] && [ -L "$dest/$d/$f" ] &&
-        [ "$(readlink "$dest/$d.bak-$ts/$f")" = "$(readlink "$dest/$d/$f")" ] ||
-        printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"
-    elif ! cmp -s "$dest/$d.bak-$ts/$f" "$dest/$d/$f"; then
-      printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"        # 両方にあり内容が違う
-    fi
-  done
-done
-if [ -s "$work/restore-candidates.txt" ]; then
-  echo "旧版にだけあったファイルを $work/restore-candidates.txt に列挙した。"
-  echo "利用者が足したもの（独自のエージェント等）は *.bak-$ts から戻し、上流が削除したものは戻さないこと"
-fi
-if [ -s "$work/changed-files.txt" ]; then
-  echo "新旧で内容が違う同名ファイルを $work/changed-files.txt に列挙した（上流の更新も含む）。"
-  echo "自分で編集したファイル（プロバイダ設定など）は *.bak-$ts の内容を見て手でマージすること"
-fi
-
-# 3) ルートのファイルは上書きしない。既存があれば差分を出し、無ければ置く
+# 3) ルートのファイル: 既存は上書きせず差分だけ出す。無いものだけ置く（置いたものは記録する）
 for f in .gitignore AGENTS.md .mcp.json opencode.json; do
   [ -e "$R/$f" ] || continue
   if [ -L "$dest/$f" ] && [ ! -e "$dest/$f" ]; then
-    echo "$f は壊れたシンボリックリンクです。触らずに残します（必要なら手で直すこと）"; continue
+    echo "$f は壊れたシンボリックリンクです。触らずに残します"; continue
   fi
   if [ -e "$dest/$f" ]; then
     out="$work/upgrade-$(echo "$f" | tr -d .).diff"
-    # diff の終了コードは 0 = 同一 / 1 = 差分あり / 2 = 読めない等のエラー。2 とリダイレクト失敗だけを止める
-    #   リダイレクトに失敗した場合も 1 になるので、差分ファイルが空でないことも確かめる
+    # diff は 0 = 同一 / 1 = 差分あり / 2 = エラー。リダイレクト失敗も 1 になるので中身の有無も見る
     if diff -u "$dest/$f" "$R/$f" > "$out"; then rm -f "$out"
     else
       rc=$?
-      { [ "$rc" -eq 1 ] && [ -s "$out" ]; } || { echo "$f の差分を作れませんでした" >&2; exit 1; }
+      { [ "$rc" -eq 1 ] && [ -s "$out" ]; } || { undo; echo "$f の差分を作れませんでした" >&2; exit 1; }
       echo "$out を確認し、$f を手でマージすること"
     fi
   else
-    cp "$R/$f" "$dest/$f" || exit 1
+    printf '%s\n' "$dest/$f" >> "$added"
+    cp "$R/$f" "$dest/$f" || { undo; echo "$f を置けませんでした" >&2; exit 1; }
   fi
 done
 
-# 4) aidlc/ は足りないファイルだけ補う。既存ファイル（利用者の記憶）には一切触れない。
-#    cp -n の終了コードは「既存を飛ばした」と「実エラー」を区別できず、存在確認だけでは
-#    途中で切れたファイルを見逃すため、欠けているファイルを 1 本ずつコピーし、
-#    その都度「cp の終了コード」と「内容の一致（cmp）」の両方を確かめる
-list=$(cd "$R/aidlc" && find . -type f) || { echo "展開したアーカイブの aidlc/ を読めません" >&2; exit 1; }
-[ -n "$list" ] || { echo "展開したアーカイブの aidlc/ が空です" >&2; exit 1; }
+# 4) aidlc/ は足りないファイルだけ補う。既存（利用者の記憶・壊れたリンクを含む）には触れない。
+#    途中のディレクトリがリンクなら、書くとプロジェクト外に出るので書かずに一覧へ回す
+mkdir -p "$dest/aidlc" || { undo; exit 1; }
 printf '%s\n' "$list" | while IFS= read -r f; do
-  { [ -e "$dest/aidlc/$f" ] || [ -L "$dest/aidlc/$f" ]; } && continue   # 壊れたリンクも「既存」として触らない
-  # 途中のディレクトリがリンクなら、書くとプロジェクト外に出る。書かずに一覧へ回す
+  { [ -e "$dest/aidlc/$f" ] || [ -L "$dest/aidlc/$f" ]; } && continue
   p="$dest/aidlc"; rest="${f#./}"; linked=
   while [ "$rest" != "${rest#*/}" ]; do
     p="$p/${rest%%/*}"; rest="${rest#*/}"
     [ -L "$p" ] && { linked=1; break; }
   done
-  if [ -n "$linked" ]; then
-    printf 'aidlc/%s\n' "${f#./}" >> "$work/skipped-under-links.txt"; continue
-  fi
+  if [ -n "$linked" ]; then printf 'aidlc/%s\n' "${f#./}" >> "$work/skipped-under-links.txt"; continue; fi
+  printf '%s\n' "$dest/aidlc/$f" >> "$added"
   mkdir -p "$dest/aidlc/$(dirname "$f")" &&
     cp "$R/aidlc/$f" "$dest/aidlc/$f" &&
     cmp -s "$R/aidlc/$f" "$dest/aidlc/$f" ||
-    { rm -f "$dest/aidlc/$f"   # ここで新規に作ったファイルだけを消す（途中で切れている場合がある）
-      echo "aidlc/ の補完に失敗しました: $f" >&2; exit 1; }
-done || exit 1
+    { echo "aidlc/ の補完に失敗しました: $f" >&2; exit 1; }
+done || { undo; exit 1; }
+
+# 5) ここまで成功したら、管理ディレクトリを一括で入れ替える（最後の一手）
+swapped=""; wasabsent=""
+for d in $managed; do
+  [ -e "$dest/$d" ] || wasabsent="$wasabsent $d"
+  if { [ ! -e "$dest/$d" ] || mv "$dest/$d" "$dest/$d.bak-$ts"; } && mv "$dest/$d.new-$ts" "$dest/$d"; then
+    swapped="$swapped $d"
+  else
+    for x in $swapped $d; do
+      if [ -e "$dest/$x.bak-$ts" ]; then
+        [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts"
+        mv "$dest/$x.bak-$ts" "$dest/$x"
+      else
+        case " $wasabsent " in *" $x "*) [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts" ;; esac
+      fi
+    done
+    undo
+    echo "$d の入れ替えに失敗したため、すべて元に戻しました" >&2; exit 1
+  fi
+done
+
+# 6) 旧版との違いを一覧にする（ここから先は報告だけで、失敗しても稼働中の状態は変えない）
+for d in $managed; do
+  [ -d "$dest/$d.bak-$ts" ] || continue
+  old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)) || continue
+  printf '%s\n' "$old" | while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    if [ ! -e "$dest/$d/$f" ] && [ ! -L "$dest/$d/$f" ]; then
+      printf '%s/%s\n' "$d" "${f#./}" >> "$work/restore-candidates.txt"   # 旧版にだけある
+    elif [ -L "$dest/$d.bak-$ts/$f" ] || [ -L "$dest/$d/$f" ]; then
+      [ -L "$dest/$d.bak-$ts/$f" ] && [ -L "$dest/$d/$f" ] &&
+        [ "$(readlink "$dest/$d.bak-$ts/$f")" = "$(readlink "$dest/$d/$f")" ] ||
+        printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"       # リンクの種別・行き先が違う
+    elif ! cmp -s "$dest/$d.bak-$ts/$f" "$dest/$d/$f"; then
+      printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"         # 両方にあり内容が違う
+    fi
+  done
+done
+if [ -s "$work/restore-candidates.txt" ]; then
+  echo "旧版にだけあったファイル: $work/restore-candidates.txt（利用者が足したものは *.bak-$ts から戻す。上流が消したものは戻さない）"
+fi
+if [ -s "$work/changed-files.txt" ]; then
+  echo "新旧で内容が違う同名ファイル: $work/changed-files.txt（上流の更新も含む。自分で編集したものは *.bak-$ts を見て手でマージする）"
+fi
 if [ -s "$work/skipped-under-links.txt" ]; then
-  echo "リンク先のディレクトリ配下にあたるため補完しなかったファイルを $work/skipped-under-links.txt に列挙した"
+  echo "リンク先の配下にあたるため補完しなかったファイル: $work/skipped-under-links.txt"
 fi
 ```
 
-> **⚠ 手順 2 は管理ディレクトリを `*.bak-<時刻>` に退避してから新版を丸ごと置く。**上流が新版で消したファイルは残らないので新旧は混ざらない。
-> **代わりに、利用者が管理ディレクトリ内に足したファイル（独自のエージェントなど）は新しい側に無くなる。**`settings.local.json` だけは自動で戻し、それ以外は `restore-candidates.txt` を見て人が戻すこと。
+> **手順の組み立て方**: 変更はすべて「足すだけで記録を取る操作」（手順 2〜4）と「入れ替え」（手順 5）に分け、
+> **入れ替えを最後の一手にしてある。** 手順 0〜4 のどこで失敗しても、この実行で足したファイルと用意した新版を消して止まり、
+> 稼働中の管理ディレクトリには触れない。手順 5 の途中で失敗した場合は、入れ替え済みの分を旧版に戻す。
+> **取り消しで消すのはファイルだけ**なので、`mkdir -p` で作った中身の無いディレクトリが残ることがある
+> （利用者が作った空のディレクトリと区別できないため、あえて消さない）。
+>
+> **⚠ 手順 5 は管理ディレクトリを `*.bak-<時刻>` に退避してから新版を丸ごと置く。**上流が新版で消したファイルは残らないので新旧は混ざらない。
+> **代わりに、利用者が管理ディレクトリ内に足したファイル（独自のエージェントなど）は新しい側に無くなる。**`settings.local.json` だけは自動で引き継ぎ、それ以外は `restore-candidates.txt` を見て人が戻すこと。
 > **利用者が編集した出荷ファイル（例: `.codex/config.toml` のプロバイダ設定、`opencode.json`）も新版で置き換わる。**
 > 新旧で内容が違う同名ファイルは `changed-files.txt` に出るが、**上流の更新と利用者の編集は区別できない**ため
 > ほとんどの管理ファイルが載りうる。自分で編集した覚えのあるファイルを中心に、退避側と見比べてマージすること（アーカイブにファイル単位の所有台帳が無いため、機械的には区別できない）。
 >
-> **検証の範囲（2026-09-23）**: 実物の `aidlc-copy-runtime-2.9.0.tar.gz` を展開し、
-> **claude ハーネスについて、使い捨ての既存プロジェクトに対して macOS で流した。**
-> `org.md`（`strict` 宣言入り）・`.claude/settings.local.json`・既存 `.gitignore` が保持され、
-> `.claude/settings.json` が更新され、不足していた記憶ファイルが補われ、`aidlc.bak-*` が作られることを確認した。
-> **管理ディレクトリの入れ替えも確かめた** —— 旧版にだけあったフックは新側に残らず、`settings.local.json` は自動で戻り、
-> 利用者の独自エージェントは `restore-candidates.txt` に挙がって `*.bak-*` 側に保全された。
-> **失敗側も確かめた** —— 書き込み不能なディレクトリと、ファイルサイズ制限による途中切れ（1024 バイトで切れた `project.md`）の
-> どちらでも手順 4 が exit 1 とファイル名を出して止まり、既存の記憶ファイルは無傷だった。
-> **codex（管理ディレクトリ 2 つ）でも、2 つ目がリンク／2 つ目のコピー失敗／ルートのファイルが読めない、の各場合に何も変更せず残骸も残さずに止まることを確かめた。**
-> **入れ替えの途中で失敗した場合の巻き戻し（手順 2b）は、2 つ目の入れ替えを故意に失敗させた写しで確かめた** ——
-> 既存の管理ディレクトリは旧版に戻り、実行前に無かったものは稼働位置から `*.failed-*` へ退けられた。
+> **検証の範囲（2026-09-23）**: 実物の `aidlc-copy-runtime-2.9.0.tar.gz` を展開し、使い捨てのプロジェクトに対して macOS の bash で流した。
+>
+> | 場面 | 結果 |
+> |---|---|
+> | 通常の更新（claude） | `org.md`（`strict` 宣言入り）・`settings.local.json`・既存 `.gitignore` を保持。`settings.json` は新版、不足の記憶ファイルを補完、`*.bak-*` を作成 |
+> | 旧版にだけあるフック・利用者の独自エージェント | 前者は新側に残らず、後者は `restore-candidates.txt` に挙がり `*.bak-*` 側に保全 |
+> | 手順 4 で失敗（書き込み不能／ファイルサイズ制限で途中切れ） | exit 1。**稼働中の `.claude` は旧版のまま**、手順 3 で置いた `.mcp.json` も取り消し、残るファイルは利用者の `org.md` だけ |
+> | `aidlc/` 自体がリンク／管理ディレクトリがリンク／ルートのファイルが読めない | 何も変更せずに止まる |
+> | `aidlc/` 配下の途中のディレクトリがリンク | プロジェクト外には 1 件も書かず、`skipped-under-links.txt` に列挙 |
+> | codex（管理ディレクトリ 2 つ）で 2 つ目の入れ替えを故意に失敗 | `.agents` は旧版に戻り、実行前に無かった `.codex` は稼働位置から `*.failed-*` へ退けられた |
+>
 > **他のハーネス・Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
 
 > **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
