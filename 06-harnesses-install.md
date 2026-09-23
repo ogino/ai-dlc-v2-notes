@@ -376,7 +376,9 @@ for d in $managed; do
   cp -R "$R/$d" "$dest/$d" || exit 1
   if [ -d "$dest/$d.bak-$ts" ]; then
     for k in $keep; do
-      [ -f "$dest/$d.bak-$ts/$k" ] && { cp -p "$dest/$d.bak-$ts/$k" "$dest/$d/$k" || exit 1; }
+      if [ -f "$dest/$d.bak-$ts/$k" ] || [ -L "$dest/$d.bak-$ts/$k" ]; then
+        cp -pRP "$dest/$d.bak-$ts/$k" "$dest/$d/$k" || exit 1   # -P: シンボリックリンクはリンクのまま戻す
+      fi
     done
     old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)) || exit 1   # シンボリックリンクも含める
     printf '%s\n' "$old" | while IFS= read -r f; do
@@ -423,7 +425,7 @@ done
 list=$(cd "$R/aidlc" && find . -type f) || { echo "展開したアーカイブの aidlc/ を読めません" >&2; exit 1; }
 [ -n "$list" ] || { echo "展開したアーカイブの aidlc/ が空です" >&2; exit 1; }
 printf '%s\n' "$list" | while IFS= read -r f; do
-  [ -e "$dest/aidlc/$f" ] && continue
+  { [ -e "$dest/aidlc/$f" ] || [ -L "$dest/aidlc/$f" ]; } && continue   # 壊れたリンクも「既存」として触らない
   mkdir -p "$dest/aidlc/$(dirname "$f")" &&
     cp "$R/aidlc/$f" "$dest/aidlc/$f" &&
     cmp -s "$R/aidlc/$f" "$dest/aidlc/$f" ||
