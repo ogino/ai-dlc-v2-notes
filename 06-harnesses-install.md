@@ -20,7 +20,7 @@
 > ```
 > 2.8.x までの「何もしなくてよい」とは違う（→ [18.5](./18-release-impact-290.md)）。
 
-> **🔴 現 Latest の v2.9.0 に、ネイティブ導入限定の不具合が 3 件残っている（2026-09-23 時点）。**
+> **🔴 現 Latest の v2.9.0 に、センサー・フック系の不具合が 3 件残っている（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）（2026-09-23 時点）。**
 > **①② は `bun` 実行では再現しない。安定版（Latest `v2.9.0`）には未収録で、preview `v2.9.1-preview.20260920.1` 以降には収録済み**（2026-09-23 実測）。
 > **③ は `bun` 実行でも起こりうる（フックの PATH 上に `bun` が無い場合）。修正はどの版にも未収録**（preview を含む）。
 >
@@ -265,6 +265,7 @@ Usage: install.sh [--version <x.y.z|x.y.z-preview.YYYYMMDD.N>] [--from <dir>] [-
 **署名検証とチェックサム照合を手順に含めている**。社内導入で供給元検証が要件なら、ここを落とさないこと。
 
 ```bash
+set -eu   # 検証に失敗したら展開へ進まない（上流の原文には無いので足している）
 tag=vX.Y.Z
 tmp="$(mktemp -d)"
 runtime_asset="aidlc-copy-runtime-${tag#v}.tar.gz"
@@ -283,10 +284,19 @@ gh attestation verify "$tmp/$runtime_asset" \
   --signer-workflow "$release_workflow" \
   --source-ref "refs/tags/$tag"
 
-(cd "$tmp" && sha256sum -c "$runtime_checksum")
+# 古い macOS には sha256sum が無い。その場合は同梱の shasum を使う
+if command -v sha256sum >/dev/null 2>&1; then
+  (cd "$tmp" && sha256sum -c "$runtime_checksum")
+else
+  (cd "$tmp" && shasum -a 256 -c "$runtime_checksum")
+fi
 tar -xzf "$tmp/$runtime_asset" -C "$tmp"
 RUNTIME_ROOT="$tmp/runtime"
 ```
+
+> **⚠ 上流の原文には `set -e` が無い。** そのまま貼ると、`gh attestation verify` や
+> チェックサム照合が失敗しても `tar -xzf` まで進んでしまう。上のブロックでは冒頭に `set -eu` を足した。
+> **また上流は `sha256sum` を前提にしているが、古い macOS には無い**ため、`shasum -a 256 -c` への分岐を足した。
 
 > **⚠ copy 用アーカイブは `version.json` / `checksums.txt` の外にある。**
 > 上流逐語: `The copy archive stays outside version.json and checksums.txt so existing
@@ -336,7 +346,7 @@ cp -R "$RUNTIME_ROOT/claude/." your-project/
 | opencode | `.opencode/`、`.aidlc/` |
 
 ```bash
-dest=your-project
+dest=$(cd your-project && pwd) || exit 1   # 絶対パスにする（下の検査で cd するため）
 h=claude                         # ハーネス名
 managed=".claude"                # 上表の管理ディレクトリ（複数ならスペース区切り）
 R="$RUNTIME_ROOT/$h"
@@ -369,8 +379,18 @@ for f in .gitignore AGENTS.md .mcp.json opencode.json; do
 done
 
 # 4) aidlc/ は足りないファイルだけ補う（-n = 既存は上書きしない）
-#    ⚠ macOS の cp -n は既存ファイルを飛ばすと終了コード 1 を返す。失敗ではないので無視する
-mkdir -p "$dest/aidlc" && { cp -Rn "$R/aidlc/." "$dest/aidlc/" || true; }
+#    macOS の cp -n は既存ファイルを飛ばしただけでも終了コード 1 を返すため、
+#    終了コードでは成否を判定できない。代わりに「全ファイルが揃ったか」で判定する
+mkdir -p "$dest/aidlc" || exit 1
+cp -Rn "$R/aidlc/." "$dest/aidlc/" 2>aidlc-copy-errors.log || true
+missing=$(cd "$R/aidlc" && find . -type f | while IFS= read -r f; do
+  [ -e "$dest/aidlc/$f" ] || printf '%s\n' "$f"
+done)
+if [ -n "$missing" ]; then
+  echo "aidlc/ の補完に失敗したファイルがあります（aidlc-copy-errors.log を参照）:" >&2
+  printf '%s\n' "$missing" >&2
+  exit 1
+fi
 ```
 
 > **⚠ 手順 2 は上書きのみで削除はしない。** 上流が新版で消したファイルは管理ディレクトリに残る。

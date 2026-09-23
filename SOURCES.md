@@ -62,7 +62,7 @@
      33 ステージ frontmatter の全数抽出と diff（差分は `- classic` 8 行のみ）/
      `core/tools/aidlc-audit.ts` の `VALID_EVENT_TYPES`（91 → 99）/
      `core/tools/aidlc-lib.ts` の Change Control 解決順 / `core/scopes/*.md` の新 frontmatter キー /
-     `core/tools/aidlc.ts` の `loadDelegate` と `core/tools/aidlc-state.ts:3040`、および `core/hooks/` の `aidlc-continue-workflow.ts` / `aidlc-rebuild-stage-graph.ts` / `aidlc-run-sensors.ts` の `"bun"` 直接指定（v2.9.0 に残るネイティブ限定の不具合 3 件。#1249 の修正 `f79e321b` の本文を含む）/ `aidlc-copy-runtime-2.9.0.tar.gz` の実物展開（手動コピー手順の検証）/
+     `core/tools/aidlc.ts` の `loadDelegate` と `core/tools/aidlc-state.ts:3040`、および `core/hooks/` の `aidlc-continue-workflow.ts` / `aidlc-rebuild-stage-graph.ts` / `aidlc-run-sensors.ts` の `"bun"` 直接指定（v2.9.0 に残るセンサー・フック系の不具合 3 件（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）。#1249 の修正 `f79e321b` の本文を含む）/ `aidlc-copy-runtime-2.9.0.tar.gz` の実物展開（手動コピー手順の検証）/
      `gh release view` によるリリース資産一覧（13 → 15 件）— 詳細は
      [18-release-impact-290.md](./18-release-impact-290.md)
    - 2.7.0 → 2.8.1 区間（2026-09-09 実測。branch `main` HEAD `c03f9e28`）:
