@@ -378,19 +378,18 @@ for f in .gitignore AGENTS.md .mcp.json opencode.json; do
   fi
 done
 
-# 4) aidlc/ は足りないファイルだけ補う（-n = 既存は上書きしない）
-#    macOS の cp -n は既存ファイルを飛ばしただけでも終了コード 1 を返すため、
-#    終了コードでは成否を判定できない。代わりに「全ファイルが揃ったか」で判定する
-mkdir -p "$dest/aidlc" || exit 1
-cp -Rn "$R/aidlc/." "$dest/aidlc/" 2>aidlc-copy-errors.log || true
-missing=$(cd "$R/aidlc" && find . -type f | while IFS= read -r f; do
-  [ -e "$dest/aidlc/$f" ] || printf '%s\n' "$f"
-done)
-if [ -n "$missing" ]; then
-  echo "aidlc/ の補完に失敗したファイルがあります（aidlc-copy-errors.log を参照）:" >&2
-  printf '%s\n' "$missing" >&2
-  exit 1
-fi
+# 4) aidlc/ は足りないファイルだけ補う。既存ファイル（利用者の記憶）には一切触れない。
+#    cp -n の終了コードは「既存を飛ばした」と「実エラー」を区別できず、存在確認だけでは
+#    途中で切れたファイルを見逃すため、欠けているファイルを 1 本ずつコピーし、
+#    その都度「cp の終了コード」と「内容の一致（cmp）」の両方を確かめる
+( cd "$R/aidlc" && find . -type f ) | while IFS= read -r f; do
+  [ -e "$dest/aidlc/$f" ] && continue
+  mkdir -p "$dest/aidlc/$(dirname "$f")" &&
+    cp "$R/aidlc/$f" "$dest/aidlc/$f" &&
+    cmp -s "$R/aidlc/$f" "$dest/aidlc/$f" ||
+    { rm -f "$dest/aidlc/$f"   # ここで新規に作ったファイルだけを消す（途中で切れている場合がある）
+      echo "aidlc/ の補完に失敗しました: $f" >&2; exit 1; }
+done || exit 1
 ```
 
 > **⚠ 手順 2 は上書きのみで削除はしない。** 上流が新版で消したファイルは管理ディレクトリに残る。
@@ -400,6 +399,8 @@ fi
 > **claude ハーネスについて、使い捨ての既存プロジェクトに対して macOS で流した。**
 > `org.md`（`strict` 宣言入り）・`.claude/settings.local.json`・既存 `.gitignore` が保持され、
 > `.claude/settings.json` が更新され、不足していた記憶ファイルが補われ、`aidlc.bak-*` が作られることを確認した。
+> **失敗側も確かめた** —— 書き込み不能なディレクトリと、ファイルサイズ制限による途中切れ（1024 バイトで切れた `project.md`）の
+> どちらでも手順 4 が exit 1 とファイル名を出して止まり、既存の記憶ファイルは無傷だった。
 > **他ハーネス・Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
 
 > **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
