@@ -351,6 +351,11 @@ h=claude                         # ハーネス名
 managed=".claude"                # 上表の管理ディレクトリ（複数ならスペース区切り）
 R="$RUNTIME_ROOT/$h"
 
+# 0) aidlc/ 自体がリンクなら、何も変更する前に止める（プロジェクト外に書かないため）
+if [ -L "$dest/aidlc" ]; then
+  echo "aidlc/ がシンボリックリンクです。プロジェクト外に書かないよう中止します" >&2; exit 1
+fi
+
 # 1) aidlc/ に中身があれば、まず退避する（mkdir より前に判定する）
 if [ -d "$dest/aidlc" ]; then
   if ! contents=$(ls -A "$dest/aidlc"); then
@@ -439,12 +444,24 @@ list=$(cd "$R/aidlc" && find . -type f) || { echo "展開したアーカイブ�
 [ -n "$list" ] || { echo "展開したアーカイブの aidlc/ が空です" >&2; exit 1; }
 printf '%s\n' "$list" | while IFS= read -r f; do
   { [ -e "$dest/aidlc/$f" ] || [ -L "$dest/aidlc/$f" ]; } && continue   # 壊れたリンクも「既存」として触らない
+  # 途中のディレクトリがリンクなら、書くとプロジェクト外に出る。書かずに一覧へ回す
+  p="$dest/aidlc"; rest="${f#./}"; linked=
+  while [ "$rest" != "${rest#*/}" ]; do
+    p="$p/${rest%%/*}"; rest="${rest#*/}"
+    [ -L "$p" ] && { linked=1; break; }
+  done
+  if [ -n "$linked" ]; then
+    printf 'aidlc/%s\n' "${f#./}" >> "$work/skipped-under-links.txt"; continue
+  fi
   mkdir -p "$dest/aidlc/$(dirname "$f")" &&
     cp "$R/aidlc/$f" "$dest/aidlc/$f" &&
     cmp -s "$R/aidlc/$f" "$dest/aidlc/$f" ||
     { rm -f "$dest/aidlc/$f"   # ここで新規に作ったファイルだけを消す（途中で切れている場合がある）
       echo "aidlc/ の補完に失敗しました: $f" >&2; exit 1; }
 done || exit 1
+if [ -s "$work/skipped-under-links.txt" ]; then
+  echo "リンク先のディレクトリ配下にあたるため補完しなかったファイルを $work/skipped-under-links.txt に列挙した"
+fi
 ```
 
 > **⚠ 手順 2 は管理ディレクトリを `*.bak-<時刻>` に退避してから新版を丸ごと置く。**上流が新版で消したファイルは残らないので新旧は混ざらない。
