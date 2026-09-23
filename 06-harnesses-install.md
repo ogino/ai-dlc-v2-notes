@@ -361,19 +361,39 @@ if [ -d "$dest/aidlc" ]; then
   fi
 fi
 
-# 2) ハーネス管理ディレクトリは上書きで更新する
-#    （利用者が足した settings.local.json などは残る。上流で削除されたファイルも残る点に注意）
+ts=$(date +%Y%m%d%H%M%S)
+work=$(mktemp -d) || exit 1          # 差分や一覧はここに書く（既存のファイルを消さずに済む）
+
+# 2) ハーネス管理ディレクトリは「退避して新しいものを丸ごと置く」
+#    上書きだけだと、上流が新版で消したファイルが残り、新旧が混ざる。
+#    ただしアーカイブにはファイル単位の所有台帳が無く、上流が消したものと利用者が足したものを
+#    機械的に区別できない。そこで旧版にだけあったファイルは消さずに一覧にし、人が判断する
+keep="settings.local.json"           # 旧ディレクトリから自動で戻す利用者ファイル（管理ディレクトリ直下からの相対）
 for d in $managed; do
-  mkdir -p "$dest/$d" && cp -R "$R/$d/." "$dest/$d/" || exit 1
+  if [ -e "$dest/$d" ]; then
+    mv "$dest/$d" "$dest/$d.bak-$ts" || exit 1
+  fi
+  cp -R "$R/$d" "$dest/$d" || exit 1
+  if [ -d "$dest/$d.bak-$ts" ]; then
+    for k in $keep; do
+      [ -f "$dest/$d.bak-$ts/$k" ] && { cp -p "$dest/$d.bak-$ts/$k" "$dest/$d/$k" || exit 1; }
+    done
+    old=$(cd "$dest/$d.bak-$ts" && find . -type f) || exit 1
+    printf '%s\n' "$old" | while IFS= read -r f; do
+      [ -n "$f" ] && [ ! -e "$dest/$d/$f" ] && printf '%s/%s\n' "$d" "${f#./}"
+    done >> "$work/restore-candidates.txt"
+  fi
 done
+if [ -s "$work/restore-candidates.txt" ]; then
+  echo "旧版にだけあったファイルを $work/restore-candidates.txt に列挙した。"
+  echo "利用者が足したもの（独自のエージェント等）は *.bak-$ts から戻し、上流が削除したものは戻さないこと"
+fi
 
 # 3) ルートのファイルは上書きしない。既存があれば差分を出し、無ければ置く
-#    差分は毎回新しく作る一時ディレクトリに書く（既存のファイルやディレクトリを消さずに済む）
-diffdir=$(mktemp -d) || exit 1
 for f in .gitignore AGENTS.md .mcp.json opencode.json; do
   [ -e "$R/$f" ] || continue
   if [ -e "$dest/$f" ]; then
-    out="$diffdir/upgrade-$(echo "$f" | tr -d .).diff"
+    out="$work/upgrade-$(echo "$f" | tr -d .).diff"
     # diff の終了コードは 0 = 同一 / 1 = 差分あり / 2 = 読めない等のエラー。2 とリダイレクト失敗だけを止める
     #   リダイレクトに失敗した場合も 1 になるので、差分ファイルが空でないことも確かめる
     if diff -u "$dest/$f" "$R/$f" > "$out"; then rm -f "$out"
@@ -403,13 +423,15 @@ printf '%s\n' "$list" | while IFS= read -r f; do
 done || exit 1
 ```
 
-> **⚠ 手順 2 は上書きのみで削除はしない。** 上流が新版で消したファイルは管理ディレクトリに残る。
-> 完全に揃えるなら、新旧のファイル一覧を比較して不要分を消すこと（その手順は本調査では詰めていない）。
+> **⚠ 手順 2 は管理ディレクトリを `*.bak-<時刻>` に退避してから新版を丸ごと置く。**上流が新版で消したファイルは残らないので新旧は混ざらない。
+> **代わりに、利用者が管理ディレクトリ内に足したファイル（独自のエージェントなど）は新しい側に無くなる。**`settings.local.json` だけは自動で戻し、それ以外は `restore-candidates.txt` を見て人が戻すこと（アーカイブにファイル単位の所有台帳が無いため、機械的には区別できない）。
 >
 > **検証の範囲（2026-09-23）**: 実物の `aidlc-copy-runtime-2.9.0.tar.gz` を展開し、
 > **claude ハーネスについて、使い捨ての既存プロジェクトに対して macOS で流した。**
 > `org.md`（`strict` 宣言入り）・`.claude/settings.local.json`・既存 `.gitignore` が保持され、
 > `.claude/settings.json` が更新され、不足していた記憶ファイルが補われ、`aidlc.bak-*` が作られることを確認した。
+> **管理ディレクトリの入れ替えも確かめた** —— 旧版にだけあったフックは新側に残らず、`settings.local.json` は自動で戻り、
+> 利用者の独自エージェントは `restore-candidates.txt` に挙がって `*.bak-*` 側に保全された。
 > **失敗側も確かめた** —— 書き込み不能なディレクトリと、ファイルサイズ制限による途中切れ（1024 バイトで切れた `project.md`）の
 > どちらでも手順 4 が exit 1 とファイル名を出して止まり、既存の記憶ファイルは無傷だった。
 > **他ハーネス・Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
