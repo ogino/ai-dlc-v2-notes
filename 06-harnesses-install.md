@@ -380,13 +380,22 @@ for d in $managed; do
     done
     old=$(cd "$dest/$d.bak-$ts" && find . -type f) || exit 1
     printf '%s\n' "$old" | while IFS= read -r f; do
-      [ -n "$f" ] && [ ! -e "$dest/$d/$f" ] && printf '%s/%s\n' "$d" "${f#./}"
-    done >> "$work/restore-candidates.txt"
+      [ -n "$f" ] || continue
+      if [ ! -e "$dest/$d/$f" ]; then
+        printf '%s/%s\n' "$d" "${f#./}" >> "$work/restore-candidates.txt"   # 旧版にだけある
+      elif ! cmp -s "$dest/$d.bak-$ts/$f" "$dest/$d/$f"; then
+        printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"        # 両方にあり内容が違う
+      fi
+    done
   fi
 done
 if [ -s "$work/restore-candidates.txt" ]; then
   echo "旧版にだけあったファイルを $work/restore-candidates.txt に列挙した。"
   echo "利用者が足したもの（独自のエージェント等）は *.bak-$ts から戻し、上流が削除したものは戻さないこと"
+fi
+if [ -s "$work/changed-files.txt" ]; then
+  echo "新旧で内容が違う同名ファイルを $work/changed-files.txt に列挙した（上流の更新も含む）。"
+  echo "自分で編集したファイル（プロバイダ設定など）は *.bak-$ts の内容を見て手でマージすること"
 fi
 
 # 3) ルートのファイルは上書きしない。既存があれば差分を出し、無ければ置く
@@ -424,7 +433,10 @@ done || exit 1
 ```
 
 > **⚠ 手順 2 は管理ディレクトリを `*.bak-<時刻>` に退避してから新版を丸ごと置く。**上流が新版で消したファイルは残らないので新旧は混ざらない。
-> **代わりに、利用者が管理ディレクトリ内に足したファイル（独自のエージェントなど）は新しい側に無くなる。**`settings.local.json` だけは自動で戻し、それ以外は `restore-candidates.txt` を見て人が戻すこと（アーカイブにファイル単位の所有台帳が無いため、機械的には区別できない）。
+> **代わりに、利用者が管理ディレクトリ内に足したファイル（独自のエージェントなど）は新しい側に無くなる。**`settings.local.json` だけは自動で戻し、それ以外は `restore-candidates.txt` を見て人が戻すこと。
+> **利用者が編集した出荷ファイル（例: `.codex/config.toml` のプロバイダ設定、`opencode.json`）も新版で置き換わる。**
+> 新旧で内容が違う同名ファイルは `changed-files.txt` に出るが、**上流の更新と利用者の編集は区別できない**ため
+> ほとんどの管理ファイルが載りうる。自分で編集した覚えのあるファイルを中心に、退避側と見比べてマージすること（アーカイブにファイル単位の所有台帳が無いため、機械的には区別できない）。
 >
 > **検証の範囲（2026-09-23）**: 実物の `aidlc-copy-runtime-2.9.0.tar.gz` を展開し、
 > **claude ハーネスについて、使い捨ての既存プロジェクトに対して macOS で流した。**
