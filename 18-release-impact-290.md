@@ -223,9 +223,11 @@ v2.9.0 でリリース資産が **13 件 → 15 件**になり、**ランタイ�
 
 | | v2.8.1 | **v2.9.0** |
 |---|---|---|
-| ネイティブ用 | `aidlc-runtime-2.8.1.tar.gz` | `aidlc-runtime-2.9.0.tar.gz`（`dist-release/<harness>`） |
-| **手動コピー用** | **同じもの** | **`aidlc-copy-runtime-2.9.0.tar.gz`**（**`dist/<harness>`**） |
+| ネイティブ用 | `aidlc-runtime-2.8.1.tar.gz` | `aidlc-runtime-2.9.0.tar.gz`（ビルド元 `dist-release/<harness>`） |
+| **手動コピー用** | **同じもの** | **`aidlc-copy-runtime-2.9.0.tar.gz`**（ビルド元 **`dist/<harness>`**） |
 | 手動コピーの前提 | **ネイティブ `aidlc` が必須** | **Bun が必要。ネイティブ `aidlc` は不要** |
+
+> **括弧内はアーカイブの*ビルド元*である。展開後のパスはどちらも `runtime/<harness>/` で、コピーするのもそのディレクトリである**（`scripts/package-release.ts` が `runtime/${distribution}/` の下に詰める）。
 
 `.sha256` を含めて 2 件増えている。
 
