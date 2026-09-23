@@ -372,6 +372,7 @@ for f in .gitignore AGENTS.md .mcp.json opencode.json; do
   [ -e "$R/$f" ] || continue
   if [ -e "$dest/$f" ]; then
     out="upgrade-$(echo "$f" | tr -d .).diff"
+    rm -rf "$out" || exit 1   # 前回の残骸を消す（古い差分を誤って受け入れないため）
     # diff の終了コードは 0 = 同一 / 1 = 差分あり / 2 = 読めない等のエラー。2 とリダイレクト失敗だけを止める
     #   リダイレクトに失敗した場合も 1 になるので、差分ファイルが空でないことも確かめる
     if diff -u "$dest/$f" "$R/$f" > "$out"; then rm -f "$out"
@@ -389,7 +390,9 @@ done
 #    cp -n の終了コードは「既存を飛ばした」と「実エラー」を区別できず、存在確認だけでは
 #    途中で切れたファイルを見逃すため、欠けているファイルを 1 本ずつコピーし、
 #    その都度「cp の終了コード」と「内容の一致（cmp）」の両方を確かめる
-( cd "$R/aidlc" && find . -type f ) | while IFS= read -r f; do
+list=$(cd "$R/aidlc" && find . -type f) || { echo "展開したアーカイブの aidlc/ を読めません" >&2; exit 1; }
+[ -n "$list" ] || { echo "展開したアーカイブの aidlc/ が空です" >&2; exit 1; }
+printf '%s\n' "$list" | while IFS= read -r f; do
   [ -e "$dest/aidlc/$f" ] && continue
   mkdir -p "$dest/aidlc/$(dirname "$f")" &&
     cp "$R/aidlc/$f" "$dest/aidlc/$f" &&
