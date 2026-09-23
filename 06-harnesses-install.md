@@ -374,6 +374,9 @@ for d in $managed; do
     echo "$d はシンボリックリンクです（dotfiles 管理など）。自動では置き換えないので、リンク先で手動更新してください" >&2
     exit 1
   fi
+  if [ -e "$dest/$d" ] && [ ! -d "$dest/$d" ]; then
+    echo "$d がディレクトリではありません（利用者のファイル？）。中止します" >&2; exit 1
+  fi
 done
 for f in .gitignore AGENTS.md .mcp.json opencode.json; do
   if [ -e "$dest/$f" ] && [ ! -r "$dest/$f" ]; then echo "$f を読めません。中止します" >&2; exit 1; fi
@@ -462,7 +465,9 @@ done
 # 6) 旧版との違いを一覧にする（ここから先は報告だけで、失敗しても稼働中の状態は変えない）
 for d in $managed; do
   [ -d "$dest/$d.bak-$ts" ] || continue
-  old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)) || continue
+  if ! old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)); then
+    echo "⚠ $d.bak-$ts を読み切れませんでした。下の一覧は不完全なので、退避側を消さずに手で確認すること" >&2
+  fi
   printf '%s\n' "$old" | while IFS= read -r f; do
     [ -n "$f" ] || continue
     if [ ! -e "$dest/$d/$f" ] && [ ! -L "$dest/$d/$f" ]; then
