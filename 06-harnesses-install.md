@@ -368,11 +368,12 @@ for d in $managed; do
 done
 
 # 3) ルートのファイルは上書きしない。既存があれば差分を出し、無ければ置く
+#    差分は毎回新しく作る一時ディレクトリに書く（既存のファイルやディレクトリを消さずに済む）
+diffdir=$(mktemp -d) || exit 1
 for f in .gitignore AGENTS.md .mcp.json opencode.json; do
   [ -e "$R/$f" ] || continue
   if [ -e "$dest/$f" ]; then
-    out="upgrade-$(echo "$f" | tr -d .).diff"
-    rm -rf "$out" || exit 1   # 前回の残骸を消す（古い差分を誤って受け入れないため）
+    out="$diffdir/upgrade-$(echo "$f" | tr -d .).diff"
     # diff の終了コードは 0 = 同一 / 1 = 差分あり / 2 = 読めない等のエラー。2 とリダイレクト失敗だけを止める
     #   リダイレクトに失敗した場合も 1 になるので、差分ファイルが空でないことも確かめる
     if diff -u "$dest/$f" "$R/$f" > "$out"; then rm -f "$out"
