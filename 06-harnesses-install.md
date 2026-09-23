@@ -21,7 +21,8 @@
 > 2.8.x までの「何もしなくてよい」とは違う（→ [18.5](./18-release-impact-290.md)）。
 
 > **🔴 現 Latest の v2.9.0 に、ネイティブ導入限定の不具合が 3 件残っている（2026-09-23 時点）。**
-> **`bun` 実行では再現しない。****安定版（Latest `v2.9.0`）には未収録。preview `v2.9.1-preview.20260920.1` 以降には収録済み**（2026-09-23 実測）。
+> **①② は `bun` 実行では再現しない。安定版（Latest `v2.9.0`）には未収録で、preview `v2.9.1-preview.20260920.1` 以降には収録済み**（2026-09-23 実測）。
+> **③ は `bun` 実行でも起こりうる（フックの PATH 上に `bun` が無い場合）。修正はどの版にも未収録**（preview を含む）。
 >
 > | 症状 | 影響 |
 > |---|---|
@@ -310,12 +311,37 @@ cp -R "$RUNTIME_ROOT/claude/." your-project/
 - `aidlc/knowledge/` —— **取り込んだ知識**
 - ルートの `AGENTS.md` —— **プロジェクト固有の指示**
 
-新規プロジェクトなら上流の手順でよい。**既存プロジェクトでは退避してから入れること。**
+新規プロジェクトなら上流の手順でよい。**既存プロジェクトでは、中身の種類ごとに扱いを変えること。**
+
+`aidlc-copy-runtime-2.9.0.tar.gz` の `runtime/<harness>/` を実測すると、中身は 3 種類に分かれる。
+
+| 種類 | 中身（実測） | 既存プロジェクトでの扱い |
+|---|---|---|
+| **ハーネス管理ディレクトリ** | 下表 | **上書きで更新する**（ここを据え置くと旧版の不具合が残る） |
+| **ルートのファイル** | `.gitignore`、`AGENTS.md`（claude 以外）、`.mcp.json`（claude）、`opencode.json`（opencode） | **上書きしない。差分を見て手でマージする** |
+| **`aidlc/` ワークスペースの殻** | `active-space`、**`spaces/default/memory/{org,team,project}.md`**、`phases/*.md` | **既存ファイルは絶対に上書きしない。足りないものだけ補う** |
+
+> **⚠ `aidlc/spaces/<space>/memory/org.md` などは利用者が書く記憶ファイルである。**
+> **[18.3](./18-release-impact-290.md) の Change Control の `strict` 宣言もここに書く。** 上書きすると統制設定ごと消える。
+
+ハーネス管理ディレクトリ（実測）:
+
+| ハーネス | 管理ディレクトリ |
+|---|---|
+| claude | `.claude/` |
+| codex | `.codex/`、`.agents/` |
+| copilot | `.github/`、`.aidlc/` |
+| cursor | `.cursor/` |
+| kiro / kiro-ide | `.kiro/` |
+| opencode | `.opencode/`、`.aidlc/` |
 
 ```bash
 dest=your-project
+h=claude                         # ハーネス名
+managed=".claude"                # 上表の管理ディレクトリ（複数ならスペース区切り）
+R="$RUNTIME_ROOT/$h"
 
-# 1) 既存の作業領域があれば、まず退避する（mkdir より前に判定する）
+# 1) aidlc/ に中身があれば、まず退避する（mkdir より前に判定する）
 if [ -d "$dest/aidlc" ]; then
   if ! contents=$(ls -A "$dest/aidlc"); then
     echo "aidlc/ を読めません。中止します。" >&2; exit 1
@@ -325,21 +351,36 @@ if [ -d "$dest/aidlc" ]; then
   fi
 fi
 
-# 2) AGENTS.md は上書きせず、差分を見てから手でマージする
-if [ -f "$dest/AGENTS.md" ]; then
-  diff -u "$dest/AGENTS.md" "$RUNTIME_ROOT/claude/AGENTS.md" > agents-md.diff || true
-  echo "agents-md.diff を確認し、手でマージすること（自動上書きはしない）"
-fi
+# 2) ハーネス管理ディレクトリは上書きで更新する
+#    （利用者が足した settings.local.json などは残る。上流で削除されたファイルも残る点に注意）
+for d in $managed; do
+  mkdir -p "$dest/$d" && cp -R "$R/$d/." "$dest/$d/" || exit 1
+done
 
-# 3) 既存を壊さずに配置する（-n = 既存ファイルは上書きしない）
-cp -Rn "$RUNTIME_ROOT/claude/." "$dest/"
+# 3) ルートのファイルは上書きしない。既存があれば差分を出し、無ければ置く
+for f in .gitignore AGENTS.md .mcp.json opencode.json; do
+  [ -e "$R/$f" ] || continue
+  if [ -e "$dest/$f" ]; then
+    diff -u "$dest/$f" "$R/$f" > "upgrade-$(echo "$f" | tr -d .).diff" || true
+    echo "upgrade-*.diff を確認し、$f を手でマージすること"
+  else
+    cp "$R/$f" "$dest/$f" || exit 1
+  fi
+done
+
+# 4) aidlc/ は足りないファイルだけ補う（-n = 既存は上書きしない）
+#    ⚠ macOS の cp -n は既存ファイルを飛ばすと終了コード 1 を返す。失敗ではないので無視する
+mkdir -p "$dest/aidlc" && { cp -Rn "$R/aidlc/." "$dest/aidlc/" || true; }
 ```
 
-> **⚠ `cp -Rn` は既存ファイルを残すため、更新したいハーネスファイルも据え置かれる。**
-> **ハーネスのツリー（`.claude/` 等）だけは意図的に置き換える必要がある。**
-> どのパスが「管理対象」でどれが「利用者の資産」かは、17 章 17.9 の
-> `managedDirectories` の考え方が参考になる。
-> **本調査では実機で流していない。社内で 1 度、使い捨てのコピーで確かめてから手順書に採ること。**
+> **⚠ 手順 2 は上書きのみで削除はしない。** 上流が新版で消したファイルは管理ディレクトリに残る。
+> 完全に揃えるなら、新旧のファイル一覧を比較して不要分を消すこと（その手順は本調査では詰めていない）。
+>
+> **検証の範囲（2026-09-23）**: 実物の `aidlc-copy-runtime-2.9.0.tar.gz` を展開し、
+> **claude ハーネスについて、使い捨ての既存プロジェクトに対して macOS で流した。**
+> `org.md`（`strict` 宣言入り）・`.claude/settings.local.json`・既存 `.gitignore` が保持され、
+> `.claude/settings.json` が更新され、不足していた記憶ファイルが補われ、`aidlc.bak-*` が作られることを確認した。
+> **他ハーネス・Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
 
 > **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
 >

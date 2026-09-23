@@ -105,7 +105,7 @@
 - [ ] 2.6.71 の localization が各ハーネスでどこまで日本語化されるか
 - [ ] 2.6.119 / 2.6.117 の文脈削減が実トークン消費・コスト・レイテンシをどれだけ下げるか
       — 測ったのは Git オブジェクトのバイト数のみ
-- [ ] `audit-format.md` の "Interaction Events (10 events)" と実際の表行数（9 行）の不一致
+- [x] `audit-format.md` の "Interaction Events (10 events)" と実際の表行数（9 行）の不一致 —— **`main` で解消（下記「2026-09-23 解決」の項）**
 - [ ] 2.6.92 の混在セパレータ問題が実データで悪用可能だったか — コード構造上の経路のみ確認
 - [ ] Copilot / opencode がエンジン再インストール後に compose フックで自己修復するか
       — 上流は Claude / Codex / Cursor / Kiro IDE と Kiro CLI しか名指ししていない

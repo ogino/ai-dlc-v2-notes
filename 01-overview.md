@@ -5,7 +5,8 @@
 > 2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、
 > 2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、
 > 2.6.123 → 2.7.0 は [16-release-impact-2700.md](./16-release-impact-2700.md)、
-> 2.7.0 → 2.8.1 は [17-release-impact-2801.md](./17-release-impact-2801.md) を参照。
+> 2.7.0 → 2.8.1 は [17-release-impact-2801.md](./17-release-impact-2801.md)、
+> 2.8.1 → 2.9.0 は [18-release-impact-290.md](./18-release-impact-290.md) を参照。
 > 本章では **Bolt の定義**が 2.6.86 の上流グロッサリ改訂に合わせて変わっている（→ [1.8.1](#181-bolt-の定義は-2686-で上流が書き換えた)）。
 
 ## 1.1 背景：なぜ「新しい SDLC」が必要か
