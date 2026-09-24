@@ -358,8 +358,15 @@ added="$work/added.txt"; : > "$added"
 
 # 失敗時の後始末: この実行で足したファイルと、用意した新版だけを消す（旧版・利用者のファイルには触れない）
 undo() {
-  while IFS= read -r a; do [ -n "$a" ] && rm -f "$a"; done < "$added"
-  for x in $managed; do rm -rf "$dest/$x.new-$ts"; done   # 名前が空いていることは手順 0 で確かめてある
+  undofail=""
+  while IFS= read -r a; do
+    [ -n "$a" ] || continue
+    rm -f "$a" || undofail=1
+  done < "$added" || undofail=1
+  for x in $managed; do rm -rf "$dest/$x.new-$ts" || undofail=1; done   # 名前が空いていることは手順 0 で確かめてある
+  if [ -n "$undofail" ]; then
+    echo "⚠ 後始末が一部できませんでした。$added に記録したファイルと *.new-$ts を手で消してください（稼働中の旧版には触れていません）" >&2
+  fi
 }
 
 # 0) 事前検査。ここで止まる場合は何も変更していない
@@ -435,7 +442,10 @@ printf '%s\n' "$list" | while IFS= read -r f; do
     p="$p/${rest%%/*}"; rest="${rest#*/}"
     [ -L "$p" ] && { linked=1; break; }
   done
-  if [ -n "$linked" ]; then printf 'aidlc/%s\n' "${f#./}" >> "$work/skipped-under-links.txt"; continue; fi
+  if [ -n "$linked" ]; then
+    printf 'aidlc/%s\n' "${f#./}" >> "$work/skipped-under-links.txt" || { echo "報告を書けません。中止します" >&2; exit 1; }
+    continue
+  fi
   printf '%s\n' "$dest/aidlc/$f" >> "$added" || { echo "取り消し用の記録を書けません。中止します" >&2; exit 1; }
   mkdir -p "$dest/aidlc/$(dirname "$f")" &&
     cp "$R/aidlc/$f" "$dest/aidlc/$f" &&
@@ -463,8 +473,8 @@ for d in $managed; do
       fi
     done
     undo
-    if [ -n "$rbfail" ]; then
-      echo "⚠ $d の入れ替えに失敗し、さらに$rbfail を元に戻せませんでした。手で復旧してください:" >&2
+    if [ -n "$rbfail" ] || [ -n "$undofail" ]; then
+      echo "⚠ $d の入れ替えに失敗し、さらに元に戻しきれませんでした（${rbfail:-後始末}）。手で復旧してください:" >&2
       echo "   各ディレクトリについて、稼働位置のものを退け、*.bak-$ts をその名前に戻す（*.failed-$ts は失敗した新版）" >&2
     else
       echo "$d の入れ替えに失敗したため、すべて元に戻しました" >&2
