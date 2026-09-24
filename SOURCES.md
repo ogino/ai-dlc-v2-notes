@@ -9,8 +9,10 @@
    https://github.com/awslabs/aidlc-workflows/tree/main
 2. 公式 `main` ブランチのローカル clone  
    `git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git`  
-   （**版を固定して調べるなら `--branch v2.8.0`**。**`v2.8.1` タグは存在しない** ——
-   実装バージョンは 2.8.1 だがリリース済みは 2.8.0 まで。SHA なら `c03f9e28`。また **`--depth 1` では過去 SHA との差分が取れない** ——
+   （**版を固定して調べるなら `--branch v2.9.0`**（現 Latest）。
+   **`v2.8.1` / `v2.8.2` / `v2.9.0` はいずれも実在するタグである**（旧記述の「タグは存在しない」は 2026-09-09 時点の話）。
+   **⚠ ただしタグ `v2.8.1`（= `215afe1a`）は 17 章の基準 `c03f9e28` の 5 コミット後を指す。別物である。**
+   また **`--depth 1` では過去 SHA との差分が取れない** ——
    `git diff 2fbee12f..origin/main` のような測定には `git fetch --unshallow` が要る）  
    **2026-09-01 の再編以前は `v2` ブランチだった。`v2` は削除済みで、`main` がその線形な継続である**
    （11〜17 章の `基準:` 行が記録している HEAD SHA は、いずれも `main` から到達できる。
@@ -18,7 +20,7 @@
 3. 同 clone 内（精読・突合済み）:
    - `README.md`（GA、ハーネス、バージョン要件）
    - `CHANGELOG.md`（**2.5.x を中心**に参照。2.4 / 2.3 も一部）
-   - `core/tools/aidlc-version.ts` → `2.8.1`（2026-09-09 再取得。branch `main` HEAD `c03f9e28`。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`）→ 2026-08-29 時点 `2.6.123`（branch `v2` HEAD `2fbee12f`）→ 2026-09-01 時点 `2.7.0`（branch `main` HEAD `96b11d39`））
+   - `core/tools/aidlc-version.ts` → `2.9.0`（2026-09-17 再取得。branch `main` HEAD `2931ef02`。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`）→ 2026-08-29 時点 `2.6.123`（branch `v2` HEAD `2fbee12f`）→ 2026-09-01 時点 `2.7.0`（branch `main` HEAD `96b11d39`））
    - `docs/guide/00-introduction.md`
    - `docs/guide/03-spaces-and-intents.md`
    - `docs/guide/04-phases-and-stages.md`
@@ -38,7 +40,9 @@
    > ※ **`dist/` 配下のパスは取得当時のものである。**
    > 2.8.x で `dist/` は上流リポジトリから削除されたため、**clone しただけでは解決できない**。
    > 同じ内容を見るには `bun scripts/package.ts <harness>` でローカル生成するか、
-   > リリース資産 `aidlc-runtime-X.Y.Z.tar.gz` の `runtime/<harness>/` を展開する。
+   > **リリース資産 `aidlc-copy-runtime-X.Y.Z.tar.gz`**（v2.9.0 以降）の `runtime/<harness>/` を展開する。
+   > **`aidlc-runtime-X.Y.Z.tar.gz` は `dist-release/` 由来の別物**なので、ここでは使えない
+   > （上の測定対象は `dist/` 配下である。→ [18.4](./18-release-impact-290.md)）。
    > とくに「全 7 ハーネスの `dist/*/…/agents/` を機械的に集計」した測定は、
    > **clone だけでは再現できない**（→ [17.1](./17-release-impact-2801.md#171-いちばん大きい変更は-dist-の消滅)）。
    - `docs/guide/glossary.md`（2026-08-29 に再読。**2.6.86 で Bolt の定義が書き換わっている**）
@@ -53,6 +57,14 @@
      上記と同じ測定を再実行し**全項目不変**を確認 / `git diff 2fbee12f..origin/main`（`core/` は 4 ファイル 4 行）/
      `docs/roadmap.md` / `.github/workflows/` — 詳細は
      [16-release-impact-2700.md](./16-release-impact-2700.md)
+   - 2.8.1 → 2.9.0 区間（2026-09-17 実測。branch `main` HEAD `2931ef02`）:
+     `git tag --contains <sha>` による各変更の初出リリース判定 /
+     33 ステージ frontmatter の全数抽出と diff（差分は `- classic` 8 行のみ）/
+     `core/tools/aidlc-audit.ts` の `VALID_EVENT_TYPES`（91 → 99）/
+     `core/tools/aidlc-lib.ts` の Change Control 解決順 / `core/scopes/*.md` の新 frontmatter キー /
+     `core/tools/aidlc.ts` の `loadDelegate` と `core/tools/aidlc-state.ts:3040`、および `core/hooks/` の `aidlc-continue-workflow.ts` / `aidlc-rebuild-stage-graph.ts` / `aidlc-run-sensors.ts` の `"bun"` 直接指定（v2.9.0 に残るセンサー・フック系の不具合 3 件（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）。#1249 の修正 `f79e321b` の本文を含む）/ `aidlc-copy-runtime-2.9.0.tar.gz` の実物展開（手動コピー手順の検証）/
+     `gh release view` によるリリース資産一覧（13 → 15 件）— 詳細は
+     [18-release-impact-290.md](./18-release-impact-290.md)
    - 2.7.0 → 2.8.1 区間（2026-09-09 実測。branch `main` HEAD `c03f9e28`）:
      上記と同じ測定を再実行し、**動いたのは `core/tools/*.ts` の 51 → 69 のみ**であることを確認 /
      `git ls-tree` による `dist/` 消滅の確認 / `.gitignore` / `scripts/install.sh` と `install.ps1` /

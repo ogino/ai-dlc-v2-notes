@@ -16,7 +16,7 @@
 |-------|-----------|------------|------|
 | `enterprise` | 33/33 | Comprehensive | 規制・フル監査・本番級運用 |
 | `feature` | 33/33 | Standard | 新機能全般（全ステージ実行）。**2.6.18 で暗黙の既定の座を `classic` に譲った** |
-| `classic` | 26/33 | Standard | **2.6.18 追加。暗黙の既定スコープ。** AI-DLC v1 相当のライフサイクル（Ideation 全 7 本をスキップ） |
+| `classic` | **18/33** | Standard | **2.6.18 追加。暗黙の既定スコープ。** AI-DLC v1 相当のライフサイクル。**v2.9.0（#1151）で 26/33 → 18/33 に縮小**（CI Pipeline と Operation 全 7 本が外れた）→ 5.1.2 |
 | `mvp` | 23/33 | Standard | グリーンフィールド MVP（下表のスキップ） |
 | `poc` | 8/33 | Minimal | 実現可能性の迅速検証 |
 | `bugfix` | 9/33 | Minimal | 特定バグ修正。**2.6.70 で 7/33 → 9/33**（→ 5.1.1） |
@@ -55,20 +55,48 @@ Environment Provisioning と残りの Operation は引き続き SKIP である�
 
 **他 9 スコープの EXECUTE 数はすべて不変**（`classic` 26 / `enterprise` 33 / `express` 10 /
 `feature` 33 / `infra` 13 / `mvp` 23 / `poc` 8 / `security-patch` 10 / `workshop` 26）。
+**これは 2.6.70 時点の話である。`classic` はその後 v2.9.0 で 26 → 18 になった（→ 5.1.2）。**
 **ステージ総数 33 とスコープ総数 11 が不変であることとは矛盾しない。別の指標である。**
 
 なお、旧値（`bugfix` 7 / `refactor` 8）の承認ゲート数は CHANGELOG に明示が無い。
 新値 6 / 7 のみが上流の明示値である。
 
-### `classic` のスキップ内訳（2.6.18 追加）
+### 5.1.2 `classic` が 26/33 → 18/33 になった（v2.9.0・破壊的）
+
+v2.9.0（`1b064585` / #1151、`feat!:`）で **暗黙の既定スコープ `classic` が 8 ステージ縮んだ。**
+
+| | タグ `v2.8.1` | **v2.9.0** |
+|---|---:|---:|
+| ステージ数 | 26/33 | **18/33** |
+| `skeleton` | `on` | **`off`** |
+| `sensors` / `learnings` | （キー無し） | **`on` / `on`** |
+| `summary_confirmation` | （キー無し） | **`off`** |
+| `change_control` | `relaxed` | `relaxed`（**変化なし**） |
+
+外れた 8 本は **CI Pipeline 1 本と Operation 全 7 本**である。
+`scopes:` から `- classic` が消えたのはちょうどこの 8 ファイルで、
+**他のスコープの所属は 1 つも動いていない。**
+
+**進行中の intent は影響を受けない。** CHANGELOG 逐語:
+
+> Existing Classic intents keep their recorded graph; use the `workshop` scope when the previous
+> Classic graph with CI Pipeline and Operation stages is required.
+
+**旧 `classic` と同じ形が要るなら `workshop`（26/33、本区間で不変）を使う。**
+詳細は [18.2](./18-release-impact-290.md)。
+
+### `classic` のスキップ内訳（2.6.18 追加時点）
 
 **7 SKIP / 26 EXECUTE**: **Ideation の 1.1–1.7 の 7 本すべて**。Inception 以降は全ステージがグリッドに入る。
+
+> **⚠ 以下は 2.6.18 追加時点の内訳である。v2.9.0 で 18/33 になった**（→ 5.1.2）。
+> **`classic` と `workshop` のステージ集合が同一だったのも 2.8.1 までの話である。**
 
 `core/scopes/aidlc-classic.md` は「AI-DLC v1 had no Ideation phase, so `classic` skips all seven Ideation stages and keeps every stage from Inception onward in the plan」と説明している。無条件（ALWAYS）なのは Initialization 3 本 + Requirements Analysis / Units Generation / Delivery Planning / Code Generation / Build and Test の計 8 本で、残る Inception 設計群と Operation 末尾は CONDITIONAL として文脈から自己選択する。
 
 test strategy は depth から継承して **Standard**（`workshop` と違って Minimal 上書きを持たない）。
 
-> **`classic` と `workshop` のステージ集合は完全に同一である。** 実測すると両者とも 26 本で、
+> **`classic` と `workshop` のステージ集合は完全に同一だった（2.8.1 まで）。** 実測すると両者とも 26 本で、
 > 差集合は双方向とも空だった（`stage-graph.json` の `scopes` を集計）。
 > 違うのは**ステージの並びではなく、テスト戦略・キーワード・専用ランナーの有無**である。
 > `workshop` は Test=Minimal を上書き宣言し `workshop` / `lab` / `training` のキーワードを持つ。
@@ -245,7 +273,7 @@ aidlc-graph.ts ars --iae <s> --csu <s> --ve <s> --r <s> --ua <s> \
 /aidlc --depth standard --test-strategy minimal
 ```
 
-`workshop` だけ Depth=Standard でも Test=Minimal が既定（研修ペース維持）。**`classic` は `workshop` と同じ 26/33 だが Test 上書きを持たない**ため、depth から Standard を継承して本番級のテスト水準が効く。`express` は depth=Minimal を継承して Test=Minimal。
+`workshop` だけ Depth=Standard でも Test=Minimal が既定（研修ペース維持）。**`classic` は v2.9.0 以降 18/33（`workshop` は 26/33 のまま）で、Test 上書きを持たない**ため、depth から Standard を継承して本番級のテスト水準が効く。`express` は depth=Minimal を継承して Test=Minimal。
 
 ---
 

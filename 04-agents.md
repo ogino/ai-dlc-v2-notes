@@ -52,7 +52,9 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 
 1. ステージ本体が成果物を生成
 2. 別 subagent としてレビュア起動（builder の memory は見ない）
-3. `## Review` に **READY / NOT-READY**
+3. **レビュー記録ファイル**に **READY / NOT-READY**
+   （`<record>/.aidlc-engine/reviews/<stage>/stage/<attempt>/<iteration>.json`。
+   **v2.8.1 より前は成果物の `## Review` 節への追記だった** → 下記 ⚠）
 4. NOT-READY なら builder 再実行（最大 `reviewer_max_iterations` 既定 2）
 5. 上限後も人間ゲートへ（**レビュアは最終拒否権を持たない**）
 
@@ -80,6 +82,21 @@ Conductor（`/aidlc`）はロスタ外の「セッション本体」。
 | **Kiro CLI / Kiro IDE** | **散文のみ** | ネイティブ agent JSON は未知フィールドで fail-closed するためキーは入らず、`.md` 面の inert なキーと `## Turn Budget` 散文だけが届く |
 
 → **「レビュアは 60 ターンで必ず止まる」と言えるのは Claude Code と opencode だけ。** 残り 5 ハーネスは「エージェントが自分で守る」ことに依存し、決定的な保証は無い。しかも強制される 2 つでも挙動が違う（Claude Code は最終ターン無し / opencode はテキストのみ 1 ターン）。
+
+> **🔴 v2.8.1（#1000）で、レビュー結果の書き先が変わった。**
+> **レビュアは `review_artifact` に `## Review` 節を追記しなくなった。**
+> 受領証は `REVIEW_COMPLETED` と**同一ロック内**で書かれる専用の記録ファイルになり、
+> ダイジェストが固定される（record-is-the-review）。
+> 埋め込み `## Review` は移行用に読めるだけで、上流プロトコルは
+> **`Do not write an embedded section`** と明示している。
+> **次の minor リリースで入力形式としては削除される。**
+> v2.9.0（#1151）で記録の置き場所が `.aidlc-reviews/` から `.aidlc-engine/reviews/` に移り、
+> 人間向けの Markdown コピーも新設された。
+>
+> **したがって、直後の 2 段落（incomplete-attempt guard と 2.6.121 の `validateReviewAppendix()`）は
+> 2.6.121 〜 基準 `c03f9e28` 時点の記述である。** `## Review` 節を前提とした検査の説明であり、
+> 現行の記録ファイル方式には**そのままは当てはまらない**（→ [18.11](./18-release-impact-290.md)）。
+> **一方、上の 60 ターン上限と、下のターン上限に関する記述は本区間で変わっていない。**
 
 **incomplete-attempt guard 自体も決定的ではない。** レビュー受領証は「ちょうど 1 つの現行 `## Review` 節 + ちょうど 1 つの正規 verdict」でのみ有効で、欠落・複数・verdict 無しは INCOMPLETE として `--retry-pending` で 1 回だけ無消費リトライし、2 回目の不完全でも `NOT-READY` を確定受領証として記録する（デッドロックはしない）。しかし **verdict のパースは導体（LLM）のプロトコル遵守に依存**しており、ツール側の強制は無い。
 
@@ -260,6 +277,6 @@ DocumentKB について、この章の文脈で押さえておく点:
 > — 本章の実測値（エージェント 14・レビュアー上限のハーネス差・CodeKB / DocumentKB の区別）は 2.6.55 でも不変。
 > ただし **2.6.52 でレビュアー受領証の要求がゲート開放時点にも及んだ**ため、14.4 を併せて読むこと。
 > **2.6.55 → 2.6.123 の差分**: [15-release-impact-26123.md](./15-release-impact-26123.md)
-> — **エージェント 14 は 2.6.123 でも不変**（**2.7.0 / 2.8.1 でも不変** → [16-release-impact-2700.md](./16-release-impact-2700.md) / [17-release-impact-2801.md](./17-release-impact-2801.md)）。ただし本章は 2 点を上で訂正済みである ——
+> — **エージェント 14 は 2.6.123 でも不変**（**2.7.0 / 2.8.1 / 2.9.0 でも不変** → [16-release-impact-2700.md](./16-release-impact-2700.md) / [17-release-impact-2801.md](./17-release-impact-2801.md) / [18-release-impact-290.md](./18-release-impact-290.md)）。ただし本章は 2 点を上で訂正済みである ——
 > **4.3**: 2.6.121 でレビュー追記の検査が決定的になった（結論は不変）／
 > **4.4**: 2.6.87 で DocumentKB に LLM が書いた要約・タグが入りうるようになった。

@@ -11,23 +11,48 @@
 > その後 **v2.8.2（09-11）と v2.9.0（09-15、現 Latest）** が公開されている。
 > **Copilot / Cursor を使う場合も、v2.8.1 以降を導入すれば不具合は起きない。**
 > **17 章が案内するソース生成の暫定回避策は不要である。**
-> 上流 `main` は `be94bde7` / 2.9.0 まで進んでおり、**2.8.1 → 2.9.0 の差分は次回区間で扱う。**
+> 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md) で扱う。
+
+> **🔴 v2.9.0 へ更新するときは、プロジェクトごとに `aidlc config --yes` が要る。**
+> CHANGELOG 逐語:
+> ```
+> run `aidlc update`, then run `aidlc config --yes` in each project to refresh its harness runtime.
+> ```
+> 2.8.x までの「何もしなくてよい」とは違う（→ [18.5](./18-release-impact-290.md)）。
+
+> **🔴 現 Latest の v2.9.0 に、センサー・フック系の不具合が 3 件残っている（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）（2026-09-23 時点）。**
+> **①② は `bun` 実行では再現しない。安定版（Latest `v2.9.0`）には未収録で、preview `v2.9.1-preview.20260920.1` 以降には収録済み**（2026-09-23 実測）。
+> **③ は `bun` 実行でも起こりうる（フックの PATH 上に `bun` が無い場合）。修正はどの版にも未収録**（preview を含む）。
 >
-> **🔴 v2.8.0 では GitHub Copilot と Cursor のフックが動作しない（2026-09-09 時点の記録）。**
+> | 症状 | 影響 |
+> |---|---|
+> | **ゲートの Review brief が動かない**（#1070） | `loadDelegate` に `review-brief` の分岐が無く `does not export main(argv)` で終わる。**2.8.0 以降の全ネイティブリリースが該当** |
+> | **ゲートのセンサーが発火しない**（#1166） | `aidlc sensor …` が `unknown command 'sensor'` になる。**`blocking` はゲートを拒否し、`advisory` は黙って捨てられる** |
+> | **3 つのコアフックが `bun` を直接名指し**（#1249） | ネイティブには Bun が無いのに spawn が試みられる。**Stop フック・runtime-graph 再構築・Write 契機センサーが無言で死ぬ。doctor も警告できない** |
+>
+> **センサーを使う予定があるなら、ネイティブ v2.9.0 では期待どおりに動かない。**
+> **✅ 回避策: そのプロジェクトだけ手動コピー経路（`aidlc-copy-runtime-2.9.0.tar.gz`、Bun 前提）で導入する。**
+> **①② は回避できる。③ は `bun` が非対話フックの PATH 上にある場合に限り回避できる。**
+> **⚠ preview に切り替えても ③ は直らない。**
+> 詳細と根拠は [18.6](./18-release-impact-290.md)。
+>
+> **⚠ v2.8.0 に限り、GitHub Copilot と Cursor のフックが動作しない。**
 > Copilot は全イベントでクラッシュ、Cursor は**全ツール呼び出しがブロックされる**。
-> 修正は上流コミット **`52da70ad`** で入ったが**未リリース**（**公開時の版番号は未確定** —— コミット本文は 2.8.2、CHANGELOG は 2.8.1 に統合）。**根拠は同コミットの本文（実機再現はしていない）。**
-> **この 2 ハーネスの導入は現時点で保留するか、ソース生成経路を採ること**（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
+> **修正 `52da70ad` は v2.8.1 に含まれるため、v2.8.1 以降では起きない。**
+> **v2.8.0 を使っている場合のみ、v2.8.1 以降（推奨は現 Latest の v2.9.0）へ更新する。**
+> **根拠は同コミットの本文とタグ包含判定（実機再現はしていない）。**
 > 上流リポジトリから **`dist/` ディレクトリが削除された**。
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）で `aidlc` コマンドを入れ、
 > プロジェクトごとに `aidlc config --harness <name>` を実行する形になった。
-> **Bun / Node.js は不要である。**
+> **この経路（ネイティブ導入）なら Bun / Node.js は不要である。**
+> **⚠ 手動コピー経路は別で、v2.9.0 以降は逆に Bun が必須・ネイティブ `aidlc` が不要になった**（→ 6.3）。
 > 本章の版ごとのアップグレード記録に出てくる「`dist/<harness>/` の再コピー」は、
 > **その版の時点で上流が指示していた操作の記録**であり、現在の手順ではない。
 > 経緯は [17-release-impact-2801.md](./17-release-impact-2801.md) を参照。
 
 ## 6.1 対応ハーネス（2.x）
 
-| Harness | 最低バージョン目安 | 導入コマンド（2.8.x） | 起動 |
+| Harness | 最低バージョン目安 | 導入コマンド（v2.8.0 以降。v2.9.0 でも同じ） | 起動 |
 |---------|-------------------|--------|------|
 | **Claude Code** | 最新推奨 | `aidlc config --harness claude` | `/aidlc` |
 | **Kiro IDE** | hooks v2 対応含む | `aidlc config --harness kiro-ide` | `/aidlc` |
@@ -62,14 +87,15 @@
 ### 全ハーネス共通
 
 1. **ネイティブ導入なら bun は要らない**（2.7.2 以降。リリースは v2.8.0 以降）。配布されるのは単一バイナリで、
-   Bun / Node.js のいずれも前提にしない
+   Bun / Node.js のいずれも前提にしない。
+   **⚠ ただし v2.9.0 以降、手動コピー経路を選ぶ場合は逆に Bun が必須でネイティブ `aidlc` が不要になった**（下記 4.）
 2. 推奨モデル: **Claude Opus 4.8**（公式 README。Kiro では有料プランが必要な場合あり）
 
 ```bash
 curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh | sh
 ```
 
-> **bun が要るのは、本章に出てくる範囲では次の 3 つの場合である。**
+> **bun が要るのは、本章に出てくる範囲では次の 4 つの場合である。**
 > 1. 上流リポジトリを clone してソースから生成する場合（`bun scripts/package.ts`。開発者向け経路。→ [6.3](#63-インストール要点)）
 > 2. **`codekb-scope-diff` を使う場合** —— 上流はこの診断コマンドを今も
 >    `bun <harness-dir>/tools/aidlc-utility.ts codekb-scope-diff` の形でしか案内しておらず、
@@ -78,6 +104,11 @@ curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/i
 > 3. **Codex の trust エントリをチェックアウトから生成する場合**
 >    （`bun install --frozen-lockfile` → `bun scripts/package.ts codex trust --project <path>`。
 >    → [6.3 の Codex CLI 節](#codex-cli)）。**TUI の "Trust all" を使うなら bun は要らない。**
+> 4. **手動コピー経路で導入・更新する場合（v2.9.0 以降）** —— `aidlc-copy-runtime-X.Y.Z.tar.gz` は
+>    **Bun 前提の投影**であり、**Bun が無いとフックもツールも起動しない**。
+>    上流ガイド逐語: `Bun is the runtime prerequisite; the native aidlc executable is not required`
+>    （→ [6.3 の手動コピー節](#手動でファイルを置きたい場合)）。
+>    **2.8.x までは逆に、手動コピーでもネイティブ `aidlc` が必須だった。**
 > その場合は非対話シェルからも見える PATH に入れること
 > （zsh なら `~/.zshenv` にも `BUN_INSTALL` / `PATH` を書く必要がある場合あり）。
 >
@@ -174,42 +205,369 @@ root での実行は拒否される。Homebrew / Nix 管理の既存 `aidlc` が
 >
 > **確認を挟まずに `sh` するなら、パイプ直結版と実質同じである。**
 
-`install.sh` のオプション（逐語）:
+`install.sh` のオプション（**v2.9.0 実測・逐語**）:
 
 ```
-Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <startup-file>] [--json|--quiet] [--no-color] [--yes]
+Usage: install.sh [--version <x.y.z|x.y.z-preview.YYYYMMDD.N>] [--from <dir>] [--offline] [--profile <startup-file>] [--json|--quiet] [--no-color] [--yes]
 ```
 
-> **⚠ `--version 2.8.1` は現時点で成立しない。** 実装は 2.8.1 だが `v2.8.1` タグは無い。
-> 版を固定するなら `--version 2.8.0`（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
+> **基準 `c03f9e28` では `--version <x.y.z>` のみだった。**
+> v2.9.0 で **preview id の構文が追加**され、`--version 2.9.1-preview.20260915.1` のような
+> 指定が通るようになっている（→ [18.13](./18-release-impact-290.md)）。
+
+**Windows（`install.ps1`）も同じ版指定ができる。** パラメータ名は `-Version` で、
+文法は `install.sh --version` と同じ（stable の `x.y.z` と preview id を受理する）:
+
+```powershell
+# 版を固定して導入する場合（既定は latest）
+.\install.ps1 -Version 2.9.0
+```
+
+> **⚠ 版を固定するなら `--version 2.9.0`（現 Latest）を使う。**
+> `v2.8.1` / `v2.8.2` / `v2.9.0` はいずれも実在するタグである
+> （「`v2.8.1` タグは存在しない」という旧記述は 2026-09-09 時点の話で、現在は誤り）。
 
 ### 手動でファイルを置きたい場合
 
-> **⚠ 手動コピー経路でも、ネイティブ `aidlc` バイナリの導入は必須である。**
-> `runtime/<harness>/` の投影は**ネイティブ `aidlc` を呼ぶ形**に書き換えられており、
-> **tar.gz にバイナリ本体は入っていない**。
-> 上流 `README.md:33-36` も「**Install the matching native `aidlc` command**, download
-> `aidlc-runtime-X.Y.Z.tar.gz` …, and copy `runtime/<harness>/` into your project」と
-> **バイナリ導入を先に置いている**。
-> **手動コピーは「ネイティブ導入の代替」ではなく「プロジェクト内ファイルを手で置く」という選択である。**
-> バイナリを入れずに `runtime/<harness>/` だけ置くと、フックもコマンドも起動できない。
-> **⚠ この前提が掛かるのは `runtime/<harness>/` と `dist-release/<harness>/` だけである。**
-> チェックアウトから生成する **`dist/<harness>/` は従来どおり Bun 前提の投影**で、
-> ネイティブ `aidlc` を呼ばない。**したがって、この経路には対応するネイティブバイナリが要らない**（代わりに bun が要る）。
-> **これは投影の呼び出し形からの読解であり、本調査では実機で確かめていない。**
-> したがって **Copilot / Cursor のフック不具合を避けるソース生成経路が考えられる**（未検証）——
-> `52da70ad` 以降を checkout し、`bun scripts/package.ts <harness>` で `dist/<harness>/` を生成して使う
-> （**この経路には対応するネイティブバイナリは要らない。bun が要る。**）。
+> **🔴 v2.9.0 で手動コピー経路の前提が逆転した。ネイティブ `aidlc` バイナリは不要になり、代わりに Bun が要る。**
+>
+> | | 2.8.x まで | **v2.9.0 以降** |
+> |---|---|---|
+> | 取得するアセット | `aidlc-runtime-X.Y.Z.tar.gz` | **`aidlc-copy-runtime-X.Y.Z.tar.gz`** |
+> | 前提 | **ネイティブ `aidlc` が必須** | **Bun が必要。ネイティブ `aidlc` は不要** |
+> | 中身の出どころ | `dist-release/<harness>`（ネイティブ投影） | **`dist/<harness>`（Bun 前提の投影）** |
+>
+> 上流 `README.md` 逐語（2.9.0）:
+> ```
+> Cannot install a native executable, or prefer to manage the project files
+> manually? Install Bun, download `aidlc-copy-runtime-X.Y.Z.tar.gz` from the
+> release, and copy the complete `runtime/<harness>/` directory into your
+> project. This path does not require the native `aidlc` command.
+> ```
+> 2.8.x までは逆に「**Install the matching native `aidlc` command**」と書かれていた。
+>
+> `scripts/package-release.ts` でも、copy 用アーカイブは `dist/<harness>`、
+> ネイティブ用は `dist-release/<harness>` から作られている。
+> **つまり手動コピー経路は「ネイティブ導入の代替」になった。**
+> **これは上流 README と `package-release.ts` の読解であり、本調査では実機で確かめていない。**
+> **📌 かつてここに「Copilot / Cursor のフック不具合を避けるソース生成経路」を記していたが、
+> その回避策はもう不要である。** 不具合は `52da70ad` で修正され、**v2.8.1 以降に含まれる**。
+> **素直に v2.8.1 以降（推奨は現 Latest の v2.9.0）を導入すればよい。**
 
-ネイティブ `aidlc` を導入したうえで、**導入したバイナリと同じ版**のリリース資産
-`aidlc-runtime-X.Y.Z.tar.gz` を展開し、**`runtime/<harness>/`** をプロジェクトへコピーする。
+**v2.9.0 以降**は、Bun を導入したうえで `aidlc-copy-runtime-X.Y.Z.tar.gz` を展開し、
+**`runtime/<harness>/` をディレクトリごと**プロジェクトへコピーする。
 これがプロジェクト内ファイルを手で管理する場合の正規経路である。
+**2.8.x までは、ネイティブ `aidlc` を導入したうえで `aidlc-runtime-X.Y.Z.tar.gz` を使う手順だった。**
 
-> **⚠ バイナリとアーカイブの版を揃えること。** 上流は 「Install the **matching** native `aidlc` command」と書いている。
-> 前節の `releases/latest` インストーラで入れたバイナリと、別リリースのアーカイブを組み合わせると版がずれる。
-> **版を固定するなら両方に同じ `X.Y.Z` を指定する**（`install.sh --version 2.8.0` と
-> `aidlc-runtime-2.8.0.tar.gz`）。**`v2.8.1` は未公開なので選べない。**
-> 導入済みの版は `aidlc version` で確認できる。
+#### 上流が案内している手順（逐語ベース）
+
+上流ガイド `docs/guide/18-install-and-lifecycle.md` の Copy Channel 節は、
+**署名検証とチェックサム照合を手順に含めている**。社内導入で供給元検証が要件なら、ここを落とさないこと。
+
+```bash
+set -eu   # 検証に失敗したら展開へ進まない（上流の原文には無いので足している）
+tag=vX.Y.Z
+tmp="$(mktemp -d)"
+runtime_asset="aidlc-copy-runtime-${tag#v}.tar.gz"
+runtime_checksum="${runtime_asset}.sha256"
+source_repo="${AIDLC_RELEASE_REPOSITORY:-awslabs/aidlc-workflows}"
+release_workflow="${AIDLC_RELEASE_WORKFLOW:-$source_repo/.github/workflows/release.yml}"
+
+gh release download "$tag" --repo "$source_repo" --dir "$tmp" \
+  --pattern "$runtime_asset" \
+  --pattern "$runtime_checksum" \
+  --pattern aidlc-release.intoto.jsonl
+
+gh attestation verify "$tmp/$runtime_asset" \
+  --bundle "$tmp/aidlc-release.intoto.jsonl" \
+  --repo "$source_repo" \
+  --signer-workflow "$release_workflow" \
+  --source-ref "refs/tags/$tag"
+
+# 古い macOS には sha256sum が無い。その場合は同梱の shasum を使う
+if command -v sha256sum >/dev/null 2>&1; then
+  (cd "$tmp" && sha256sum -c "$runtime_checksum")
+else
+  (cd "$tmp" && shasum -a 256 -c "$runtime_checksum")
+fi
+tar -xzf "$tmp/$runtime_asset" -C "$tmp"
+RUNTIME_ROOT="$tmp/runtime"
+```
+
+> **⚠ 上流の原文には `set -e` が無い。** そのまま貼ると、`gh attestation verify` や
+> チェックサム照合が失敗しても `tar -xzf` まで進んでしまう。上のブロックでは冒頭に `set -eu` を足した。
+> **また上流は `sha256sum` を前提にしているが、古い macOS には無い**ため、`shasum -a 256 -c` への分岐を足した。
+
+> **⚠ copy 用アーカイブは `version.json` / `checksums.txt` の外にある。**
+> 上流逐語: `The copy archive stays outside version.json and checksums.txt so existing
+> 2.8.x native clients can continue to parse release metadata and self-update.`
+> **検証は専用の `.sha256` サイドカーと provenance で行う。**
+
+#### 🔴 既存プロジェクトへの適用は、そのままコピーしてはいけない
+
+上流の最後の 1 行は次の形である:
+
+```bash
+cp -R "$RUNTIME_ROOT/claude/." your-project/
+```
+
+**`runtime/<harness>/` には、ハーネスのツリーだけでなく `aidlc/` ワークスペースの殻と
+プロジェクトルートのファイル（`AGENTS.md` 等）が同梱されている**（上流逐語:
+`so the harness tree, aidlc/ workspace shell, and project-root files stay together`）。
+
+**既存プロジェクトにそのまま `cp -R` すると、次を潰しうる。**
+
+- `aidlc/spaces/<space>/memory/` —— **利用者が積み上げた記憶**
+- `aidlc/knowledge/` —— **取り込んだ知識**
+- ルートの `AGENTS.md` —— **プロジェクト固有の指示**
+
+新規プロジェクトなら上流の手順でよい。**既存プロジェクトでは、中身の種類ごとに扱いを変えること。**
+
+`aidlc-copy-runtime-2.9.0.tar.gz` の `runtime/<harness>/` を実測すると、中身は 3 種類に分かれる。
+
+| 種類 | 中身（実測） | 既存プロジェクトでの扱い |
+|---|---|---|
+| **ハーネス管理ディレクトリ** | 下表 | **上書きで更新する**（ここを据え置くと旧版の不具合が残る） |
+| **ルートのファイル** | `.gitignore`、`AGENTS.md`（claude 以外）、`.mcp.json`（claude）、`opencode.json`（opencode） | **上書きしない。差分を見て手でマージする** |
+| **`aidlc/` ワークスペースの殻** | `active-space`、**`spaces/default/memory/{org,team,project}.md`**、`phases/*.md` | **既存ファイルは絶対に上書きしない。足りないものだけ補う** |
+
+> **⚠ `aidlc/spaces/<space>/memory/org.md` などは利用者が書く記憶ファイルである。**
+> **[18.3](./18-release-impact-290.md) の Change Control の `strict` 宣言もここに書く。** 上書きすると統制設定ごと消える。
+
+ハーネス管理ディレクトリ（実測）:
+
+| ハーネス | 管理ディレクトリ |
+|---|---|
+| claude | `.claude/` |
+| codex | `.codex/`、`.agents/` |
+| copilot | `.github/`、`.aidlc/` |
+| cursor | `.cursor/` |
+| kiro / kiro-ide | `.kiro/` |
+| opencode | `.opencode/`、`.aidlc/` |
+
+```bash
+# bash で実行すること（zsh では $managed が単語に分割されず、複数の管理ディレクトリを扱えない）
+dest=$(cd your-project && pwd) || exit 1   # 絶対パスにする（下の検査で cd するため）
+h=claude                         # ハーネス名
+managed=".claude"                # 上表の管理ディレクトリ（複数ならスペース区切り）
+keep="settings.local.json"       # 旧ディレクトリから引き継ぐ利用者ファイル（管理ディレクトリ直下からの相対）
+R="$RUNTIME_ROOT/$h"
+ts=$(date +%Y%m%d%H%M%S)
+work=$(mktemp -d) || exit 1      # 差分や一覧はここに書く（既存のファイルを消さずに済む）
+added="$work/added.txt"; : > "$added"
+
+# 失敗時の後始末: この実行で足したファイルと、用意した新版だけを消す（旧版・利用者のファイルには触れない）
+undo() {
+  undofail=""
+  while IFS= read -r a; do
+    [ -n "$a" ] || continue
+    rm -f "$a" || undofail=1
+  done < "$added" || undofail=1
+  for x in $managed; do rm -rf "$dest/$x.new-$ts" || undofail=1; done   # 名前が空いていることは手順 0 で確かめてある
+  if [ -n "$undofail" ]; then
+    echo "⚠ 後始末が一部できませんでした。$added に記録したファイルと *.new-$ts を手で消してください（稼働中の旧版には触れていません）" >&2
+  fi
+}
+
+# 0) 事前検査。ここで止まる場合は何も変更していない
+if [ -L "$dest/aidlc" ]; then
+  echo "aidlc/ がシンボリックリンクです。プロジェクト外に書かないよう中止します" >&2; exit 1
+fi
+for n in "aidlc.bak-$ts" $(for d in $managed; do echo "$d.new-$ts $d.bak-$ts $d.failed-$ts"; done); do
+  if [ -e "$dest/$n" ] || [ -L "$dest/$n" ]; then echo "$n が既にあります。中止します" >&2; exit 1; fi
+done
+for d in $managed; do
+  if [ -L "$dest/$d" ]; then
+    echo "$d はシンボリックリンクです（dotfiles 管理など）。自動では置き換えないので、リンク先で手動更新してください" >&2
+    exit 1
+  fi
+  if [ -e "$dest/$d" ] && [ ! -d "$dest/$d" ]; then
+    echo "$d がディレクトリではありません（利用者のファイル？）。中止します" >&2; exit 1
+  fi
+done
+for f in .gitignore AGENTS.md .mcp.json opencode.json; do
+  if [ -e "$dest/$f" ] && [ ! -r "$dest/$f" ]; then echo "$f を読めません。中止します" >&2; exit 1; fi
+done
+list=$(cd "$R/aidlc" && find . -type f) || { echo "展開したアーカイブの aidlc/ を読めません" >&2; exit 1; }
+[ -n "$list" ] || { echo "展開したアーカイブの aidlc/ が空です" >&2; exit 1; }
+
+# 1) aidlc/ に中身があれば退避する（この退避は失敗時も残す）
+if [ -d "$dest/aidlc" ]; then
+  if ! contents=$(ls -A "$dest/aidlc"); then echo "aidlc/ を読めません。中止します" >&2; exit 1; fi
+  if [ -n "$contents" ]; then cp -R "$dest/aidlc" "$dest/aidlc.bak-$ts" || exit 1; fi
+fi
+
+# 2) 管理ディレクトリの新版を別名で用意し、利用者ファイルもそこへ引き継ぐ（稼働中のものには触れない）
+for d in $managed; do
+  ok=1
+  cp -R "$R/$d" "$dest/$d.new-$ts" || ok=
+  for k in $keep; do
+    [ -n "$ok" ] || break
+    if [ -f "$dest/$d/$k" ] || [ -L "$dest/$d/$k" ]; then
+      cp -pRP "$dest/$d/$k" "$dest/$d.new-$ts/$k" || ok=   # -P: シンボリックリンクはリンクのまま
+    fi
+  done
+  [ -n "$ok" ] || { undo; echo "$d の新版を用意できませんでした（何も変更していません）" >&2; exit 1; }
+done
+
+# 3) ルートのファイル: 既存は上書きせず差分だけ出す。無いものだけ置く（置いたものは記録する）
+for f in .gitignore AGENTS.md .mcp.json opencode.json; do
+  [ -e "$R/$f" ] || continue
+  if [ -L "$dest/$f" ] && [ ! -e "$dest/$f" ]; then
+    echo "$f は壊れたシンボリックリンクです。触らずに残します"; continue
+  fi
+  if [ -e "$dest/$f" ]; then
+    out="$work/upgrade-$(echo "$f" | tr -d .).diff"
+    # diff は 0 = 同一 / 1 = 差分あり / 2 = エラー。リダイレクト失敗も 1 になるので中身の有無も見る
+    if diff -u "$dest/$f" "$R/$f" > "$out"; then rm -f "$out"
+    else
+      rc=$?
+      { [ "$rc" -eq 1 ] && [ -s "$out" ]; } || { undo; echo "$f の差分を作れませんでした" >&2; exit 1; }
+      echo "$out を確認し、$f を手でマージすること"
+    fi
+  else
+    # 取り消し用の記録を先に書く。書けなければ何も足さずに止める
+    printf '%s\n' "$dest/$f" >> "$added" || { undo; echo "取り消し用の記録を書けません。中止します" >&2; exit 1; }
+    cp "$R/$f" "$dest/$f" || { undo; echo "$f を置けませんでした" >&2; exit 1; }
+  fi
+done
+
+# 4) aidlc/ は足りないファイルだけ補う。既存（利用者の記憶・壊れたリンクを含む）には触れない。
+#    途中のディレクトリがリンクなら、書くとプロジェクト外に出るので書かずに一覧へ回す
+mkdir -p "$dest/aidlc" || { undo; exit 1; }
+printf '%s\n' "$list" | while IFS= read -r f; do
+  { [ -e "$dest/aidlc/$f" ] || [ -L "$dest/aidlc/$f" ]; } && continue
+  p="$dest/aidlc"; rest="${f#./}"; linked=
+  while [ "$rest" != "${rest#*/}" ]; do
+    p="$p/${rest%%/*}"; rest="${rest#*/}"
+    [ -L "$p" ] && { linked=1; break; }
+  done
+  if [ -n "$linked" ]; then
+    printf 'aidlc/%s\n' "${f#./}" >> "$work/skipped-under-links.txt" || { echo "報告を書けません。中止します" >&2; exit 1; }
+    continue
+  fi
+  printf '%s\n' "$dest/aidlc/$f" >> "$added" || { echo "取り消し用の記録を書けません。中止します" >&2; exit 1; }
+  mkdir -p "$dest/aidlc/$(dirname "$f")" &&
+    cp "$R/aidlc/$f" "$dest/aidlc/$f" &&
+    cmp -s "$R/aidlc/$f" "$dest/aidlc/$f" ||
+    { echo "aidlc/ の補完に失敗しました: $f" >&2; exit 1; }
+done || { undo; exit 1; }
+
+# 5) ここまで成功したら、管理ディレクトリを一括で入れ替える（最後の一手）
+swapped=""; wasabsent=""
+for d in $managed; do
+  [ -e "$dest/$d" ] || wasabsent="$wasabsent $d"
+  if { [ ! -e "$dest/$d" ] || mv "$dest/$d" "$dest/$d.bak-$ts"; } && mv "$dest/$d.new-$ts" "$dest/$d"; then
+    swapped="$swapped $d"
+  else
+    rbfail=""
+    for x in $swapped $d; do
+      if [ -e "$dest/$x.bak-$ts" ]; then
+        # 稼働位置を空けられなければ、旧版をその中へ動かしてしまうので戻さない
+        if [ -e "$dest/$x" ] && ! mv "$dest/$x" "$dest/$x.failed-$ts"; then rbfail="$rbfail $x"; continue; fi
+        mv "$dest/$x.bak-$ts" "$dest/$x" || rbfail="$rbfail $x"
+      else
+        case " $wasabsent " in
+          *" $x "*) if [ -e "$dest/$x" ] && ! mv "$dest/$x" "$dest/$x.failed-$ts"; then rbfail="$rbfail $x"; fi ;;
+        esac
+      fi
+    done
+    undo
+    if [ -n "$rbfail" ] || [ -n "$undofail" ]; then
+      echo "⚠ $d の入れ替えに失敗し、さらに元に戻しきれませんでした（${rbfail:-後始末}）。手で復旧してください:" >&2
+      echo "   各ディレクトリについて、稼働位置のものを退け、*.bak-$ts をその名前に戻す（*.failed-$ts は失敗した新版）" >&2
+    else
+      echo "$d の入れ替えに失敗したため、すべて元に戻しました" >&2
+    fi
+    exit 1
+  fi
+done
+
+# 6) 旧版との違いを一覧にする（ここから先は報告だけで、失敗しても稼働中の状態は変えない）
+repfail=""
+for d in $managed; do
+  [ -d "$dest/$d.bak-$ts" ] || continue
+  if ! old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)); then
+    echo "⚠ $d.bak-$ts を読み切れませんでした。下の一覧は不完全なので、退避側を消さずに手で確認すること" >&2
+  fi
+  printf '%s\n' "$old" | while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    if [ ! -e "$dest/$d/$f" ] && [ ! -L "$dest/$d/$f" ]; then
+      printf '%s/%s\n' "$d" "${f#./}" >> "$work/restore-candidates.txt" || exit 1   # 旧版にだけある
+    elif [ -L "$dest/$d.bak-$ts/$f" ] || [ -L "$dest/$d/$f" ]; then
+      if ! { [ -L "$dest/$d.bak-$ts/$f" ] && [ -L "$dest/$d/$f" ] &&
+             [ "$(readlink "$dest/$d.bak-$ts/$f")" = "$(readlink "$dest/$d/$f")" ]; }; then
+        printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt" || exit 1     # リンクの種別・行き先が違う
+      fi
+    elif ! cmp -s "$dest/$d.bak-$ts/$f" "$dest/$d/$f"; then
+      printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt" || exit 1       # 両方にあり内容が違う
+    fi
+  done || repfail=1
+done
+if [ -n "$repfail" ]; then
+  echo "⚠ 一覧の書き込みに失敗しました。一覧は不完全なので、*.bak-$ts をすべて手で確認すること" >&2
+fi
+if [ -s "$work/restore-candidates.txt" ]; then
+  echo "旧版にだけあったファイル: $work/restore-candidates.txt（利用者が足したものは *.bak-$ts から戻す。上流が消したものは戻さない）"
+fi
+if [ -s "$work/changed-files.txt" ]; then
+  echo "新旧で内容が違う同名ファイル: $work/changed-files.txt（上流の更新も含む。自分で編集したものは *.bak-$ts を見て手でマージする）"
+fi
+if [ -s "$work/skipped-under-links.txt" ]; then
+  echo "リンク先の配下にあたるため補完しなかったファイル: $work/skipped-under-links.txt"
+fi
+```
+
+> **手順の組み立て方**: 変更はすべて「足すだけで記録を取る操作」（手順 2〜4）と「入れ替え」（手順 5）に分け、
+> **入れ替えを最後の一手にしてある。** 手順 0〜4 のどこで失敗しても、この実行で足したファイルと用意した新版を消して止まり、
+> 稼働中の管理ディレクトリには触れない。手順 5 の途中で失敗した場合は、入れ替え済みの分を旧版に戻す。
+> **取り消しで消すのはファイルだけ**なので、`mkdir -p` で作った中身の無いディレクトリが残ることがある
+> （利用者が作った空のディレクトリと区別できないため、あえて消さない）。
+>
+> **⚠ 手順 5 は管理ディレクトリを `*.bak-<時刻>` に退避してから新版を丸ごと置く。**上流が新版で消したファイルは残らないので新旧は混ざらない。
+> **代わりに、利用者が管理ディレクトリ内に足したファイル（独自のエージェントなど）は新しい側に無くなる。**`settings.local.json` だけは自動で引き継ぎ、それ以外は `restore-candidates.txt` を見て人が戻すこと。
+> **管理ディレクトリ内で利用者が編集した出荷ファイル（例: `.codex/config.toml` のプロバイダ設定）も新版で置き換わる。**
+> （ルートの `opencode.json` や `AGENTS.md` は置き換えず、手順 3 の `upgrade-*.diff` に差分を出すだけである。）
+> 新旧で内容が違う同名ファイルは `changed-files.txt` に出るが、**上流の更新と利用者の編集は区別できない**ため
+> ほとんどの管理ファイルが載りうる。自分で編集した覚えのあるファイルを中心に、退避側と見比べてマージすること（アーカイブにファイル単位の所有台帳が無いため、機械的には区別できない）。
+>
+> **検証の範囲（2026-09-23）**: 実物の `aidlc-copy-runtime-2.9.0.tar.gz` を展開し、使い捨てのプロジェクトに対して macOS の bash で流した。
+>
+> | 場面 | 結果 |
+> |---|---|
+> | 通常の更新（claude） | `org.md`（`strict` 宣言入り）・`settings.local.json`・既存 `.gitignore` を保持。`settings.json` は新版、不足の記憶ファイルを補完、`*.bak-*` を作成 |
+> | 旧版にだけあるフック・利用者の独自エージェント | 前者は新側に残らず、後者は `restore-candidates.txt` に挙がり `*.bak-*` 側に保全 |
+> | 手順 4 で失敗（書き込み不能／ファイルサイズ制限で途中切れ） | exit 1。**稼働中の `.claude` は旧版のまま**、手順 3 で置いた `.mcp.json` も取り消し、残るファイルは利用者の `org.md` だけ |
+> | `aidlc/` 自体がリンク／管理ディレクトリがリンク／ルートのファイルが読めない | 何も変更せずに止まる |
+> | `aidlc/` 配下の途中のディレクトリがリンク | プロジェクト外には 1 件も書かず、`skipped-under-links.txt` に列挙 |
+> | codex（管理ディレクトリ 2 つ）で 2 つ目の入れ替えを故意に失敗 | `.agents` は旧版に戻り、実行前に無かった `.codex` は稼働位置から `*.failed-*` へ退けられた |
+>
+> **他のハーネス・Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
+
+> **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
+>
+> | 版 | ネイティブ用 | **手動コピー用** |
+> |---|---|---|
+> | v2.8.x | `aidlc-runtime-X.Y.Z.tar.gz` | 同じもの |
+> | **v2.9.0 以降** | `aidlc-runtime-X.Y.Z.tar.gz` | **`aidlc-copy-runtime-X.Y.Z.tar.gz`** |
+>
+> **v2.9.0 で `aidlc-runtime-2.9.0.tar.gz` を取っても手動コピー用ではない。**
+> CHANGELOG 逐語:
+> ```
+> Manual-copy users must replace the complete `runtime/<harness>/` tree from
+> `aidlc-copy-runtime-2.9.0.tar.gz`.
+> ```
+> （→ [18.4](./18-release-impact-290.md)）
+
+> **⚠ 版の固定は、経路ごとに対象が違う。**
+>
+> | 経路 | 固定するもの |
+> |---|---|
+> | **手動コピーのみ**（v2.9.0 以降の既定） | **`aidlc-copy-runtime-X.Y.Z.tar.gz` だけ**。ネイティブ導入は不要 |
+> | **ネイティブ導入のみ** | `install.sh --version X.Y.Z`（資産は `aidlc-runtime-X.Y.Z.tar.gz`） |
+> | 両方を併用する場合 | **両方に同じ `X.Y.Z` を指定する。** `releases/latest` で入れたバイナリと別リリースのアーカイブを混ぜない |
+>
+> 導入済みの版は `aidlc version` で確認できる（ネイティブ導入時のみ）。
 
 **チェックアウトから `bun scripts/package.ts <harness>` で `dist/<harness>/` を生成することも今も可能**だが、
 上流はこれを利用者向けとは認めていない（`docs/guide/12-cli-commands.md:243-246` 逐語）:
@@ -218,8 +576,11 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > `bun scripts/package.ts`; **release users should not copy from a checkout.**
 
 なお `bun scripts/package.ts <harness>` は `dist/<harness>/` と `dist-release/<harness>/` の
-**両方**を生成する。前者は従来どおり `bun …` を呼ぶ Bun 前提の投影、
-後者はネイティブ `aidlc` を呼ぶ形で、**リリース資産に入るのは後者**である。
+**両方**を生成する。前者は `bun …` を呼ぶ Bun 前提の投影、後者はネイティブ `aidlc` を呼ぶ形である。
+**v2.9.0 以降はどちらもリリース資産になる** —— `dist/<harness>/` は
+`aidlc-copy-runtime-X.Y.Z.tar.gz`、`dist-release/<harness>/` は `aidlc-runtime-X.Y.Z.tar.gz`
+の中身である（`scripts/package-release.ts` 実測）。
+**2.8.x までは後者だけがリリース資産だった。**
 
 ### 初回実行ウィザード
 
@@ -252,10 +613,8 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 最後に `Apply? [Y/n]` のゲートがあり、**それより前にはファイルを 1 つも書かない**。
 
 > **⚠ このゲートで Enter を押すとキャンセル扱いになる不具合がある。**
-> **実装版 2.8.1**（`c03f9e28`）で修正されたが、**それを含むリリースはまだ無い**。
-> なお**公開時にどの版番号が付くかは未確定**である（後続の `52da70ad` はコミット本文で 2.8.2 を名乗り、
-> CHANGELOG は 2.8.1 に統合している）。**修正の有無はタグ名ではなくコミットの包含で判定すること。**
-> 2.8.0 を使う間は、既定を受け入れる場合も明示的に `y` を入力すること。
+> **`c03f9e28` で修正され、リリース版 `v2.8.1` 以降に含まれる（解消済み）。**
+> **v2.8.0 を使い続ける場合のみ**、既定を受け入れるときも明示的に `y` を入力すること。
 
 セクションを指定してピンポイントに設定することもできる:
 `aidlc config models` / `runtime` / `providers` / `trust` / `flags` / `project`。
@@ -356,13 +715,10 @@ Usage: install.sh [--version <x.y.z>] [--from <dir>] [--offline] [--profile <sta
 > **⚠ ただし同じ失敗様式が v2.8.0 で再発している**（ネイティブ化でアダプタ経路が外れたため。→ 下記の表と 17.3）。
 > **したがって「2.5.69 以降なら安全」ではない。**
 > - **2.5.63〜2.5.68 に当たっている場合**: エンジンを **2.5.69 以上 2.7.x 以下**へ更新して再導入する。
-> - **v2.8.0 に当たっている場合**: **更新では直らない**。修正は **`52da70ad`** で入ったが**未リリース**（公開時の版番号は未確定）。
->   **`52da70ad` を含むリリース**の公開を待つ（**版番号は未確定**。`git fetch origin --tags` してから
->   `git merge-base --is-ancestor 52da70ad <tag>` で判定する。**`ls-remote` だけではタグを取得できない**）か、
->   **ソース生成による暫定回避**を採る（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）。
->   手順は `git checkout 52da70ad` → `bun install --frozen-lockfile` →
->   `bun scripts/package.ts cursor` → `bun dist/cursor/install.ts <project>`。
->   **上流非推奨の経路であり、本調査では検証していない。**
+> - **v2.8.0 に当たっている場合**: **v2.8.1 以降へ更新すれば直る**（推奨は現 Latest の v2.9.0）。
+>   修正 `52da70ad` は **v2.8.1 に含まれる**（`git fetch origin --tags` してから
+>   `git merge-base --is-ancestor 52da70ad v2.8.1` で確認済み）。
+>   **かつてここに記していたソース生成による暫定回避は、もう不要である。**
 > 切り分けは [6.6 のトラブルシュート表](#66-トラブルシュート頻出)を参照。
 
 #### opencode
@@ -665,8 +1021,8 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 | Kiro CLI で `/aidlc --status` 等が無反応（silent no-op） | 2.6.46 の verb interceptor 修正。エンジンを更新して `aidlc config --harness kiro` を再実行（**Kiro CLI のみの修正**） |
 | Kiro: プラグインの compose がアップグレード後に走らない | 2.6.47。projection を再ビルド／再コピーし、**CLI は** `aidlc plugin sync` か `hooks/compose.ts` を明示実行（**IDE は不要**）。§6.4 |
 | Kiro IDE hooks 無反応 | v2 schema hooks の正しい中身コピー（2.5.10） |
-| GitHub Copilot でフックが全イベントでクラッシュする（`undefined is not an object (evaluating 'input.length')`） | **v2.8.0 の既知不具合**（ネイティブ化で Copilot アダプタが引数 1 個のフック経路に落ち、対象が捨てられる）。**更新では直らない。修正は `52da70ad` で入ったが未リリース**（→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)） |
-| Cursor IDE で全ツール呼び出しがブロックされる | **原因が 2 つある。どちらかを切り分けること。**<br>**(a) 2.5.63〜2.5.68 の既知不具合**（allow JSON 未出力 × `failClosed`）→ **2.5.69 以上 2.7.x 以下**へ更新して再導入。<br>**(b) v2.8.0 の再発**（ネイティブ化で Cursor アダプタが引数 1 個のフック経路に落ちた。→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）→ **更新では直らない。修正は `52da70ad` で入ったが未リリース**。`v2.8.1` の公開を待つか、ソースから生成する経路を採る |
+| GitHub Copilot でフックが全イベントでクラッシュする（`undefined is not an object (evaluating 'input.length')`） | **v2.8.0 の既知不具合**（ネイティブ化で Copilot アダプタが引数 1 個のフック経路に落ち、対象が捨てられる）。**v2.8.1 以降へ更新すれば直る**（修正 `52da70ad` は v2.8.1 に含まれる。→ [18 章](./18-release-impact-290.md)） |
+| Cursor IDE で全ツール呼び出しがブロックされる | **原因が 2 つある。どちらかを切り分けること。**<br>**(a) 2.5.63〜2.5.68 の既知不具合**（allow JSON 未出力 × `failClosed`）→ **2.5.69 以上 2.7.x 以下**へ更新して再導入。<br>**(b) v2.8.0 の再発**（ネイティブ化で Cursor アダプタが引数 1 個のフック経路に落ちた。→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）→ **v2.8.1 以降へ更新すれば直る**（修正 `52da70ad` は v2.8.1 に含まれる。推奨は現 Latest の v2.9.0） |
 | 学習 persist が `selections-json is malformed: missing or non-string space` で落ちる | 2.6.36 の非互換。該当ステージの **`surface` を再実行**して selections を作り直す（`persist` のリトライでは直らない）。§6.4 |
 
 ### GitHub Copilot: アップグレード後は進行中ワークフローを新しい会話で継続する（2.6.12）
@@ -703,13 +1059,13 @@ aidlc version
 ソースを直接見る場合:
 
 ```bash
-# 本ノートが対象とする 2.8.1 のソースを照合する場合は SHA を指定する
-# ⚠ v2.8.1 タグは存在しない。v2.8.0 は 0d399dd8 を指し、その後の 2 コミットを含まない
+# 17 章が対象とする 2.8.1 のソースを照合する場合は SHA を指定する
+# ⚠ c03f9e28 はリリース版 v2.8.1（= 215afe1a）ではない。タグは 5 コミット後を指す
 git clone https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows && git checkout c03f9e28
 
-# リリース済みの版だけを見るならタグで固定してよい
-# git clone --depth 1 --branch v2.8.0 https://github.com/awslabs/aidlc-workflows.git
+# リリース済みの版を見るならタグで固定する（現 Latest は v2.9.0）
+# git clone --depth 1 --branch v2.9.0 https://github.com/awslabs/aidlc-workflows.git
 
 # 上流の現在を追うなら main（動くブランチなので、本ノートの数値と食い違いうる）
 # git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git
