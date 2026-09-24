@@ -8,38 +8,35 @@
 >
 > **📌 続報（2026-09-17）—— 上記の 🔴 は解消済み。**
 > `52da70ad` を含む **`v2.8.1` が 2026-09-09 20:12 UTC にリリース**された（本ノートの測定の数時間後）。
-> その後 **v2.8.2（09-11）と v2.9.0（09-15、現 Latest）** が公開されている。
+> その後 **v2.8.2（09-11）・v2.9.0（09-15）・v2.10.0（09-24、現 Latest）** が公開されている。
 > **Copilot / Cursor を使う場合も、v2.8.1 以降を導入すれば不具合は起きない。**
 > **17 章が案内するソース生成の暫定回避策は不要である。**
-> 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md) で扱う。
+> 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md)、2.9.0 → 2.10.0 は [19 章](./19-release-impact-2100.md) で扱う。
 
-> **🔴 v2.9.0 へ更新するときは、プロジェクトごとに `aidlc config --yes` が要る。**
+> **🔴 v2.9.0 以降へ更新するときは（v2.10.0 も同じ）、プロジェクトごとに `aidlc config --yes` が要る。**
 > CHANGELOG 逐語:
 > ```
 > run `aidlc update`, then run `aidlc config --yes` in each project to refresh its harness runtime.
 > ```
 > 2.8.x までの「何もしなくてよい」とは違う（→ [18.5](./18-release-impact-290.md)）。
+>
+> **⚠ v2.10.0 では、出荷既定のまま Bedrock を使っていたプロジェクトが `aidlc config --yes` で Bedrock 設定を失いうる**（→ [19.7](./19-release-impact-2100.md)）。
 
-> **🔴 現 Latest の v2.9.0 に、センサー・フック系の不具合が 3 件残っている（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）（2026-09-23 時点）。**
-> **①② は `bun` 実行では再現しない。安定版（Latest `v2.9.0`）には未収録で、preview `v2.9.1-preview.20260920.1` 以降には収録済み**（2026-09-23 実測）。
-> **③ は `bun` 実行でも起こりうる（フックの PATH 上に `bun` が無い場合）。修正はどの版にも未収録**（preview を含む）。
+> **✅ v2.9.0 に残っていたセンサー・フック系の不具合 3 件は、すべて `v2.10.0` に収録された（2026-09-24）。**
 >
-> | 症状 | 影響 |
-> |---|---|
-> | **ゲートの Review brief が動かない**（#1070） | `loadDelegate` に `review-brief` の分岐が無く `does not export main(argv)` で終わる。**2.8.0 以降の全ネイティブリリースが該当** |
-> | **ゲートのセンサーが発火しない**（#1166） | `aidlc sensor …` が `unknown command 'sensor'` になる。**`blocking` はゲートを拒否し、`advisory` は黙って捨てられる** |
-> | **3 つのコアフックが `bun` を直接名指し**（#1249） | ネイティブには Bun が無いのに spawn が試みられる。**Stop フック・runtime-graph 再構築・Write 契機センサーが無言で死ぬ。doctor も警告できない** |
+> | 症状 | 影響（v2.9.0） | 修正 |
+> |---|---|---|
+> | **ゲートの Review brief が動かない**（#1070） | `loadDelegate` に `review-brief` の分岐が無く `does not export main(argv)` で終わる。**2.8.0 以降の全ネイティブリリースが該当** | `be94bde7` |
+> | **ゲートのセンサーが発火しない**（#1166） | `aidlc sensor …` が `unknown command 'sensor'` になる。**`blocking` はゲートを拒否し、`advisory` は黙って捨てられる** | `c97fa7ba` |
+> | **3 つのコアフックが `bun` を直接名指し**（#1249） | ネイティブには Bun が無いのに spawn が試みられる。**Stop フック・runtime-graph 再構築・Write 契機センサーが無言で死ぬ。doctor も警告できない** | `f79e321b` |
 >
-> **センサーを使う予定があるなら、ネイティブ v2.9.0 では期待どおりに動かない。**
-> **✅ 回避策: そのプロジェクトだけ手動コピー経路（`aidlc-copy-runtime-2.9.0.tar.gz`、Bun 前提）で導入する。**
-> **①② は回避できる。③ は `bun` が非対話フックの PATH 上にある場合に限り回避できる。**
-> **⚠ preview に切り替えても ③ は直らない。**
-> 詳細と根拠は [18.6](./18-release-impact-290.md)。
+> **v2.10.0 に上げれば、18.6 が案内していた回避策（手動コピー経路＋フックの PATH に `bun`）は不要である。**
+> v2.9.0 に留まる場合は [18.6](./18-release-impact-290.md) の警告と回避策がそのまま当てはまる（→ [19.4](./19-release-impact-2100.md)）。
 >
 > **⚠ v2.8.0 に限り、GitHub Copilot と Cursor のフックが動作しない。**
 > Copilot は全イベントでクラッシュ、Cursor は**全ツール呼び出しがブロックされる**。
 > **修正 `52da70ad` は v2.8.1 に含まれるため、v2.8.1 以降では起きない。**
-> **v2.8.0 を使っている場合のみ、v2.8.1 以降（推奨は現 Latest の v2.9.0）へ更新する。**
+> **v2.8.0 を使っている場合のみ、v2.8.1 以降（推奨は現 Latest の v2.10.0）へ更新する。**
 > **根拠は同コミットの本文とタグ包含判定（実機再現はしていない）。**
 > 上流リポジトリから **`dist/` ディレクトリが削除された**。
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）で `aidlc` コマンドを入れ、
@@ -52,7 +49,7 @@
 
 ## 6.1 対応ハーネス（2.x）
 
-| Harness | 最低バージョン目安 | 導入コマンド（v2.8.0 以降。v2.9.0 でも同じ） | 起動 |
+| Harness | 最低バージョン目安 | 導入コマンド（v2.8.0 以降。v2.10.0 でも同じ） | 起動 |
 |---------|-------------------|--------|------|
 | **Claude Code** | 最新推奨 | `aidlc config --harness claude` | `/aidlc` |
 | **Kiro IDE** | hooks v2 対応含む | `aidlc config --harness kiro-ide` | `/aidlc` |
@@ -205,7 +202,7 @@ root での実行は拒否される。Homebrew / Nix 管理の既存 `aidlc` が
 >
 > **確認を挟まずに `sh` するなら、パイプ直結版と実質同じである。**
 
-`install.sh` のオプション（**v2.9.0 実測・逐語**）:
+`install.sh` のオプション（**v2.9.0 実測・逐語。v2.10.0 も同一**）:
 
 ```
 Usage: install.sh [--version <x.y.z|x.y.z-preview.YYYYMMDD.N>] [--from <dir>] [--offline] [--profile <startup-file>] [--json|--quiet] [--no-color] [--yes]
@@ -220,11 +217,11 @@ Usage: install.sh [--version <x.y.z|x.y.z-preview.YYYYMMDD.N>] [--from <dir>] [-
 
 ```powershell
 # 版を固定して導入する場合（既定は latest）
-.\install.ps1 -Version 2.9.0
+.\install.ps1 -Version 2.10.0
 ```
 
-> **⚠ 版を固定するなら `--version 2.9.0`（現 Latest）を使う。**
-> `v2.8.1` / `v2.8.2` / `v2.9.0` はいずれも実在するタグである
+> **⚠ 版を固定するなら `--version 2.10.0`（現 Latest）を使う。**
+> `v2.8.1` / `v2.8.2` / `v2.9.0` / `v2.10.0` はいずれも実在するタグである
 > （「`v2.8.1` タグは存在しない」という旧記述は 2026-09-09 時点の話で、現在は誤り）。
 
 ### 手動でファイルを置きたい場合
@@ -252,7 +249,7 @@ Usage: install.sh [--version <x.y.z|x.y.z-preview.YYYYMMDD.N>] [--from <dir>] [-
 > **これは上流 README と `package-release.ts` の読解であり、本調査では実機で確かめていない。**
 > **📌 かつてここに「Copilot / Cursor のフック不具合を避けるソース生成経路」を記していたが、
 > その回避策はもう不要である。** 不具合は `52da70ad` で修正され、**v2.8.1 以降に含まれる**。
-> **素直に v2.8.1 以降（推奨は現 Latest の v2.9.0）を導入すればよい。**
+> **素直に v2.8.1 以降（推奨は現 Latest の v2.10.0）を導入すればよい。**
 
 **v2.9.0 以降**は、Bun を導入したうえで `aidlc-copy-runtime-X.Y.Z.tar.gz` を展開し、
 **`runtime/<harness>/` をディレクトリごと**プロジェクトへコピーする。
@@ -323,7 +320,7 @@ cp -R "$RUNTIME_ROOT/claude/." your-project/
 
 新規プロジェクトなら上流の手順でよい。**既存プロジェクトでは、中身の種類ごとに扱いを変えること。**
 
-`aidlc-copy-runtime-2.9.0.tar.gz` の `runtime/<harness>/` を実測すると、中身は 3 種類に分かれる。
+`aidlc-copy-runtime-2.9.0.tar.gz` の `runtime/<harness>/` を実測すると、中身は 3 種類に分かれる（`2.10.0` も同じ構成であることを実物で確認した）。
 
 | 種類 | 中身（実測） | 既存プロジェクトでの扱い |
 |---|---|---|
@@ -332,7 +329,7 @@ cp -R "$RUNTIME_ROOT/claude/." your-project/
 | **`aidlc/` ワークスペースの殻** | `active-space`、**`spaces/default/memory/{org,team,project}.md`**、`phases/*.md` | **既存ファイルは絶対に上書きしない。足りないものだけ補う** |
 
 > **⚠ `aidlc/spaces/<space>/memory/org.md` などは利用者が書く記憶ファイルである。**
-> **[18.3](./18-release-impact-290.md) の Change Control の `strict` 宣言もここに書く。** 上書きすると統制設定ごと消える。
+> **[18.3](./18-release-impact-290.md) の Change Control（v2.10.0 からは Guard Policy。見出しは `## Guard Policy` → [19.3](./19-release-impact-2100.md)）の `strict` 宣言もここに書く。** 上書きすると統制設定ごと消える。
 
 ハーネス管理ディレクトリ（実測）:
 
@@ -340,10 +337,16 @@ cp -R "$RUNTIME_ROOT/claude/." your-project/
 |---|---|
 | claude | `.claude/` |
 | codex | `.codex/`、`.agents/` |
-| copilot | `.github/`、`.aidlc/` |
+| copilot | `.github/agents/`、`.github/hooks/`、`.github/skills/`、`.aidlc/`（**`.github/` 丸ごとではない**） |
 | cursor | `.cursor/` |
 | kiro / kiro-ide | `.kiro/` |
 | opencode | `.opencode/`、`.aidlc/` |
+
+> **⚠ copilot で `managed=".github .aidlc"` としてはいけない。** 手順 5 は管理ディレクトリを丸ごと退避して入れ替えるので、
+> 既存の `.github/workflows/` や `CODEOWNERS` まで `.github.bak-<時刻>` へ移り、**CI が止まる**。
+> アーカイブの `.github/` に入っているのは `agents/`・`hooks/`・`skills/` の 3 つだけなので、それぞれを管理ディレクトリとして指定する
+> （`managed=".github/agents .github/hooks .github/skills .aidlc"`）。
+> **利用者が `.github/agents/` などに足した独自のファイルは、他の管理ディレクトリと同じく `restore-candidates.txt` に出る。**
 
 ```bash
 # bash で実行すること（zsh では $managed が単語に分割されず、複数の管理ディレクトリを扱えない）
@@ -381,6 +384,9 @@ for d in $managed; do
     echo "$d はシンボリックリンクです（dotfiles 管理など）。自動では置き換えないので、リンク先で手動更新してください" >&2
     exit 1
   fi
+  if [ "$(dirname "$d")" != . ] && [ -L "$dest/$(dirname "$d")" ]; then
+    echo "$(dirname "$d") はシンボリックリンクです。プロジェクト外に書かないよう中止します" >&2; exit 1
+  fi
   if [ -e "$dest/$d" ] && [ ! -d "$dest/$d" ]; then
     echo "$d がディレクトリではありません（利用者のファイル？）。中止します" >&2; exit 1
   fi
@@ -391,6 +397,17 @@ for d in $managed; do
     if [ -n "$other" ] && [ "$other" != "$h" ]; then
       echo "$d は既に $other が使っています。$h とは同じプロジェクトに置けないので中止します" >&2; exit 1
     fi
+  fi
+done
+# copilot の AGENTS.md は専用で、AGENTS.md を共有する codex / cursor / kiro / kiro-ide / opencode とは
+# 同じプロジェクトに置けない（claude はどれとも共存できる）。導入済みのハーネスを管理ディレクトリから調べる
+for c in .codex .cursor .kiro .aidlc; do
+  [ "$h" != claude ] || break
+  [ -f "$dest/$c/tools/data/harness.json" ] || continue
+  other=$(sed -n 's/.*"distribution": *"\([^"]*\)".*/\1/p' "$dest/$c/tools/data/harness.json" | head -1)
+  [ -n "$other" ] && [ "$other" != "$h" ] || continue
+  if [ "$h" = copilot ] || [ "$other" = copilot ]; then
+    echo "$other が既に入っています。copilot は AGENTS.md を他のハーネスと共有できないので中止します" >&2; exit 1
   fi
 done
 for f in .gitignore AGENTS.md .mcp.json opencode.json; do
@@ -408,7 +425,8 @@ fi
 # 2) 管理ディレクトリの新版を別名で用意し、利用者ファイルもそこへ引き継ぐ（稼働中のものには触れない）
 for d in $managed; do
   ok=1
-  cp -R "$R/$d" "$dest/$d.new-$ts" || ok=
+  mkdir -p "$dest/$(dirname "$d")" || ok=     # copilot の .github/ が無い新規プロジェクト向け
+  [ -n "$ok" ] && cp -R "$R/$d" "$dest/$d.new-$ts" || ok=
   for k in $keep; do
     [ -n "$ok" ] || break
     if [ -f "$dest/$d/$k" ] || [ -L "$dest/$d/$k" ]; then
@@ -550,7 +568,27 @@ fi
 > | `aidlc/` 配下の途中のディレクトリがリンク | プロジェクト外には 1 件も書かず、`skipped-under-links.txt` に列挙 |
 > | codex（管理ディレクトリ 2 つ）で 2 つ目の入れ替えを故意に失敗 | `.agents` は旧版に戻り、実行前に無かった `.codex` は稼働位置から `*.failed-*` へ退けられた |
 >
-> **他のハーネス・Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
+> **追加の検証（2026-09-24、`aidlc-copy-runtime-2.10.0.tar.gz`）**:
+>
+> | 場面 | 結果 |
+> |---|---|
+> | claude の新規導入 → 1 秒後に再実行（更新） | どちらも成功。**同じ秒の再実行は `aidlc.bak-<時刻>` の名前衝突で何も変えずに止まる**（仕様どおり） |
+> | 既存の `.github/workflows/` と `CODEOWNERS` があるプロジェクトに copilot を導入・更新 | **どちらも稼働位置に残った**。退避されたのは `.github/agents`・`hooks`・`skills` だけ |
+> | copilot の後に opencode／opencode の後に copilot（`.aidlc/` 共有） | 後から入れる方が中止。先に入っていた方は無傷 |
+> | kiro の後に kiro-ide（`.kiro/` 共有） | 中止 |
+> | codex の後に copilot／copilot の後に codex（`AGENTS.md` 排他） | 中止 |
+> | claude と codex／claude と copilot（順序は両方） | 成功（共存できる組み合わせ） |
+> | `.github` がシンボリックリンク | 何も変えずに中止 |
+>
+> **⚠ 複数のハーネスを置いたプロジェクトでは、全ハーネスを同じリリースで更新すること。**
+> 共有の `AGENTS.md` ブロックを別リリースの兄弟ハーネスが持っている状態を、上流は競合として扱う（`docs/guide/18-install-and-lifecycle.md`）。
+> 手順 3 は `AGENTS.md` を上書きしないので、差分（`upgrade-AGENTSmd.diff`）を必ず確認する。
+> **opencode では `AGENTS.md` と `opencode.json` を一緒にマージすること**（2.10.0 の `opencode.json` は `instructions` に `.aidlc/onboarding.md` を加えている）。
+>
+> **⚠ cursor はこの手順の対象外である。** アーカイブに同梱のルート `install.ts` が行う処理（`.cursor/hooks.json` の構造マージ等）を再現していない。
+> 上流も「Cursor の手動コピー用インストーラは単一ハーネス専用で、複数ハーネスのプロジェクトには `aidlc config --harness cursor` で加えること」としている。
+>
+> **cursor / kiro / kiro-ide の更新、Linux・Windows では流していない。** 社内で 1 度確かめてから手順書に採ること。
 
 > **🔴 v2.9.0 で手動コピー用のアセットが分離された。取得するファイル名が変わっている。**
 >
@@ -723,7 +761,7 @@ fi
 > **⚠ ただし同じ失敗様式が v2.8.0 で再発している**（ネイティブ化でアダプタ経路が外れたため。→ 下記の表と 17.3）。
 > **したがって「2.5.69 以降なら安全」ではない。**
 > - **2.5.63〜2.5.68 に当たっている場合**: エンジンを **2.5.69 以上 2.7.x 以下**へ更新して再導入する。
-> - **v2.8.0 に当たっている場合**: **v2.8.1 以降へ更新すれば直る**（推奨は現 Latest の v2.9.0）。
+> - **v2.8.0 に当たっている場合**: **v2.8.1 以降へ更新すれば直る**（推奨は現 Latest の v2.10.0）。
 >   修正 `52da70ad` は **v2.8.1 に含まれる**（`git fetch origin --tags` してから
 >   `git merge-base --is-ancestor 52da70ad v2.8.1` で確認済み）。
 >   **かつてここに記していたソース生成による暫定回避は、もう不要である。**
@@ -1030,7 +1068,7 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 | Kiro: プラグインの compose がアップグレード後に走らない | 2.6.47。projection を再ビルド／再コピーし、**CLI は** `aidlc plugin sync` か `hooks/compose.ts` を明示実行（**IDE は不要**）。§6.4 |
 | Kiro IDE hooks 無反応 | v2 schema hooks の正しい中身コピー（2.5.10） |
 | GitHub Copilot でフックが全イベントでクラッシュする（`undefined is not an object (evaluating 'input.length')`） | **v2.8.0 の既知不具合**（ネイティブ化で Copilot アダプタが引数 1 個のフック経路に落ち、対象が捨てられる）。**v2.8.1 以降へ更新すれば直る**（修正 `52da70ad` は v2.8.1 に含まれる。→ [18 章](./18-release-impact-290.md)） |
-| Cursor IDE で全ツール呼び出しがブロックされる | **原因が 2 つある。どちらかを切り分けること。**<br>**(a) 2.5.63〜2.5.68 の既知不具合**（allow JSON 未出力 × `failClosed`）→ **2.5.69 以上 2.7.x 以下**へ更新して再導入。<br>**(b) v2.8.0 の再発**（ネイティブ化で Cursor アダプタが引数 1 個のフック経路に落ちた。→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）→ **v2.8.1 以降へ更新すれば直る**（修正 `52da70ad` は v2.8.1 に含まれる。推奨は現 Latest の v2.9.0） |
+| Cursor IDE で全ツール呼び出しがブロックされる | **原因が 2 つある。どちらかを切り分けること。**<br>**(a) 2.5.63〜2.5.68 の既知不具合**（allow JSON 未出力 × `failClosed`）→ **2.5.69 以上 2.7.x 以下**へ更新して再導入。<br>**(b) v2.8.0 の再発**（ネイティブ化で Cursor アダプタが引数 1 個のフック経路に落ちた。→ [17.3](./17-release-impact-2801.md#173--281-は-changelog-にあるがリリースされていない)）→ **v2.8.1 以降へ更新すれば直る**（修正 `52da70ad` は v2.8.1 に含まれる。推奨は現 Latest の v2.10.0） |
 | 学習 persist が `selections-json is malformed: missing or non-string space` で落ちる | 2.6.36 の非互換。該当ステージの **`surface` を再実行**して selections を作り直す（`persist` のリトライでは直らない）。§6.4 |
 
 ### GitHub Copilot: アップグレード後は進行中ワークフローを新しい会話で継続する（2.6.12）
@@ -1072,8 +1110,8 @@ aidlc version
 git clone https://github.com/awslabs/aidlc-workflows.git
 cd aidlc-workflows && git checkout c03f9e28
 
-# リリース済みの版を見るならタグで固定する（現 Latest は v2.9.0）
-# git clone --depth 1 --branch v2.9.0 https://github.com/awslabs/aidlc-workflows.git
+# リリース済みの版を見るならタグで固定する（現 Latest は v2.10.0）
+# git clone --depth 1 --branch v2.10.0 https://github.com/awslabs/aidlc-workflows.git
 
 # 上流の現在を追うなら main（動くブランチなので、本ノートの数値と食い違いうる）
 # git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git

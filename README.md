@@ -7,8 +7,8 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-09-17（測定）／2026-09-23（上流の再確認と追記）  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **`main` ブランチ**（実装バージョン **2.9.0**。上流 HEAD `2931ef02` / 取得日 2026-09-17）
+最終同期日: 2026-09-24（タグ `v2.10.0` で測定）  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **リリース `v2.10.0`**（`2a883858`。取得日 2026-09-24。同日の `main` は `20008a5d` でタグから +1、テストのみ）
 
 > **⚠ 上流の `dist/` ディレクトリは 2026-09-08 に削除された。**
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）と `aidlc config` に変わった。
@@ -17,47 +17,44 @@
 >
 > **📌 続報（2026-09-17）—— 上記の 🔴 は解消済み。**
 > `52da70ad` を含む **`v2.8.1` が 2026-09-09 20:12 UTC にリリース**された（本ノートの測定の数時間後）。
-> その後 **v2.8.2（09-11）と v2.9.0（09-15、現 Latest）** が公開されている。
+> その後 **v2.8.2（09-11）・v2.9.0（09-15）・v2.10.0（09-24、現 Latest）** が公開されている。
 > **Copilot / Cursor を使う場合も、v2.8.1 以降を導入すれば不具合は起きない。**
 > **17 章が案内するソース生成の暫定回避策は不要である。**
-> 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md) で扱う。
+> 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md)、2.9.0 → 2.10.0 は [19 章](./19-release-impact-2100.md) で扱う。
 
-> **⚠ 版を固定するなら `v2.9.0`（現 Latest）を使う。**
-> **`v2.8.1` / `v2.8.2` / `v2.9.0` はいずれも実在するタグである**
+> **⚠ 版を固定するなら `v2.10.0`（現 Latest）を使う。**
+> **`v2.8.1` / `v2.8.2` / `v2.9.0` / `v2.10.0` はいずれも実在するタグである**
 > （旧記述の「`v2.8.1` タグは存在しない」は 2026-09-09 時点の話で、現在は誤り）。
 >
 > **⚠ 17 章の基準 `c03f9e28` は、リリース版 `v2.8.1`（＝ `215afe1a`）ではない。**
 > どちらも `AIDLC_VERSION` は `2.8.1` だが、タグは 5 コミット後を指す。
 > ソースを照合する目的なら SHA を、導入するならタグを使うこと（→ [18.1](./18-release-impact-290.md)）。
 
-> **🔴 現 Latest の v2.9.0 に、センサー・フック系の不具合が 3 件残っている（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）（2026-09-23 時点）。**
-> **①② は `bun` 実行では再現しない。安定版（Latest `v2.9.0`）には未収録で、preview `v2.9.1-preview.20260920.1` 以降には収録済み**（2026-09-23 実測）。
-> **③ は `bun` 実行でも起こりうる（フックの PATH 上に `bun` が無い場合）。修正はどの版にも未収録**（preview を含む）。
-> - **ゲートの Review brief が動かない**（#1070）—— 2.8.0 以降の全ネイティブリリースが該当
-> - **ゲートのセンサーが発火しない**（#1166）—— `blocking` はゲートを拒否し、`advisory` は黙って捨てられる
-> - **3 つのコアフックが `bun` を直接名指ししている**（#1249）—— Stop フック・runtime-graph 再構築・**Write 契機センサーが無言で死ぬ。doctor も警告できない**
->
-> **社内でセンサーを使う予定があるなら、ネイティブ v2.9.0 では期待どおりに動かない。**
-> **✅ 回避策: そのプロジェクトだけ手動コピー経路（`aidlc-copy-runtime-2.9.0.tar.gz`、Bun 前提）で導入する。**
-> **①② はコンパイル済みバイナリを通る経路にしか無いので回避できる。**
-> **③ は `bun` が非対話フックの PATH 上にある場合に限り回避できる。**
-> **⚠ preview に切り替えても ③ は直らない。**
-> 詳細は [18.6](./18-release-impact-290.md)。
+> **✅ v2.9.0 に残っていたセンサー・フック系の不具合 3 件（#1070 / #1166 / #1249）は、すべて `v2.10.0` に収録された（2026-09-24）。**
+> **v2.10.0 に上げれば、18.6 が案内していた回避策（手動コピー経路で導入し、フックの PATH に `bun` を置く）は不要になる。**
+> v2.9.0 に留まる場合は [18.6](./18-release-impact-290.md) の警告が引き続き当てはまる（→ [19.4](./19-release-impact-2100.md)）。
 
-> **🔴 2.9.0 への更新は作業が要る。導入経路によって手順が違う。**
+> **🔴 2.10.0 への更新は作業が要る（2.9.0 と同じ形）。導入経路によって手順が違う。**
 >
 > | 導入経路 | 手順 |
 > |---|---|
 > | **ネイティブ導入** | `aidlc update` の後、**プロジェクトごとに `aidlc config --yes`** |
-> | **手動コピー運用** | **`aidlc-copy-runtime-2.9.0.tar.gz`** を取得し、ハーネス管理ディレクトリを更新し、ルートのファイルと `aidlc/`（利用者の記憶）は保全する。**丸ごと上書きしてはいけない**（手順は [6 章の手動コピー節](./06-harnesses-install.md#手動でファイルを置きたい場合)）。**`aidlc` コマンドは使わない**（そもそも存在しない） |
+> | **手動コピー運用** | **`aidlc-copy-runtime-2.10.0.tar.gz`** を取得し、ハーネス管理ディレクトリを更新し、ルートのファイルと `aidlc/`（利用者の記憶）は保全する。**丸ごと上書きしてはいけない**（手順は [6 章の手動コピー節](./06-harnesses-install.md#手動でファイルを置きたい場合)）。**`aidlc` コマンドは使わない**（そもそも存在しない） |
 >
 > **手動コピー運用者は `aidlc update` も `aidlc config --yes` も実行できない。**
 > ネイティブバイナリを入れていないためである（→ [18.4](./18-release-impact-290.md) / [18.5](./18-release-impact-290.md)）。
+>
+> **⚠ Bedrock を出荷既定のまま使っているプロジェクトは、`aidlc config --yes` で Bedrock 設定が外れうる**（→ [19.7](./19-release-impact-2100.md)）。
+> **⚠ 1 つのプロジェクトに置けないハーネスの組み合わせがある**（Kiro CLI と Kiro IDE、OpenCode と GitHub Copilot。→ [19.6](./19-release-impact-2100.md)）。
 
-> **🔴 既存ワークフローは Change Control が暗黙に `strict` になる。**
-> `Change Control` 行を持たない既存の `aidlc-state.md` は、スコープ既定ではなく **`strict`** として扱われる。
+> **🔴 Change Control は v2.10.0 で Guard Policy に改名され、`relaxed` の意味が広がった。**
+> 既定スコープ `classic` を含む 8 スコープ（既定 `relaxed`）では、**承認後に計画を編集しても再承認を求められず、レビュー後の成果物の書き換えも拒否されない**（監査行 `GUARD_STOOD_ASIDE` が残る）。
+> **初回の Plan Approval は引き続き必須**である。組織として締めたいならメモリの `## Guard Policy` に `Mode: strict` を書く（→ [19.3](./19-release-impact-2100.md)）。
+>
+> **🔴 既存ワークフローは Guard Policy（旧 Change Control）が暗黙に `strict` になる。**
+> `Guard Policy` 行（旧 `Change Control` 行）を持たない既存の `aidlc-state.md` は、スコープ既定ではなく **`strict`** として扱われる。
 > **doctor にも診断にも該当する finding が無く、気付く手段が用意されていない。**
-> 既存 intent には一度 `/aidlc --change-control <strict|relaxed>` を実行して意図を固定すること（→ [18.3.1](./18-release-impact-290.md)）。
+> 既存 intent には一度 `/aidlc --guard-policy <strict|relaxed|off>`（v2.9.0 では `--change-control <strict|relaxed>`）を実行して意図を固定すること（→ [18.3.1](./18-release-impact-290.md)）。
 
 > **🔴 既定スコープ `classic` が 26 → 18 ステージに縮小した（v2.9.0、破壊的）。**
 > **効くのは、実際に `classic` に解決される intent である** —— `/aidlc-init` や `--scope` 無しの `intent-create` などのフォールバック経路と、`classic` を明示した場合。
@@ -115,7 +112,8 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [15-release-impact-26123.md](./15-release-impact-26123.md) | 2.6.55 → 2.6.123 のリリース差分。**フック 17→18 / `core/tools/*.ts` 41→51 / 監査 86→91 / `bugfix` 7→9・`refactor` 8→10**、プラグイン作成ツールチェーン、Bolt 用語の再定義 |
 | [16-release-impact-2700.md](./16-release-impact-2700.md) | 2.6.123 → 2.7.0 のリリース差分。**中核メトリクスは全項目不変**。上流の `v2` ブランチ削除と `main` への一本化、2.6.124 の状態ファイル相対パス化、**2.7.0 の CHANGELOG がロールアップ再掲である**こと |
 | [17-release-impact-2801.md](./17-release-impact-2801.md) | 2.7.0 → 2.8.1 のリリース差分。**上流から `dist/` が消えネイティブ配布へ**、`aidlc` CLI と設定階層の新設、ガードレール 9 種の設定ファイル記録、2.7.1 の Plan Approval デッドロック修正、**測定時点で 2.8.1 が未リリースだった**こと（→ 18 章で解消） |
-| [18-release-impact-290.md](./18-release-impact-290.md) | 2.8.1 → 2.9.0 のリリース差分。**既定スコープ `classic` が 26 → 18**（破壊的）、**Change Control**（v2.8.1 出荷済み）と既存レコードが暗黙に `strict` になる件、**手動コピー用アセットの分離**、監査イベント 91 → 99、**現 Latest に残るセンサー・フック系の不具合 3 件（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）**（うち 1 件は preview でも未修正） |
+| [18-release-impact-290.md](./18-release-impact-290.md) | 2.8.1 → 2.9.0 のリリース差分。**既定スコープ `classic` が 26 → 18**（破壊的）、**Change Control**（v2.8.1 出荷済み）と既存レコードが暗黙に `strict` になる件、**手動コピー用アセットの分離**、監査イベント 91 → 99、**現 Latest に残るセンサー・フック系の不具合 3 件（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）**（うち 1 件は preview でも未修正。**3 件とも v2.10.0 で解消** → 19 章） |
+| [19-release-impact-2100.md](./19-release-impact-2100.md) | 2.9.0 → 2.10.0 のリリース差分（**タグ間で測定**）。**Change Control → Guard Policy** と `relaxed` の意味の拡大（初回 Plan Approval は必須のまま）、**18 章の不具合 3 件の解消**、Construction の新既定、複数ハーネスの共存と組み合わせ制限、Bedrock 出荷既定の撤去、**リリース時フルテストの再撤去**、監査イベント 99 → 105 |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
 ### メンテナ向け（作業記録）
@@ -137,15 +135,15 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | エージェント | 14（ドメイン 11 + レビュア 2 + Composer 1） |
 | スコープ | 11 + 自動検出 + カスタム compose |
 | 深度 / テスト戦略 | 各 3 段階（独立） |
-| 監査イベント種別 | **99**（基準 `c03f9e28` は 91、タグ `v2.8.1` は 95）※ |
+| 監査イベント種別 | **105**（タグ `v2.9.0` は 99、基準 `c03f9e28` は 91、タグ `v2.8.1` は 95）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
-| 実装バージョン | **2.9.0**（上流 `main` HEAD `2931ef02`。取得日 2026-09-17）※現 Latest は `v2.9.0` |
+| 実装バージョン | **2.10.0**（タグ `v2.10.0` = `2a883858`。取得日 2026-09-24）※現 Latest は `v2.10.0` |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 
-※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準で **25**（形式見出し 3 本は分類に数えない）。**基準 `c03f9e28` は 22、タグ `v2.8.1` は 23**（Change Control が加わった）、**2.9.0 で 25**（Ceremony と Commit Provenance が加わった）。
+※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準で **25**（形式見出し 3 本は分類に数えない）。**基準 `c03f9e28` は 22、タグ `v2.8.1` は 23**（Change Control が加わった）、**2.9.0 で 25**（Ceremony と Commit Provenance が加わった）。**2.10.0 も 25**（イベントは 6 種増えたが分類は増えていない）。
 ※ **`docs/reference/12-state-machine.md` 基準では 20 分類**（基準 `c03f9e28` では 19）。イベント種別の集合自体は両出典で同一で、**分類数が違うのはグルーピングの粒度の差である**。どちらを引用するかは出典を明記すること。
-※ **`Interaction Events` は見出しが宣言する件数と表の行数が 1 件ずれている**（基準 `c03f9e28`: 宣言 10 / 行 9、**タグ `v2.8.1` 以降は宣言 11 / 行 10**）。**⚠ この齟齬は上流 `main` で解消された**（`261083ce` / #1150 で宣言 13 / 行 13 に是正）。**安定版 `v2.9.0` には未収録で、そちらは 11 / 10 のままである。**
+※ **`Interaction Events` は見出しが宣言する件数と表の行数が 1 件ずれている**（基準 `c03f9e28`: 宣言 10 / 行 9、**タグ `v2.8.1` 以降は宣言 11 / 行 10**）。**⚠ この齟齬は `v2.10.0` で解消された**（`261083ce` / #1150 で宣言 13 / 行 13 に是正。初出は preview `v2.9.1-preview.20260920.1`）。**`v2.9.0` は 11 / 10 のままである。**
 
 ---
 
@@ -157,7 +155,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.sh | sh
 #    Windows PowerShell
 #    irm https://github.com/awslabs/aidlc-workflows/releases/latest/download/install.ps1 | iex
-#    版を固定する場合は install.ps1 を保存してから: .\install.ps1 -Version 2.9.0
+#    版を固定する場合は install.ps1 を保存してから: .\install.ps1 -Version 2.10.0
 
 # 2. PATH を通す（インストーラは子シェルで走るため、親シェルには反映されない）
 #    インストーラが表示する手順に従うか、新しいシェルを開く
@@ -186,17 +184,17 @@ aidlc doctor
 > ```
 
 **本ノートの数値を再現・照合する場合**は、上流リポジトリを clone してソースを直接測る。
-版を固定するなら **`v2.9.0`**（現 Latest）か SHA を使う。
+版を固定するなら **`v2.10.0`**（現 Latest）か SHA を使う。
 
 ```bash
 git clone --branch main https://github.com/awslabs/aidlc-workflows.git   # 最新を追う場合
-# git clone --branch v2.9.0 https://github.com/awslabs/aidlc-workflows.git  # 版を固定する場合
+# git clone --branch v2.10.0 https://github.com/awslabs/aidlc-workflows.git  # 版を固定する場合
 cd aidlc-workflows
 ```
 
 **モデル／認証の前提（ハーネス別）**: 出荷設定は多くの場合 **AWS Bedrock** を想定するが、**全ハーネス共通の必須ではない**。Claude Code / Codex の出荷設定は Bedrock 寄り、Kiro はサインインとセッションモデル、opencode はグローバル設定のプロバイダ、に依存する。詳細は [06-harnesses-install.md](./06-harnesses-install.md)。
 
-> **⚠ 上流 `main` では、出荷既定から Bedrock 指定とモデル pin が全面的に撤去された**（`c8ad4116` / #1101。preview `v2.9.1-preview.20260921.1` 以降に収録）。`harness/claude/settings.json` の `env` は `AWS_AIDLC_DEFAULT_SCOPE` のみになり、Codex / opencode のモデル pin も消えた。**安定版 `v2.9.0` にはまだ入っていない。**以下は安定版 `v2.9.0` 時点の記述である。
+> **⚠ `v2.10.0` で、出荷既定から Bedrock 指定が撤去された**（`c8ad4116` / #1101。初出は preview `v2.9.1-preview.20260921.1`）。`harness/claude/settings.json` の `env` は `AWS_AIDLC_DEFAULT_SCOPE` のみになり、Codex / opencode の `balanced` 階層もモデル指定が `null`（ハーネス任せ）になった。**Claude の `balanced` は引き続き `sonnet` / `medium`** である。**出荷既定のまま Bedrock を使っていたプロジェクトは `aidlc config --yes` で設定が外れうる**（→ [19.7](./19-release-impact-2100.md)）。上の文は `v2.9.0` 以前の出荷設定の説明として読むこと。
 
 ---
 

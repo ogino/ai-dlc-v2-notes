@@ -104,7 +104,7 @@ core/
 │   │   └── operation/        # 4.1–4.7
 │   └── protocols/            # stage-protocol 等
 ├── tools/            # TypeScript（エンジン本体）。全部が CLI ではない → 下の注記
-├── hooks/            # session-start, stop, sensors, reviewer-scope 等（18 本）
+├── hooks/            # session-start, stop, sensors, reviewer-scope 等（19 本。2.10.0）
 ├── scopes/           # 11 スコープ定義
 ├── sensors/          # claim-sources, required-sections, upstream-coverage, linter, type-check, traceability（2.5.71 追加）
 ├── knowledge/        # 方法論ナレッジ（エージェント別）
@@ -113,30 +113,31 @@ core/
 └── templates/        # AGENTS.md / CLAUDE.md 系スケルトン
 ```
 
-**tools 本数（2.9.0 実測）**: `core/tools/*.ts` は **71 本**（2.6.55 時点は 41 本、2.6.123 〜 2.7.0 は 51 本、2.8.1 は 69 本）。
+**tools 本数（2.10.0 実測）**: `core/tools/*.ts` は **76 本**（2.6.55 時点は 41 本、2.6.123 〜 2.7.0 は 51 本、2.8.1 は 69 本、2.9.0 は 71 本）。
+**2.9.0 → 2.10.0 の +5 本は Construction のチェックポイント 2 本（`aidlc-construction-checkpoints.ts` / `aidlc-swarm-checkpoints.ts`）と Guard Policy の 3 本（`aidlc-guard-fences.ts` / `aidlc-guard-switch.ts` / `aidlc-guard-operation.ts`）で、いずれもライブラリ（CLI は 40 本のまま）**（→ [19.9](./19-release-impact-2100.md)）。
 **2.8.1 → 2.9.0 の +2 本は `aidlc-attest.ts`（Commit Provenance）と `aidlc-channel.ts`（リリースチャネル）である**（→ [18.12](./18-release-impact-290.md)）。
 **2.7.0 → 2.8.1 の +18 本はすべてインストール・配布・更新・設定のライフサイクル系**であり、
 ワークフロー実行系は 1 本も増えていない（→ [17.2](./17-release-impact-2801.md#172-数値の変化--動いたのは-coretools-だけ)）。
 
-**⚠ 71 は「CLI の本数」ではない。** `core/tools/*.ts` はファイル数であって、
+**⚠ 76 は「CLI の本数」ではない。** `core/tools/*.ts` はファイル数であって、
 そのうち実際に単体起動できる CLI（`import.meta.main` を持つもの）は **40 本**、
-残る **31 本は他ツールから import されるライブラリモジュール**である
+残る **36 本は他ツールから import されるライブラリモジュール**である
 （2.8.1 時点は CLI 39 + ライブラリ 30。追加された `aidlc-channel.ts` は
 `import.meta.main` を持たない純ライブラリである）。
 2.7.0 時点は 51 本＝ CLI 32 本 + ライブラリ 19 本、
 2.6.55 時点は 41 本＝ CLI 26 本 + ライブラリ 15 本だった。
 
-| | 2.6.55 | 2.6.123 / 2.7.0 | 2.8.1 | 2.9.0 |
-|---|---:|---:|---:|---:|
-| `core/tools/*.ts` ファイル数 | 41 | 51 | 69 | **71** |
-| うち `import.meta.main` を持つ実際の CLI | 26 | 32 | 39 | **40** |
-| ライブラリモジュール | 15 | 19 | 30 | **31** |
+| | 2.6.55 | 2.6.123 / 2.7.0 | 2.8.1 | 2.9.0 | 2.10.0 |
+|---|---:|---:|---:|---:|---:|
+| `core/tools/*.ts` ファイル数 | 41 | 51 | 69 | 71 | **76** |
+| うち `import.meta.main` を持つ実際の CLI | 26 | 32 | 39 | 40 | **40** |
+| ライブラリモジュール | 15 | 19 | 30 | 31 | **36** |
 
 本ノート群は 13 章以前でこの数を「CLI tools」と呼んでいるが、
 **正しくは「`core/tools/*.ts` のファイル数」である**（過去章の数値自体は誤っていない）。
 新規 10 本の内訳と導入版は [15-release-impact-26123.md](./15-release-impact-26123.md) を参照。
 
-**TypeScript フックは `core/hooks/*.ts` が 18 本**（2.6.55 時点は 17 本）。
+**TypeScript フックは `core/hooks/*.ts` が 19 本**（2.10.0。2.6.55 時点は 17 本、2.9.0 は 18 本。2.10.0 で `runtime-integrity.ts` が加わった）。
 
 **2.6.55 以前の推移（当時の実測）**: 2.6.55 時点の `core/tools/aidlc-*.ts` は **40 本**、ディスパッチャ `aidlc.ts` を含む `.ts` 全体では **41 本**（`aidlc.ts` はディスパッチャ本体で `aidlc-*` パターンに含まれない）。2.6.2 時点は 37 本＋ディスパッチャで計 38 だった（2.6.2 → 2.6.49 で追加された 3 本は `aidlc-documentkb-schema.ts` / `aidlc-knowledge.ts` / `aidlc-testing-posture.ts`）。さらにさかのぼると 2.5.62 時点は 36 本＋ディスパッチャで計 37 だった（増えた 1 本は `aidlc-sensor-traceability.ts` で、**追加は 2.5.71**）。一方、**2.6.2 時点で公式 README のツリー図は `25 aidlc-*.ts engine tools` と表記しており、実数（37 本）と 12 本ずれていた**（README 側の記載が 2.6.55 時点でも同じ「25」かは本ノートでは未確認。参照時は `grep 'engine tools' README.md` で確認すること）。
 
@@ -241,16 +242,16 @@ your-project/
 | ランタイム | **ビルド時は bun**（`scripts/package.ts` / テスト）。**配布版の実行には不要**（2.8.x のネイティブ `aidlc` は単一バイナリで Bun / Node.js を要求しない） |
 | 言語 | TypeScript（core tools / hooks / tests） |
 | リント | Biome |
-| モデル実行 | **出荷既定は多くのハーネスで AWS Bedrock 寄り**（**安定版 `v2.9.0` 時点**。`main` では撤去済み → 下記 ⚠）。必須ではない（下表） |
+| モデル実行 | **`v2.10.0` で出荷既定から Bedrock 指定が撤去された**（`v2.9.0` までは多くのハーネスで Bedrock 寄り → 下記 ⚠）。必須ではない（下表） |
 | 推奨モデル | Claude Opus 4.8（公式 README） |
-| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.9.0"`（本ノート整理時点。上流 `main` HEAD `2931ef02` / 取得日 2026-09-17。**現 Latest は `v2.9.0`**。2.8.1 → 2.9.0 の差分は [18-release-impact-290.md](./18-release-impact-290.md)、2.7.0 → 2.8.1 は [17-release-impact-2801.md](./17-release-impact-2801.md)、2.6.123 → 2.7.0 は [16-release-impact-2700.md](./16-release-impact-2700.md)、2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
+| バージョン定数 | `core/tools/aidlc-version.ts` → `AIDLC_VERSION = "2.10.0"`（本ノート整理時点。タグ `v2.10.0` = `2a883858` / 取得日 2026-09-24。**現 Latest は `v2.10.0`**。2.9.0 → 2.10.0 の差分は [19-release-impact-2100.md](./19-release-impact-2100.md)、2.8.1 → 2.9.0 の差分は [18-release-impact-290.md](./18-release-impact-290.md)、2.7.0 → 2.8.1 は [17-release-impact-2801.md](./17-release-impact-2801.md)、2.6.123 → 2.7.0 は [16-release-impact-2700.md](./16-release-impact-2700.md)、2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、2.6.2 → 2.6.49 は [13-release-impact-2649.md](./13-release-impact-2649.md)、2.5.62 → 2.6.2 は [12-release-impact-2602.md](./12-release-impact-2602.md)、2.5.37 → 2.5.62 は [11-release-impact-2562.md](./11-release-impact-2562.md)） |
 
 | ハーネス | モデル／認証の目安 |
 |----------|-------------------|
-| Claude Code | 出荷 `settings.json` は Bedrock（region）。AWS 資格情報とモデル有効化が実質必要。**2.7.2（`12b8d6e0`）でトップレベルのモデル pin（`model: opus[1m]` / `effortLevel: xhigh`）は削除され、セッション設定を継承する。2.7.2 は公開済みの v2.8.0 に含まれるため、2.8.0 を使っていればすでに効いている。ただし `balanced` tier（レビュー専用エージェント 2 体）は安定版 `v2.9.0` では今も `sonnet` / `medium` に固定されたままである（**`main` ではモデル pin が消え、medium の effort cap だけが残る**）**（→ [17.6](./17-release-impact-2801.md#176-claude-code-出荷設定からモデル固定と無制限-bash-許可が消えた)） |
-| Codex CLI | 出荷 `config.toml` は Bedrock ブロック。OpenAI 認証等への差し替え余地あり（ガイド参照） |
+| Claude Code | 出荷 `settings.json` は Bedrock（region）。AWS 資格情報とモデル有効化が実質必要。**2.7.2（`12b8d6e0`）でトップレベルのモデル pin（`model: opus[1m]` / `effortLevel: xhigh`）は削除され、セッション設定を継承する。2.7.2 は公開済みの v2.8.0 に含まれるため、2.8.0 を使っていればすでに効いている。ただし `balanced` tier（レビュー専用エージェント 2 体）は `v2.10.0` でも `sonnet` / `medium` に固定されたままである**（`v2.10.0` でモデル指定が `null` になったのは codex / opencode の `balanced` だけ。2026-09-23 版の本表の「`main` ではモデル pin が消え」は誤りだった → [19.14](./19-release-impact-2100.md)）（→ [17.6](./17-release-impact-2801.md#176-claude-code-出荷設定からモデル固定と無制限-bash-許可が消えた)） |
+| Codex CLI | `v2.9.0` までの出荷 `config.toml` は Bedrock ブロック（`model_provider = "amazon-bedrock"`）。**`v2.10.0` の出荷 `config.toml` には `model` も `model_provider` も無く**、利用者のプロバイダ設定に従う |
 | Kiro IDE / CLI | **Kiro サインイン + セッションモデル**が中心。2.5.6 以降エージェントはセッションモデル継承 |
 | opencode | プロジェクト `opencode.json` はセッションモデルを固定しない。**グローバル opencode 設定のプロバイダ** |
 | GitHub Copilot | GitHub Copilot の認証を使用。**folder trust が前提**（`~/.copilot/config.json` の `trustedFolders`）。2.5.60 で追加 |
 | Cursor | Cursor 自身のランタイムに設定したプロバイダ／認証を使用。**出荷ペルソナにモデル pin が無く、セッションモデルを継承**。named model（`--model` やペルソナ pin）は有料プラン必須で、Free は `Auto`。導入は 2.8.x で他ハーネスと同じ `aidlc config --harness cursor` に統一された（2.7.0 までは専用インストーラ実行）。2.5.63 で追加 |
-> **⚠ 上流 `main` では、出荷既定から Bedrock 指定とモデル pin が全面的に撤去された**（`c8ad4116` / #1101。preview `v2.9.1-preview.20260921.1` 以降に収録）。`harness/claude/settings.json` の `env` は `AWS_AIDLC_DEFAULT_SCOPE` のみになり、Codex / opencode のモデル pin も消えた。**安定版 `v2.9.0` にはまだ入っていない。**以下・以上は安定版 `v2.9.0` 時点の記述である。
+> **⚠ `v2.10.0` で、出荷既定から Bedrock 指定が撤去された**（`c8ad4116` / #1101。初出は preview `v2.9.1-preview.20260921.1`）。`harness/claude/settings.json` の `env` は `AWS_AIDLC_DEFAULT_SCOPE` のみになり、Codex の出荷 `config.toml` からもモデルとプロバイダの指定が消え、Codex / opencode の `balanced` tier もモデル指定が `null` になった。**Claude の `balanced` tier は `sonnet` / `medium` のまま**である。Claude Code 行の「出荷 `settings.json` は Bedrock」は `v2.9.0` までの記述として読むこと。**出荷既定のまま Bedrock を使っていたプロジェクトは `aidlc config --yes` で設定が外れうる**（→ [19.7](./19-release-impact-2100.md)）。

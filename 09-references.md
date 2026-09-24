@@ -88,6 +88,6 @@ rg 'AIDLC_VERSION' core/tools/aidlc-version.ts
 （**版を固定するときはタグまたはコミット SHA を使う。**
 17 章が対象とする 2.8.1 のソースを照合するなら **SHA `c03f9e28` を checkout する**。
 **⚠ タグ `v2.8.1`（= `215afe1a`）は `c03f9e28` の 5 コミット後を指す別物である**（→ [18.1](./18-release-impact-290.md)）。
-リリース資産・公開済み版の確認なら **`--branch v2.9.0`**（現 Latest）。
+リリース資産・公開済み版の確認なら **`--branch v2.10.0`**（現 Latest）。
 手順は [6.7](./06-harnesses-install.md#67-ソースの確認方法)）。
 用途が違うので、この 2 つを取り違えないこと。

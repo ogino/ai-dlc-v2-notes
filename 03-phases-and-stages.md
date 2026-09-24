@@ -114,7 +114,7 @@ INITIALIZATION (0.1–0.3)  ──auto（ゲートなし）──►  IDEATION (
 本節はかつて「3.1–3.5 = Bolt 単位」「実行単位 = Per Bolt」と書いていたが、
 2.6.86 で Bolt は**実行の単位ではなくなった**——
 「スプリント様の Construction 反復」を **Delivery Planning（2.9）が記録するもの**であり、
-**既定の stage-major ランタイムは `bolt-plan.md` をグルーピング／順序の境界として消費しない**。
+**stage-major ランタイムは `bolt-plan.md` をグルーピング／順序の境界として消費しない**（2.10.0 より前は stage-major が既定。**v2.10.0 から、ユニット分解を持つ新規の単独ワークフローの既定は unit-major** → [19.5](./19-release-impact-2100.md)）。
 実行のバッチは `unit-of-work-dependency.md`（2.7）から再計算される。
 
 したがって**本章の 3.1–3.5 は Unit 単位で読む**のが正しい。
