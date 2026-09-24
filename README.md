@@ -112,7 +112,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [15-release-impact-26123.md](./15-release-impact-26123.md) | 2.6.55 → 2.6.123 のリリース差分。**フック 17→18 / `core/tools/*.ts` 41→51 / 監査 86→91 / `bugfix` 7→9・`refactor` 8→10**、プラグイン作成ツールチェーン、Bolt 用語の再定義 |
 | [16-release-impact-2700.md](./16-release-impact-2700.md) | 2.6.123 → 2.7.0 のリリース差分。**中核メトリクスは全項目不変**。上流の `v2` ブランチ削除と `main` への一本化、2.6.124 の状態ファイル相対パス化、**2.7.0 の CHANGELOG がロールアップ再掲である**こと |
 | [17-release-impact-2801.md](./17-release-impact-2801.md) | 2.7.0 → 2.8.1 のリリース差分。**上流から `dist/` が消えネイティブ配布へ**、`aidlc` CLI と設定階層の新設、ガードレール 9 種の設定ファイル記録、2.7.1 の Plan Approval デッドロック修正、**測定時点で 2.8.1 が未リリースだった**こと（→ 18 章で解消） |
-| [18-release-impact-290.md](./18-release-impact-290.md) | 2.8.1 → 2.9.0 のリリース差分。**既定スコープ `classic` が 26 → 18**（破壊的）、**Change Control**（v2.8.1 出荷済み）と既存レコードが暗黙に `strict` になる件、**手動コピー用アセットの分離**、監査イベント 91 → 99、**現 Latest に残るセンサー・フック系の不具合 3 件（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）**（うち 1 件は preview でも未修正。**3 件とも v2.10.0 で解消** → 19 章） |
+| [18-release-impact-290.md](./18-release-impact-290.md) | 2.8.1 → 2.9.0 のリリース差分。**既定スコープ `classic` が 26 → 18**（破壊的）、**Change Control**（v2.8.1 出荷済み）と既存レコードが暗黙に `strict` になる件、**手動コピー用アセットの分離**、監査イベント 91 → 99、**v2.9.0 に残っていたセンサー・フック系の不具合 3 件（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）**（うち 1 件は当時 preview でも未修正だった。**3 件とも v2.10.0 で解消** → 19 章） |
 | [19-release-impact-2100.md](./19-release-impact-2100.md) | 2.9.0 → 2.10.0 のリリース差分（**タグ間で測定**）。**Change Control → Guard Policy** と `relaxed` の意味の拡大（初回 Plan Approval は必須のまま）、**18 章の不具合 3 件の解消**、Construction の新既定、複数ハーネスの共存と組み合わせ制限、Bedrock 出荷既定の撤去、**リリース時フルテストの再撤去**、監査イベント 99 → 105 |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
@@ -192,9 +192,9 @@ git clone --branch main https://github.com/awslabs/aidlc-workflows.git   # 最�
 cd aidlc-workflows
 ```
 
-**モデル／認証の前提（ハーネス別）**: 出荷設定は多くの場合 **AWS Bedrock** を想定するが、**全ハーネス共通の必須ではない**。Claude Code / Codex の出荷設定は Bedrock 寄り、Kiro はサインインとセッションモデル、opencode はグローバル設定のプロバイダ、に依存する。詳細は [06-harnesses-install.md](./06-harnesses-install.md)。
+**モデル／認証の前提（ハーネス別）**: **`v2.10.0` の出荷設定は Bedrock を指定しない**（Claude Code / Codex は利用者のプロバイダ設定に従う。`v2.9.0` までは両者とも Bedrock 寄りだった）。Kiro はサインインとセッションモデル、opencode はグローバル設定のプロバイダ、に依存する。詳細は [06-harnesses-install.md](./06-harnesses-install.md)。
 
-> **⚠ `v2.10.0` で、出荷既定から Bedrock 指定が撤去された**（`c8ad4116` / #1101。初出は preview `v2.9.1-preview.20260921.1`）。`harness/claude/settings.json` の `env` は `AWS_AIDLC_DEFAULT_SCOPE` のみになり、Codex / opencode の `balanced` 階層もモデル指定が `null`（ハーネス任せ）になった。**Claude の `balanced` は引き続き `sonnet` / `medium`** である。**出荷既定のまま Bedrock を使っていたプロジェクトは `aidlc config --yes` で設定が外れうる**（→ [19.7](./19-release-impact-2100.md)）。上の文は `v2.9.0` 以前の出荷設定の説明として読むこと。
+> **⚠ `v2.10.0` で、出荷既定から Bedrock 指定が撤去された**（`c8ad4116` / #1101。初出は preview `v2.9.1-preview.20260921.1`）。`harness/claude/settings.json` の `env` は `AWS_AIDLC_DEFAULT_SCOPE` のみになり、Codex / opencode の `balanced` 階層もモデル指定が `null`（ハーネス任せ）になった。**Claude の `balanced` は引き続き `sonnet` / `medium`** である。**出荷既定のまま Bedrock を使っていたプロジェクトは `aidlc config --yes` で設定が外れうる**（→ [19.7](./19-release-impact-2100.md)）。
 
 ---
 

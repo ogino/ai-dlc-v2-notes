@@ -31,7 +31,7 @@
 したがって**本章の 67 コミットには、18 章の終点までの 12 コミットも入っている。**
 18 章の数値と本章の数値を足し合わせてはいけない。
 
-区間内の preview タグは 2 本（`v2.9.1-preview.20260920.1` / `.20260921.1`）。
+区間内の preview タグは 3 本（`v2.9.1-preview.20260915.1` / `.20260920.1` / `.20260921.1`）。
 本章の各項目には、`git tag --contains <sha> --sort=creatordate` で求めた**初出タグ**を付けた。
 
 ---
@@ -82,6 +82,11 @@ CHANGELOG 2.10.0 の逐語:
 | `reviewer-scope` | レビュアの隣接ユニットへの読み取り | | ✔ |
 | `human-presence` | 新しい人間のターンを要する操作 | **切替不可** | **切替不可** |
 
+表の「下がる」はポリシー語による。**これとは別に、`state-transition` 以外の 4 つには環境変数の kill switch がある**
+（`human-presence` は `AIDLC_SKIP_HUMAN_PRESENCE_GUARD=1` だけで外れ、作業単位の切替は無い。エージェントのツール呼び出しからの代入は後述の `runtime-integrity.ts` が拒否する）。
+
+**⚠ `plan-approval` の ✔ は「初回の Plan Approval が不要になる」という意味ではない**（→ 下の「✅」）。下がって効くのは、承認後の内容変更に対する再承認の拘束である。
+
 下がった柵は**拒否せずに通し、1 行の通知と `GUARD_STOOD_ASIDE` 監査行を残す**（上流の用語で "stand aside"）。
 **柵が下がっているかどうかだけで決まり、誰の指示で動いているか（人間の発言、エンジンの指示、どちらでもない）は判定に使われない**
 （`decideGuard` の表。人間の「いいから書いて」という返答では柵は下がらない）。
@@ -116,8 +121,10 @@ CHANGELOG 2.10.0 の逐語:
 > The conductor still asks every approval question; **a lowered fence does not enforce that prose obligation.**
 > It lets undirected work through, with a `GUARD_STOOD_ASIDE` row
 
-**⚠ "undirected work" は上流で定義されていない。** `v2.10.0` の `docs/` 全体で 3 か所に出てくるだけで、
-定義文は無い。文脈からは「柵の判定が、エンジンの指示の範囲外と見なした行為」を指すと読めるが、**当ノートの解釈**である。
+**⚠ "undirected work" という語は上流で定義されていない。** `v2.10.0` の `docs/` 全体で 3 か所に出てくるだけである。
+実質的な定義に近いのは参照文書の次の一文で、柵の判定は「指示が求めた範囲の外」と判定された行為にだけ働く（逐語）:
+
+> A fence only reaches this function once its own predicate has already found the action outside what the instruction asked for
 
 ### 締まった点
 
@@ -187,7 +194,7 @@ CHANGELOG 2.10.0 の逐語:
 
 **初出 `v2.9.1-preview.20260920.1`**（`c66c4222` / #1199）、AGENTS.md の中立化は `.20260921.1`（`13a1a859` / #1268）。
 
-- 1 つのプロジェクトに**衝突しない**ハーネスを複数置けるようになった。`--harness` の指定が必須になるのは 2 つ以上あるときだけ
+- 1 つのプロジェクトに**衝突しない**ハーネスを複数置けるようになった。既存プロジェクトでは、2 つ以上のハーネスがあるときに `--harness` の指定が必須になる（非対話の新規導入では従来どおり必須）
 - **Kiro CLI と Kiro IDE（どちらも `.kiro/`）、OpenCode と GitHub Copilot（どちらも `.aidlc/`）は共存できない**
 - ルートの `AGENTS.md` の管理ブロックは**ハーネス中立の共有文面**になった。codex / cursor / kiro / kiro-ide / opencode で同一
 - **copilot の `AGENTS.md` ブロックは専用のままで、`AGENTS.md` を持つ他のハーネス（codex / cursor / kiro / kiro-ide / opencode）とは共存できない**（上流ガイド逐語 "Copilot's `AGENTS.md` stays exclusive"）。**copilot と共存できるのは claude だけ**である
@@ -224,7 +231,7 @@ Bedrock を使い続けるなら、`aidlc config` で Bedrock を明示的に選
 **⚠ 当方は実行して確かめていない**（コード読解）。
 
 **モデル階層（tiers）について:** Claude の `balanced` は**引き続き `sonnet` / `medium`**。
-`null`（ハーネス任せ）になったのは codex / opencode の `balanced` である。
+**モデル指定**が `null`（ハーネス任せ）になったのは codex / opencode の `balanced` である（effort / variant の `medium` は残る）。
 
 ---
 
@@ -253,7 +260,7 @@ Bolt worktree のパスを前提にしたスクリプトがあれば見直しが
 | TypeScript フック | 18 | **19** | `runtime-integrity.ts` |
 | `core/tools/*.ts` | 71 | **76** | CLI は 40 のまま |
 | 監査イベント | 99 | **105** | 25 分類のまま |
-| 環境変数 | 135 | **143** | |
+| `AIDLC_*` 識別子※ | 135 | **143** | |
 | ステージ / スコープ / エージェント | 33 / 11 / 14 | 33 / 11 / 14 | 不変 |
 | センサー / プロトコル / ハーネス / バイパス | 6 / 9 / 7 / 12 | 6 / 9 / 7 / 12 | 不変 |
 
@@ -262,7 +269,8 @@ Bolt worktree のパスを前提にしたスクリプトがあれば見直しが
   - `CHECKPOINT_VERIFICATION_RECORDED` / `CONSTRUCTION_POLICY_RECORDED` / `VERIFICATION_COMMAND_RECORDED`（#1150、初出 `.20260920.1`）
   - `GUARD_POLICY_SET` / `GUARD_RESTORED` / `GUARD_STOOD_ASIDE`（#1262、初出 `v2.10.0`）
 - スコープ別のステージ所属数・ステージ frontmatter も不変
-- 18 章の「環境変数 136」は終点 `2931ef02` の値で、**タグ `v2.9.0` では 135**（数え方の違いではない）
+- ※ `core/` と `harness/` に現れる `AIDLC_[A-Z0-9_]+` の一意語の数（`git grep -hoE 'AIDLC_[A-Z0-9_]+' <tag> -- core harness | sort -u | wc -l`）。**環境変数だけの数ではない** —— 定数 `AIDLC_VERSION`、接頭辞の断片 `AIDLC_DISABLE_` 等、ログのラベル、テスト用の名前も含む。`process.env.AIDLC_*` の参照に絞ると 96 → 101
+- 18 章の「環境変数 136」は同じ数え方での終点 `2931ef02` の値で、**タグ `v2.9.0` では 135**（数え方の違いではない）
 
 **⚠ 評価上の注意:** 監査イベントの増加 6 種のうち 3 種は **Guard Policy の記録**である。
 `GUARD_STOOD_ASIDE` が増えることは「統制が強くなった」ことを意味しない —— **拒否が記録に置き換わった**ことの痕跡である（→ 19.3）。
@@ -273,15 +281,16 @@ Bolt worktree のパスを前提にしたスクリプトがあれば見直しが
 
 18.15 で「`native-smoke` の `needs` に `test` が加わり、テストが発行の前提条件に戻った」と書いた。**本区間でこれが覆った。**
 
-| `.github/workflows/release.yml` | `v2.9.0` | `v2.10.0` |
+| `.github/workflows/release.yml`（両タグで実測） | タグ `v2.9.0` | タグ `v2.10.0` |
 |---|---|---|
 | テスト系ジョブ（smoke / unit 4 シャード / deep / 集約） | 4 本 | **0 本** |
 | `native-smoke` の `needs` | `[validate, verify, test]` | **`[validate, verify]`** |
 
-経緯は 2 段である:
+経緯は 3 段である（3 コミットとも初出は `v2.10.0`）:
 
-1. `90af77e2`（#1311）がテストジョブを外し、代わりに**別ワークフローのフルスイート結果（evidence）を要求する**検査を入れた
-2. **リリース準備コミット `2a883858`（#1380）がその evidence 検査も外した**
+1. `bf879397`（#1216）が、テストジョブを残したまま**別ワークフローのフルスイート結果（evidence）を要求する**検査を足した
+2. `90af77e2`（#1311）がテストジョブを外した（evidence 検査が前提条件を担う形になった）
+3. **リリース準備コミット `2a883858`（#1380）がその evidence 検査も外した**
 
 CHANGELOG の逐語:
 

@@ -145,8 +145,8 @@ curl -fsSL https://github.com/awslabs/aidlc-workflows/releases/latest/download/i
 
 | ハーネス | 目安 |
 |----------|------|
-| **Claude Code** | 出荷設定は Bedrock。モデルアクセス有効化 + AWS SDK 資格情報が実質必要 |
-| **Codex CLI** | 出荷 `config.toml` は Bedrock ブロック。OpenAI 認証等への代替はガイド参照 |
+| **Claude Code** | **`v2.10.0` の出荷設定はプロバイダを指定しない**（`env` は `AWS_AIDLC_DEFAULT_SCOPE` だけ）。Claude Code 自身の認証・プロバイダ設定に従う。**`v2.9.0` までは出荷設定が Bedrock**で、モデルアクセス有効化 + AWS SDK 資格情報が実質必要だった。Bedrock を使うなら `aidlc config` で明示的に選ぶ（→ [19.7](./19-release-impact-2100.md)） |
+| **Codex CLI** | **`v2.10.0` の出荷 `config.toml` には `model` も `model_provider` も無く**、利用者のプロバイダ設定に従う。**`v2.9.0` までは Bedrock ブロック**（`model_provider = "amazon-bedrock"`）だった |
 | **GitHub Copilot** | GitHub Copilot の認証をそのまま使う。**加えて folder trust が必須**（`~/.copilot/config.json` の `trustedFolders`）。ヘッドレスは `GITHUB_COPILOT_PROMPT_MODE_REPO_HOOKS=1` |
 | **Cursor** | Cursor 自身のサインイン。**出荷ペルソナはモデルを一切 pin していない**ため、全エージェントがセッションのモデルを継承する。名前付きモデル（`--model` 等）は**有料プランが必要**で、Free は `Auto` のみ |
 | **Kiro IDE / CLI** | Kiro サインイン + セッションで選ぶモデル（≥2.6 等は公式 README の Kiro CLI 要件） |
@@ -391,7 +391,8 @@ for d in $managed; do
     echo "$d がディレクトリではありません（利用者のファイル？）。中止します" >&2; exit 1
   fi
   # 別のハーネスが同じ管理ディレクトリを使っていたら止める（copilot と opencode は .aidlc/、
-  # kiro と kiro-ide は .kiro/ を共有し、同じプロジェクトには置けない。上書きすると相手が壊れる）
+  # kiro と kiro-ide は .kiro/ を共有し、同じプロジェクトには置けない。上書きすると相手が壊れる）。
+  # copilot の .github/* には harness.json が無いので、そこでは何も検知しない（検知の実体は .aidlc/ と .kiro/）
   if [ -f "$dest/$d/tools/data/harness.json" ]; then
     other=$(sed -n 's/.*"distribution": *"\([^"]*\)".*/\1/p' "$dest/$d/tools/data/harness.json" | head -1)
     if [ -n "$other" ] && [ "$other" != "$h" ]; then
@@ -433,7 +434,7 @@ for d in $managed; do
       cp -pRP "$dest/$d/$k" "$dest/$d.new-$ts/$k" || ok=   # -P: シンボリックリンクはリンクのまま
     fi
   done
-  [ -n "$ok" ] || { undo; echo "$d の新版を用意できませんでした（何も変更していません）" >&2; exit 1; }
+  [ -n "$ok" ] || { undo; echo "$d の新版を用意できませんでした（既存のファイルには触れていません。作った空ディレクトリは残ることがあります）" >&2; exit 1; }
 done
 
 # 3) ルートのファイル: 既存は上書きせず差分だけ出す。無いものだけ置く（置いたものは記録する）
@@ -1059,7 +1060,7 @@ Codex は `$aidlc` 表記。Cursor には加えてネイティブの `/aidlc-sta
 |------|------|
 | 端末では bun が見えるがハーネスが見えない | 非対話 PATH（`~/.zshenv` 等） |
 | Codex doctor が version 不足 | ≥ 0.145.0 |
-| Bedrock AccessDenied（Claude/Codex 出荷設定） | モデル有効化 + 資格情報 + region |
+| Bedrock AccessDenied（Claude/Codex で Bedrock を選んだ場合。`v2.9.0` までは出荷設定のまま起こりえた） | モデル有効化 + 資格情報 + region |
 | Codex hooks が動かない | §6.3 の trust（TUI または config.toml へ TOML 反映） |
 | Codex: アップグレード後に hooks が誤動作／効かない | **trust テーブルの再生成**（2.6.44 で PostToolUse 配列の先頭に新フックが入りインデックスがズレる。§6.3 の囲み） |
 | エンジンを更新したが反映されない | **新セッション**起動 |
