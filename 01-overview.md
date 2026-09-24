@@ -1,12 +1,13 @@
 # 01. 概要 — AI-DLC とは何か
 
-> 本章の数値は実装バージョン **2.9.0**（上流 `main` HEAD `2931ef02` / 取得日 2026-09-17）時点。
+> 本章の数値は実装バージョン **2.10.0**（タグ `v2.10.0` = `2a883858` / 取得日 2026-09-24）時点。
 > 2.6.2 → 2.6.49 の差分は [13-release-impact-2649.md](./13-release-impact-2649.md)、
 > 2.6.49 → 2.6.55 は [14-release-impact-2655.md](./14-release-impact-2655.md)、
 > 2.6.55 → 2.6.123 は [15-release-impact-26123.md](./15-release-impact-26123.md)、
 > 2.6.123 → 2.7.0 は [16-release-impact-2700.md](./16-release-impact-2700.md)、
 > 2.7.0 → 2.8.1 は [17-release-impact-2801.md](./17-release-impact-2801.md)、
-> 2.8.1 → 2.9.0 は [18-release-impact-290.md](./18-release-impact-290.md) を参照。
+> 2.8.1 → 2.9.0 は [18-release-impact-290.md](./18-release-impact-290.md)、
+> 2.9.0 → 2.10.0 は [19-release-impact-2100.md](./19-release-impact-2100.md) を参照。
 > 本章では **Bolt の定義**が 2.6.86 の上流グロッサリ改訂に合わせて変わっている（→ [1.8.1](#181-bolt-の定義は-2686-で上流が書き換えた)）。
 
 ## 1.1 背景：なぜ「新しい SDLC」が必要か
@@ -103,7 +104,7 @@ README の表現:
 | 痛み | 2.0 の打ち手 |
 |------|----------------|
 | プロンプト間のコンテキスト・ドリフト | 永続 state（`aidlc-state.md`）・監査・Space/Intent |
-| 決定理由が残らない | アーティファクト + **99 種**イベントの監査証跡 |
+| 決定理由が残らない | アーティファクト + **105 種**イベントの監査証跡 |
 | 依頼していない作業の勝手実行 | ステージ境界の承認ゲート・Human presence |
 | 小規模 PoC と規制対応の両立 | スコープ × 深度 × テスト戦略で儀式量を調整 |
 | ハーネスごとのルール分裂 | `core/` 単一正本 → 7 ハーネス分の面を生成（2.8.x ではリリース資産の `runtime/<harness>/`） |
@@ -148,7 +149,7 @@ AWS ブログが挙げる便益:
 | 方法論（原典） | 2.0 実装 |
 |----------------|----------|
 | Inception / Construction / Operations | Initialization + Ideation + Inception + Construction + Operation |
-| Bolt | **Construction の「スプリント様の反復」**。Delivery Planning（2.9）が意図したグルーピングを `bolt-plan.md` に記録する。**既定の stage-major ランタイムはこの反復をインターリーブし、`bolt-plan.md` をグルーピング／順序の境界として消費しない**（→ [1.8.1](#181-bolt-の定義は-2686-で上流が書き換えた)） |
+| Bolt | **Construction の「スプリント様の反復」**。Delivery Planning（2.9）が意図したグルーピングを `bolt-plan.md` に記録する。**stage-major ランタイムはこの反復をインターリーブし、`bolt-plan.md` をグルーピング／順序の境界として消費しない**（→ [1.8.1](#181-bolt-の定義は-2686-で上流が書き換えた)）。**v2.10.0 から、ユニット分解を持つ新規の単独ワークフローの既定は unit-major**（→ [19.5](./19-release-impact-2100.md)） |
 | Unit of Work | ステージ 2.7 で分解される実装単位 |
 | Mob Elaboration / Construction | `mode: mob` / `mode: subagent`（hub-and-spoke 形状）/ `mode: pipeline` などのトポロジ |
 | 1.x 時代のルール／ステアリング配布（コミュニティ対比） | TypeScript エンジン + skills/agents/hooks のネイティブ実装（[08](./08-v1-vs-v2.md) は要一次確認） |
@@ -162,7 +163,7 @@ AWS ブログが挙げる便益:
 | | 旧（2.6.55 まで） | 新（2.6.86 以降） |
 |---|---|---|
 | Bolt とは | 「**Construction 実行の単位** — 1 つの Unit に対する 3.1–3.5 の一巡」 | 「**スプリント様の Construction 反復**。Delivery Planning (2.9) が意図したグルーピングを記録する」 |
-| `bolt-plan.md` の役割 | 実行の境界 | **計画上の記録**。既定の stage-major ランタイムは**グルーピング／順序の境界として消費しない** |
+| `bolt-plan.md` の役割 | 実行の境界 | **計画上の記録**。stage-major ランタイムは**グルーピング／順序の境界として消費しない**（v2.10.0 から新規の単独ワークフローの既定は unit-major → [19.5](./19-release-impact-2100.md)） |
 | ランタイムのバッチ | Bolt から | `unit-of-work-dependency.md`（2.7）から**再計算**される |
 | `BOLT_STARTED` / `BOLT_COMPLETED` | Construction 一般 | **swarm / worktree 経路の Unit 単位イベント**。通常のゲート付き実行では**記録されない** |
 

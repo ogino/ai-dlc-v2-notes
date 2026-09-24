@@ -73,6 +73,9 @@ v2.9.0（`1b064585` / #1151、`feat!:`）で **暗黙の既定スコープ `clas
 | `summary_confirmation` | （キー無し） | **`off`** |
 | `change_control` | `relaxed` | `relaxed`（**変化なし**） |
 
+> **v2.10.0 で `change_control:` キーは `guard_policy:` に改名された**（値は 11 スコープとも同じ。`classic` は `relaxed`）。
+> **ただし `relaxed` の意味が広がり、承認後の計画編集の再承認と review freeze が外れる**（初回の Plan Approval は必須のまま → [19.3](./19-release-impact-2100.md)）。
+
 外れた 8 本は **CI Pipeline 1 本と Operation 全 7 本**である。
 `scopes:` から `- classic` が消えたのはちょうどこの 8 ファイルで、
 **他のスコープの所属は 1 つも動いていない。**
