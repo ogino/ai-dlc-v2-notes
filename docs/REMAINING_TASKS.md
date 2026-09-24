@@ -159,6 +159,8 @@
       **#1070（Review brief）/ #1166（ゲートのセンサー）/ #1249（3 つのコアフックが `bun` を直接名指し）は、すべて `v2.10.0` に収録された**
       （`be94bde7` / `c97fa7ba` / `f79e321b`。→ [19.4](../19-release-impact-2100.md)）。
       v2.9.0 に留まる利用者には [18.6](../18-release-impact-290.md) の警告が引き続き当てはまる
+- [ ] **🔴 `v2.10.0` のネイティブ導入でチーム担当の Construction が始まらない不具合（#1286）の収録を追う**（2026-09-25 追加）—
+      修正 `057b13be`（#1309）は `main` のみ。新タグが出たら `git merge-base --is-ancestor 057b13be <tag>` で判定する（→ [19.4](../19-release-impact-2100.md)）
 - [ ] **Guard Policy の実挙動を確かめる**（2026-09-24 追加）—
       `relaxed` のプロジェクトで「承認後の計画編集が再承認なしで進む」「review freeze が `GUARD_STOOD_ASIDE` で通す」こと、
       メモリの `## Guard Policy` `Mode: strict` で旧来の拒否に戻ることを実機で確かめる（→ [19.3](../19-release-impact-2100.md)。現状はコード読解）
