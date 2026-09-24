@@ -419,7 +419,8 @@ for f in .gitignore AGENTS.md .mcp.json opencode.json; do
       echo "$out を確認し、$f を手でマージすること"
     fi
   else
-    printf '%s\n' "$dest/$f" >> "$added"
+    # 取り消し用の記録を先に書く。書けなければ何も足さずに止める
+    printf '%s\n' "$dest/$f" >> "$added" || { undo; echo "取り消し用の記録を書けません。中止します" >&2; exit 1; }
     cp "$R/$f" "$dest/$f" || { undo; echo "$f を置けませんでした" >&2; exit 1; }
   fi
 done
@@ -435,7 +436,7 @@ printf '%s\n' "$list" | while IFS= read -r f; do
     [ -L "$p" ] && { linked=1; break; }
   done
   if [ -n "$linked" ]; then printf 'aidlc/%s\n' "${f#./}" >> "$work/skipped-under-links.txt"; continue; fi
-  printf '%s\n' "$dest/aidlc/$f" >> "$added"
+  printf '%s\n' "$dest/aidlc/$f" >> "$added" || { echo "取り消し用の記録を書けません。中止します" >&2; exit 1; }
   mkdir -p "$dest/aidlc/$(dirname "$f")" &&
     cp "$R/aidlc/$f" "$dest/aidlc/$f" &&
     cmp -s "$R/aidlc/$f" "$dest/aidlc/$f" ||
