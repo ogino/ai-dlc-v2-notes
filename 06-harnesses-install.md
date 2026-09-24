@@ -384,6 +384,14 @@ for d in $managed; do
   if [ -e "$dest/$d" ] && [ ! -d "$dest/$d" ]; then
     echo "$d がディレクトリではありません（利用者のファイル？）。中止します" >&2; exit 1
   fi
+  # 別のハーネスが同じ管理ディレクトリを使っていたら止める（copilot と opencode は .aidlc/、
+  # kiro と kiro-ide は .kiro/ を共有し、同じプロジェクトには置けない。上書きすると相手が壊れる）
+  if [ -f "$dest/$d/tools/data/harness.json" ]; then
+    other=$(sed -n 's/.*"distribution": *"\([^"]*\)".*/\1/p' "$dest/$d/tools/data/harness.json" | head -1)
+    if [ -n "$other" ] && [ "$other" != "$h" ]; then
+      echo "$d は既に $other が使っています。$h とは同じプロジェクトに置けないので中止します" >&2; exit 1
+    fi
+  fi
 done
 for f in .gitignore AGENTS.md .mcp.json opencode.json; do
   if [ -e "$dest/$f" ] && [ ! -r "$dest/$f" ]; then echo "$f を読めません。中止します" >&2; exit 1; fi
