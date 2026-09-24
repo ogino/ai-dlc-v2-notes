@@ -172,6 +172,23 @@ CHANGELOG 2.10.0 の逐語:
 
 **⚠ 実機での再現・解消確認はしていない**（版間の到達判定とコード読解による）。
 
+### 🔴 追記（2026-09-25）: `v2.10.0` に残る既知の不具合 —— ネイティブ導入でチーム担当の Construction が始まらない
+
+**上の「3 件は解消」は 18.6 の不具合についての話である。** `v2.10.0` 公開後、次の不具合の修正が `main` に入った。
+**修正 `057b13be`（#1309、issue #1286）はどのリリースにも未収録**（2026-09-25 時点）。
+
+| 項目 | 内容 |
+|---|---|
+| 条件 | **ネイティブ（コンパイル済み）`aidlc`** で、Delivery Planning が `Construction Iteration: unit-major` と **`Unit Ownership: team`** を記録した intent |
+| 症状 ① | エンジン（`aidlc-orchestrate.ts`）自身が呼ぶ状態操作 `refresh-unit-progress` / `sync-unit-scope-stage` が、ディスパッチャの許可リストに無いため拒否され、**チーム担当の Construction が開始できない** |
+| 症状 ② | `aidlc unit land` の状態反映（`fold-unit-merge`）が、バンドル内のスクリプトパスをコマンドとして渡してしまい `unknown command '/$bunfs/root/aidlc-state.ts'` で失敗する（`v2.10.0` の `aidlc-unit.ts` の `runStateFold`）。修正は呼び出し経路の変更と、`fold-unit-merge` の許可リストへの追加の両方を要した（`v2.10.0` の `core/tools/aidlc.ts` には 3 語とも無い） |
+| 影響しない場合 | 単独（solo）運用。**手動コピー（Bun）経路**（Bun 実行ではディスパッチャを通らないため。上流のテストで見つからなかった理由もこれ、とコミット本文にある） |
+
+**チーム担当の Construction を使う予定があるなら、当面は手動コピー（Bun）経路にするか、修正を含む版を待つ。**
+判定は `git merge-base --is-ancestor 057b13be <tag>`（**`f79e321b` での判定ではこの修正を取りこぼす**）。
+
+**⚠ 実機では再現させていない**（コミット本文、issue #1286、`v2.10.0` のコード読解による）。
+
 ---
 
 ## 19.5 Construction の既定の進め方が変わった（新規 intent のみ）
