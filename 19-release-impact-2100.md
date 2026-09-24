@@ -180,8 +180,8 @@ CHANGELOG 2.10.0 の逐語:
 | 項目 | 内容 |
 |---|---|
 | 条件 | **ネイティブ（コンパイル済み）`aidlc`** で、Delivery Planning が `Construction Iteration: unit-major` と **`Unit Ownership: team`** を記録した intent |
-| 症状 ① | エンジン自身が呼ぶ状態操作 `refresh-unit-progress` / `sync-unit-scope-stage` / `fold-unit-merge` が、ディスパッチャの許可リストに無いため拒否され、**チーム担当の Construction が開始できない**（`v2.10.0` の `core/tools/aidlc.ts` にこの 3 語は 1 つも無い） |
-| 症状 ② | `aidlc unit land` の状態反映が、バンドル内のスクリプトパスをコマンドとして渡してしまい `unknown command '/$bunfs/root/aidlc-state.ts'` で失敗する（`v2.10.0` の `aidlc-unit.ts` の `runStateFold`） |
+| 症状 ① | エンジン（`aidlc-orchestrate.ts`）自身が呼ぶ状態操作 `refresh-unit-progress` / `sync-unit-scope-stage` が、ディスパッチャの許可リストに無いため拒否され、**チーム担当の Construction が開始できない** |
+| 症状 ② | `aidlc unit land` の状態反映（`fold-unit-merge`）が、バンドル内のスクリプトパスをコマンドとして渡してしまい `unknown command '/$bunfs/root/aidlc-state.ts'` で失敗する（`v2.10.0` の `aidlc-unit.ts` の `runStateFold`）。修正は呼び出し経路の変更と、`fold-unit-merge` の許可リストへの追加の両方を要した（`v2.10.0` の `core/tools/aidlc.ts` には 3 語とも無い） |
 | 影響しない場合 | 単独（solo）運用。**手動コピー（Bun）経路**（Bun 実行ではディスパッチャを通らないため。上流のテストで見つからなかった理由もこれ、とコミット本文にある） |
 
 **チーム担当の Construction を使う予定があるなら、当面は手動コピー（Bun）経路にするか、修正を含む版を待つ。**
