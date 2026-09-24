@@ -194,7 +194,7 @@ CHANGELOG 2.10.0 の逐語:
 
 **初出 `v2.9.1-preview.20260920.1`**（`c66c4222` / #1199）、AGENTS.md の中立化は `.20260921.1`（`13a1a859` / #1268）。
 
-- 1 つのプロジェクトに**衝突しない**ハーネスを複数置けるようになった。既存プロジェクトでは、2 つ以上のハーネスがあるときに `--harness` の指定が必須になる（非対話の新規導入では従来どおり必須）
+- 1 つのプロジェクトに**衝突しない**ハーネスを複数置けるようになった。既存プロジェクトでは、2 つ以上のハーネスがあるときに `--harness` の指定が必須になる（新規導入では、`--from`・設定済みの既定・単一の候補からハーネスが決まらないまま非対話で走らせると必須。自動化では明示を勧める）
 - **Kiro CLI と Kiro IDE（どちらも `.kiro/`）、OpenCode と GitHub Copilot（どちらも `.aidlc/`）は共存できない**
 - ルートの `AGENTS.md` の管理ブロックは**ハーネス中立の共有文面**になった。codex / cursor / kiro / kiro-ide / opencode で同一
 - **copilot の `AGENTS.md` ブロックは専用のままで、`AGENTS.md` を持つ他のハーネス（codex / cursor / kiro / kiro-ide / opencode）とは共存できない**（上流ガイド逐語 "Copilot's `AGENTS.md` stays exclusive"）。**copilot と共存できるのは claude だけ**である
