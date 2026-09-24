@@ -449,20 +449,31 @@ for d in $managed; do
   if { [ ! -e "$dest/$d" ] || mv "$dest/$d" "$dest/$d.bak-$ts"; } && mv "$dest/$d.new-$ts" "$dest/$d"; then
     swapped="$swapped $d"
   else
+    rbfail=""
     for x in $swapped $d; do
       if [ -e "$dest/$x.bak-$ts" ]; then
-        [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts"
-        mv "$dest/$x.bak-$ts" "$dest/$x"
+        # 稼働位置を空けられなければ、旧版をその中へ動かしてしまうので戻さない
+        if [ -e "$dest/$x" ] && ! mv "$dest/$x" "$dest/$x.failed-$ts"; then rbfail="$rbfail $x"; continue; fi
+        mv "$dest/$x.bak-$ts" "$dest/$x" || rbfail="$rbfail $x"
       else
-        case " $wasabsent " in *" $x "*) [ -e "$dest/$x" ] && mv "$dest/$x" "$dest/$x.failed-$ts" ;; esac
+        case " $wasabsent " in
+          *" $x "*) if [ -e "$dest/$x" ] && ! mv "$dest/$x" "$dest/$x.failed-$ts"; then rbfail="$rbfail $x"; fi ;;
+        esac
       fi
     done
     undo
-    echo "$d の入れ替えに失敗したため、すべて元に戻しました" >&2; exit 1
+    if [ -n "$rbfail" ]; then
+      echo "⚠ $d の入れ替えに失敗し、さらに$rbfail を元に戻せませんでした。手で復旧してください:" >&2
+      echo "   各ディレクトリについて、稼働位置のものを退け、*.bak-$ts をその名前に戻す（*.failed-$ts は失敗した新版）" >&2
+    else
+      echo "$d の入れ替えに失敗したため、すべて元に戻しました" >&2
+    fi
+    exit 1
   fi
 done
 
 # 6) 旧版との違いを一覧にする（ここから先は報告だけで、失敗しても稼働中の状態は変えない）
+repfail=""
 for d in $managed; do
   [ -d "$dest/$d.bak-$ts" ] || continue
   if ! old=$(cd "$dest/$d.bak-$ts" && find . \( -type f -o -type l \)); then
@@ -471,16 +482,20 @@ for d in $managed; do
   printf '%s\n' "$old" | while IFS= read -r f; do
     [ -n "$f" ] || continue
     if [ ! -e "$dest/$d/$f" ] && [ ! -L "$dest/$d/$f" ]; then
-      printf '%s/%s\n' "$d" "${f#./}" >> "$work/restore-candidates.txt"   # 旧版にだけある
+      printf '%s/%s\n' "$d" "${f#./}" >> "$work/restore-candidates.txt" || exit 1   # 旧版にだけある
     elif [ -L "$dest/$d.bak-$ts/$f" ] || [ -L "$dest/$d/$f" ]; then
-      [ -L "$dest/$d.bak-$ts/$f" ] && [ -L "$dest/$d/$f" ] &&
-        [ "$(readlink "$dest/$d.bak-$ts/$f")" = "$(readlink "$dest/$d/$f")" ] ||
-        printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"       # リンクの種別・行き先が違う
+      if ! { [ -L "$dest/$d.bak-$ts/$f" ] && [ -L "$dest/$d/$f" ] &&
+             [ "$(readlink "$dest/$d.bak-$ts/$f")" = "$(readlink "$dest/$d/$f")" ]; }; then
+        printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt" || exit 1     # リンクの種別・行き先が違う
+      fi
     elif ! cmp -s "$dest/$d.bak-$ts/$f" "$dest/$d/$f"; then
-      printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt"         # 両方にあり内容が違う
+      printf '%s/%s\n' "$d" "${f#./}" >> "$work/changed-files.txt" || exit 1       # 両方にあり内容が違う
     fi
-  done
+  done || repfail=1
 done
+if [ -n "$repfail" ]; then
+  echo "⚠ 一覧の書き込みに失敗しました。一覧は不完全なので、*.bak-$ts をすべて手で確認すること" >&2
+fi
 if [ -s "$work/restore-candidates.txt" ]; then
   echo "旧版にだけあったファイル: $work/restore-candidates.txt（利用者が足したものは *.bak-$ts から戻す。上流が消したものは戻さない）"
 fi
