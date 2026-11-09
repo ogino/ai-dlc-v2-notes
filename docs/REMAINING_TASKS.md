@@ -11,7 +11,7 @@
 - [ ] `docs/reference/*` 精読後のエンジン内部メモ追加
 - [ ] `docs/guide/agents/*.md`・`workshop-mode.md` が 2.5.11 時点で既に存在したか（新規追加か索引漏れか）の切り分け
 
-## 上流追従（2.10.0 まで同期済み）
+## 上流追従（2.11.3 まで同期済み）
 
 - [x] 上流 2.5.11 → 2.5.37 の差分反映（2026-08-05）
 - [x] 上流 2.5.37 → 2.5.62 の差分反映（2026-08-11）→ [11-release-impact-2562.md](../11-release-impact-2562.md)
@@ -23,6 +23,7 @@
 - [x] 上流 2.7.0 → 2.8.1 の差分反映（2026-09-09。`main` HEAD `c03f9e28`。**上流の `dist/` 削除に伴う導入手順の全面改訂を含む**）→ [17-release-impact-2801.md](../17-release-impact-2801.md)
 - [x] 上流 2.8.1 → 2.9.0 の差分反映（2026-09-17。`main` HEAD `2931ef02`）→ [18-release-impact-290.md](../18-release-impact-290.md)
 - [x] 上流 2.9.0 → 2.10.0 の差分反映（2026-09-24。**タグ `v2.9.0` → タグ `v2.10.0`（`2a883858`）で測定**）→ [19-release-impact-2100.md](../19-release-impact-2100.md)
+- [x] 上流 2.10.0 → 2.11.3 の差分反映（2026-11-05。**タグ `v2.10.0`（`2a883858`） → タグ `v2.11.3`（`a8721be3`）で測定**。preview `v2.11.4-preview.20261104.1` と `origin/main` も併記）→ [20-release-impact-2113.md](../20-release-impact-2113.md)
 - [ ] **追従フローの定例化** — 担当者と頻度を決める
   - **⚠ 2.7.2 で前提が一部変わった。** ネイティブ CLI に `aidlc update` / `aidlc version` /
     `aidlc doctor` が入り、**導入済みの版とリリースの比較**はコマンドでできるようになった。
@@ -36,7 +37,7 @@
     版定数も CHANGELOG も変えないコミットがあるため、**版だけを見ると取りこぼす**。
     ```bash
     # 本ノートが記録している同期地点（README / 各章の `基準:` 行）
-    last=2a883858   # タグ v2.10.0（2026-09-24。同日の main は 20008a5d で +1、テストのみ）
+    last=a8721be3   # タグ v2.11.3（2026-11-04。同日 origin/main は 0caa9155 で +82）
     # ⚠ 先に fetch する。`git ls-remote` は SHA を表示するだけで
     #    refs/remotes/origin/main を更新しないため、直後の log / diff が古い参照を見る
     git fetch origin main --tags
@@ -148,10 +149,11 @@
       `aidlc-windows-x64.exe` を固定で取得する。エミュレーション前提かどうか上流に記述が無い
 - [x] **次のリリースタグがいつ付くか（2026-09-17 解決）** — `v2.8.1`（09-09）/ `v2.8.2`（09-11）/ **`v2.9.0`（09-15、現 Latest）** が公開された。
       **タグ `v2.8.1` = `215afe1a` で、当方の基準 `c03f9e28` の 5 コミット後を指す**（→ [18.1](../18-release-impact-290.md)）
-- [ ] **🔴 リリース時のフルテストスイートが v2.10.0 で再び外れた（2026-09-24）** —
+- [ ] **🔴 リリース時のフルテストスイートが v2.10.0 で再び外れた（2026-09-24。2026-11-05 現在も `v2.11.3` で解消していない）** —
       `release.yml` のテストジョブは 0 本、`native-smoke` の `needs` は `[validate, verify]`。
       代わりに入った「フルスイート結果（evidence）の要求」もリリース準備コミット `2a883858` で外された。
-      **再びリリース時に要求されるようになるかを追う**（→ [19.10](../19-release-impact-2100.md)）
+      再確認では、`v2.11.3` の `release.yml` も full suite job を持たず、`native-smoke` が `tests/unit/t238-build-binaries.test.ts` を走らせるに留まる。
+      **再びリリース時に要求されるようになるかを追う**（→ [19.10](../19-release-impact-2100.md) / [20.8](../20-release-impact-2113.md)）
 - [x] **リリース時のフルテストスイートの無効化がいつ解除されるか（2026-09-17 解決 → 2026-09-24 に再び外れた。上の項目）** —
       `TEMPORARY` は HEAD から消えた。コメント解除ではなく**専用ジョブ 4 本への分割**で復活し、
       `native-smoke` が `test` に依存するようになった（→ [18.15](../18-release-impact-290.md)）
@@ -159,8 +161,9 @@
       **#1070（Review brief）/ #1166（ゲートのセンサー）/ #1249（3 つのコアフックが `bun` を直接名指し）は、すべて `v2.10.0` に収録された**
       （`be94bde7` / `c97fa7ba` / `f79e321b`。→ [19.4](../19-release-impact-2100.md)）。
       v2.9.0 に留まる利用者には [18.6](../18-release-impact-290.md) の警告が引き続き当てはまる
-- [ ] **🔴 `v2.10.0` のネイティブ導入でチーム担当の Construction が始まらない不具合（#1286）の収録を追う**（2026-09-25 追加）—
-      修正 `057b13be`（#1309）は `main` のみ。新タグが出たら `git merge-base --is-ancestor 057b13be <tag>` で判定する（→ [19.4](../19-release-impact-2100.md)）
+- [x] **🔴 `v2.10.0` のネイティブ導入でチーム担当の Construction が始まらない不具合（#1286）の収録を追う**（2026-09-25 追加、2026-11-05 解決）—
+      修正 `057b13be`（#1309）は stable `v2.11.0` に収録。`git tag --contains 057b13be --sort=creatordate` で `v2.11.0` 以降を確認した。
+      ただし `v2.11.3` でも team Unit の end-of-Unit gate と merge question に既知ギャップが残る（→ [20.5](../20-release-impact-2113.md)）
 - [ ] **Guard Policy の実挙動を確かめる**（2026-09-24 追加）—
       `relaxed` のプロジェクトで「承認後の計画編集が再承認なしで進む」「review freeze が `GUARD_STOOD_ASIDE` で通す」こと、
       メモリの `## Guard Policy` `Mode: strict` で旧来の拒否に戻ることを実機で確かめる（→ [19.3](../19-release-impact-2100.md)。現状はコード読解）
@@ -189,6 +192,28 @@
       **`52da70ad` を含むリリースが公開されるまで、この 2 ハーネスは v2.8.0 で導入できない**
       （**版番号は未確定**。新タグが出たら **`git fetch origin --tags` してから**
       `git merge-base --is-ancestor 52da70ad <tag>` で修正の有無を確認する）
+
+- [ ] **🔴 `v2.11.3` の native binary が Bun 1.4.4 であることと、CVE-2026-111497 対応が導入環境で実際に反映されるかを確かめる**（2026-11-05 追加）—
+      `v2.11.2` 以前の native `aidlc` は該当 Bun 内 Brotli decoder を内包する可能性。Bun 個別更新では native binary は更新されず、`aidlc update` / `aidlc config --pin 2.11.3` が要る（→ [20.3](../20-release-impact-2113.md)）
+- [ ] **`v2.11.0` 以降の Guard Policy 出荷既定 off が実プロジェクトで想定通りか確かめる**（2026-11-05 追加）—
+      `classic` 等の既定が `off` で plan approval / review freeze / state transition / reviewer scope の gate が立つ。既存の `aidlc-state.md` に Guard Policy 行が無い場合の `strict` 解決は `v2.11.3` の `resolveGuardPolicy` 読解で確認したが、実機での doctor / 監査出力は未検証（→ [20.4](../20-release-impact-2113.md)）
+- [ ] **`v2.11.3` の team Unit 既知ギャップが preview / main でどこまで解消されたかを追う**（2026-11-05 追加）—
+      `v2.11.3` で Claude Code と GitHub Copilot CLI の team Unit end-to-end は CHANGELOG に記載。一方 end-of-Unit gate と merge question に既知ギャップが残り、`v2.11.4-preview.20261104.1` / `origin/main` にも team Unit 系修正が多い（→ [20.5](../20-release-impact-2113.md)）
+- [ ] **preview / main で `AIDLC_VERSION` が `2.11.3` のままあることによる誤認を防ぐ運用を決める**（2026-11-05 追加）—
+      stable `v2.11.3`、preview `v2.11.4-preview.20261104.1`、`origin/main` の version 定数がすべて `2.11.3`。調査・導入判断では tag / SHA を優先する（→ [20.1](../20-release-impact-2113.md)）
+
+> **📌 2026-11-05 時点の上流（本区間は追従済み）**
+>
+> | 項目 | 値 |
+> |---|---|
+> | Latest | **`v2.11.3`**（`a8721be3`、2026-11-04 公開） |
+> | `origin/main` HEAD | `0caa9155`（2026-11-05 06:39 UTC、タグから +82） |
+> | preview | `v2.11.4-preview.20261104.1`（`17c123ca`、Build date 2026-11-04） |
+> | 本区間（タグ `v2.10.0` → タグ `v2.11.3`） | **1,575 コミット / 1,813 ファイル / +537,484 −89,414** |
+> | `AIDLC_VERSION` | stable / preview / origin/main とも **`2.11.3`** |
+> | team Unit blocker #1286 | **`v2.11.0` 以降で解消**（`057b13be` を含む）。v2.11.3 に別ギャップ |
+>
+> **この区間の追従は [20 章](../20-release-impact-2113.md) で完了した。**
 
 > **📌 2026-09-24 時点の上流（本区間は追従済み）**
 >
