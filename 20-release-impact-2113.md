@@ -221,7 +221,7 @@ v2.11.3 は hard link を使わない。exFAT で config / workspace sync / repo
 
 ## 20.7 ファイル体系・監査・ガード系の増減
 
-| 指標 | v2.10.0 | v2.11.3 | preview | origin/main |
+| 指標 | v2.10.0 | v2.11.3 | preview（2026-11-05） | origin/main（2026-11-05） |
 |---|---:|---:|---:|---:|
 | `docs/` | 103 | 107 | 107 | 107 |
 | `core/tools/*.ts` | 76 | 113 | 115 | 120 |
@@ -230,7 +230,7 @@ v2.11.3 は hard link を使わない。exFAT で config / workspace sync / repo
 | `VALID_EVENT_TYPES` | 105 | 131 | 131 | 131 |
 | `audit-format.md` | 105 events / 25 categories | 131 / 27 | 131 / 27 | 131 / 27 |
 
-不変:
+preview / `origin/main` 列は 2026-11-05 の `v2.11.4-preview.20261104.1` と `0caa9155` の測定である。2026-11-11 の追跡更新では、これらのファイル数を再測定していない。
 
 - `core/aidlc-common/stages`: 33
 - `core/scopes`: 11
