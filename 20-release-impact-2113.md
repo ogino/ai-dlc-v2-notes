@@ -59,7 +59,9 @@ done
 `v2.11.3`、`v2.11.4-preview.20261104.1`、`origin/main`（`0caa915560b912c23c032f8898724ba624f4d88f`、2026-11-05T06:39:50Z 時点）の `core/tools/aidlc-version.ts` はすべて `AIDLC_VERSION = "2.11.3"` だった。
 **版文字列だけを見ると preview / main を区別できないため、導入判断ではタグまたは SHA を使う。**
 
-2026-11-11 再取得でも安定 Latest は `v2.11.3` のまま。最新 preview は `v2.11.4-preview.20261110.1`（`92d39a09`、2026-11-10T17:53:49Z）、`origin/main` は `59b64b0d`（2026-11-11T09:41:02Z）。GitHub compare では preview が 208 commits、`main` が 222 commits 先行し、いずれも tag commit 自体を含まない。ファイル数と行数は compare API が 300 files で打ち切るため、再取得分はコミット数だけを記す。`AIDLC_VERSION` はどちらも `2.11.3`。以前参照した `caea995a` は `v2.11.4-preview.20261108.1` であり、安定 `v2.11.3` には含まれない。
+2026-11-11 再取得では、最新 preview は `v2.11.4-preview.20261110.1`（`92d39a09`）、`origin/main` は `59b64b0d` で、compare では preview が 208 commits、`main` が 222 commits 先行していた。
+
+2026-11-12 再取得でも安定 Latest は `v2.11.3` のまま。最新 preview は `v2.11.4-preview.20261111.1`（`47de5005`、2026-11-11T18:28:54Z）、`origin/main` は `165a19c7`（2026-11-12T00:52:47Z）。GitHub compare では preview が 240 commits、`main` が 264 commits 先行し、いずれも tag commit 自体を含まない。ファイル数と行数は compare API が 300 files で打ち切るため、再取得分はコミット数だけを記す。`AIDLC_VERSION` はどちらも `2.11.3`。以前参照した `caea995a` は `v2.11.4-preview.20261108.1` であり、安定 `v2.11.3` には含まれない。
 
 ### 範囲の大きさ
 
@@ -73,6 +75,8 @@ done
 | `v2.11.3..origin/main`（2026-11-05） | 82 | 276 files / +40,114 / −3,540 | tests 146 / core 64 / docs 31 |
 | `v2.11.3..v2.11.4-preview.20261110.1`（2026-11-11） | 208 | compare API が 300 files で打ち切り | コミット数のみ採用 |
 | `v2.11.3..origin/main`（2026-11-11、`59b64b0d`） | 222 | compare API が 300 files で打ち切り | コミット数のみ採用 |
+| `v2.11.3..v2.11.4-preview.20261111.1`（2026-11-12） | 240 | compare API が 300 files で打ち切り | コミット数のみ採用 |
+| `v2.11.3..origin/main`（2026-11-12、`165a19c7`） | 264 | compare API が 300 files で打ち切り | コミット数のみ採用 |
 
 ---
 
