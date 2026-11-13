@@ -61,7 +61,9 @@ done
 
 2026-11-11 再取得では、最新 preview は `v2.11.4-preview.20261110.1`（`92d39a09`）、`origin/main` は `59b64b0d` で、compare では preview が 208 commits、`main` が 222 commits 先行していた。
 
-2026-11-12 再取得でも安定 Latest は `v2.11.3` のまま。最新 preview は `v2.11.4-preview.20261111.1`（`47de5005`、2026-11-11T18:28:54Z）、`origin/main` は `165a19c7`（2026-11-12T00:52:47Z）。GitHub compare では preview が 240 commits、`main` が 264 commits 先行し、いずれも tag commit 自体を含まない。ファイル数と行数は compare API が 300 files で打ち切るため、再取得分はコミット数だけを記す。`AIDLC_VERSION` はどちらも `2.11.3`。以前参照した `caea995a` は `v2.11.4-preview.20261108.1` であり、安定 `v2.11.3` には含まれない。
+2026-11-12 再取得では、最新 preview は `v2.11.4-preview.20261111.1`（`47de5005`）、`origin/main` は `165a19c7` で、compare では preview が 240 commits、`main` が 264 commits 先行していた。
+
+2026-11-13 再取得でも安定 Latest は `v2.11.3` のまま。最新 preview `v2.11.4-preview.20261112.1` と `origin/main` は同一の `161ddb82`（2026-11-12T18:05:10Z）である。GitHub compare では `v2.11.3` から 292 commits 先行し、tag commit 自体は含まない。ファイル数と行数は compare API が 300 files で打ち切るため、再取得分はコミット数だけを記す。`AIDLC_VERSION` は `2.11.3`。以前参照した `caea995a` は `v2.11.4-preview.20261108.1` であり、安定 `v2.11.3` には含まれない。
 
 ### 範囲の大きさ
 
@@ -77,6 +79,7 @@ done
 | `v2.11.3..origin/main`（2026-11-11、`59b64b0d`） | 222 | compare API が 300 files で打ち切り | コミット数のみ採用 |
 | `v2.11.3..v2.11.4-preview.20261111.1`（2026-11-12） | 240 | compare API が 300 files で打ち切り | コミット数のみ採用 |
 | `v2.11.3..origin/main`（2026-11-12、`165a19c7`） | 264 | compare API が 300 files で打ち切り | コミット数のみ採用 |
+| `v2.11.3..v2.11.4-preview.20261112.1` / `origin/main`（2026-11-13、同一 `161ddb82`） | 292 | compare API が 300 files で打ち切り | コミット数のみ採用 |
 
 ---
 
@@ -234,7 +237,7 @@ v2.11.3 は hard link を使わない。exFAT で config / workspace sync / repo
 | `VALID_EVENT_TYPES` | 105 | 131 | 131 | 131 |
 | `audit-format.md` | 105 events / 25 categories | 131 / 27 | 131 / 27 | 131 / 27 |
 
-preview / `origin/main` 列は 2026-11-05 の `v2.11.4-preview.20261104.1` と `0caa9155` の測定である。2026-11-11 の追跡更新では、これらのファイル数を再測定していない。
+preview / `origin/main` 列は 2026-11-05 の `v2.11.4-preview.20261104.1` と `0caa9155` の測定である。2026-11-13 の追跡更新でも、これらのファイル数は再測定していない。
 
 - `core/aidlc-common/stages`: 33
 - `core/scopes`: 11
