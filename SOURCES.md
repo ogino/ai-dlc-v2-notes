@@ -20,7 +20,7 @@
 3. 同 clone 内（精読・突合済み）:
    - `README.md`（GA、ハーネス、バージョン要件）
    - `CHANGELOG.md`（**2.5.x を中心**に参照。2.4 / 2.3 も一部）
-   - `core/tools/aidlc-version.ts` → `2.11.3`（2026-11-12 再取得。安定タグ `v2.11.3` = `a8721be3`。同日の `origin/main` = `165a19c7`、最新 preview `v2.11.4-preview.20261111.1` = `47de5005` も `AIDLC_VERSION` は `2.11.3`。2026-11-11 時点は `origin/main` = `59b64b0d`、preview `v2.11.4-preview.20261110.1` = `92d39a09`。2026-11-05 時点は `origin/main` = `0caa9155`、preview `v2.11.4-preview.20261104.1` = `17c123ca`。2026-09-24 時点 `2.10.0`（タグ `v2.10.0` = `2a883858`）。2026-09-17 時点 `2.9.0`（branch `main` HEAD `2931ef02`）。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`）→ 2026-08-29 時点 `2.6.123`（branch `v2` HEAD `2fbee12f`）→ 2026-09-01 時点 `2.7.0`（branch `main` HEAD `96b11d39`））
+   - `core/tools/aidlc-version.ts` → `2.11.3`（2026-11-13 再取得。安定タグ `v2.11.3` = `a8721be3`。同日の最新 preview `v2.11.4-preview.20261112.1` と `origin/main` は同一の `161ddb82` で `AIDLC_VERSION` は `2.11.3`。2026-11-12 時点は `origin/main` = `165a19c7`、preview `v2.11.4-preview.20261111.1` = `47de5005`。2026-11-11 時点は `origin/main` = `59b64b0d`、preview `v2.11.4-preview.20261110.1` = `92d39a09`。2026-11-05 時点は `origin/main` = `0caa9155`、preview `v2.11.4-preview.20261104.1` = `17c123ca`。2026-09-24 時点 `2.10.0`（タグ `v2.10.0` = `2a883858`）。2026-09-17 時点 `2.9.0`（branch `main` HEAD `2931ef02`）。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`）→ 2026-08-29 時点 `2.6.123`（branch `v2` HEAD `2fbee12f`）→ 2026-09-01 時点 `2.7.0`（branch `main` HEAD `96b11d39`））
    - `docs/guide/00-introduction.md`
    - `docs/guide/03-spaces-and-intents.md`
    - `docs/guide/04-phases-and-stages.md`
@@ -63,7 +63,7 @@
      `git tag --contains 057b13be --sort=creatordate` による team Unit blocker の解消タグ判定 /
      `core/tools/aidlc-audit.ts` の `VALID_EVENT_TYPES`（105 → 131）と `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 分類（25 → 27）/
      `core/scopes/*.md` の `guard_policy:`・`collaborators:`・`plan_approval:` frontmatter 全数抽出 /
-      `CHANGELOG.md` の v2.11.0〜v2.11.3・preview・main 追跡 / `.github/workflows/release.yml` の full test 不在確認。2026-11-12 に preview / `main` の追跡地点だけ再取得（安定終点は変更なし）— 詳細は
+      `CHANGELOG.md` の v2.11.0〜v2.11.3・preview・main 追跡 / `.github/workflows/release.yml` の full test 不在確認。2026-11-13 に preview / `main` の追跡地点だけ再取得（安定終点は変更なし）— 詳細は
       [20-release-impact-2113.md](./20-release-impact-2113.md)
    - 2.9.0 → 2.10.0 区間（2026-09-24 実測。**タグ `v2.9.0` → タグ `v2.10.0`**）:
      `git tag --contains <sha> --sort=creatordate` による各変更の初出タグ判定 /
