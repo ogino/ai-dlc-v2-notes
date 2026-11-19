@@ -3,20 +3,20 @@
 作成日: 2026-11-18
 基準: **タグ `v2.11.3`（`a8721be3`）→ タグ `v2.11.4`（`61fdb122`）**
 前回: [20-release-impact-2113.md](./20-release-impact-2113.md)
-出典: タグ `v2.11.4` の `CHANGELOG.md`、GitHub compare、`core/tools/aidlc-version.ts`、`.github/workflows/release.yml`。資産数は再測定していない。
+出典: ローカル clone のタグ `v2.11.4`、`CHANGELOG.md`、`core/tools/aidlc-version.ts`、`.github/workflows/release.yml`。監査イベント数などの内部資産数は再測定していない。
 
 ## 21.1 測定
 
 `v2.11.4` は 2026-11-13T05:23:39Z の promotion commit で、`v2.11.4-preview.20261112.1` を安定版へ上げたもの。公開は 2026-11-13T05:48:13Z。`AIDLC_VERSION` は `2.11.4`。
 
-GitHub compare の `v2.11.3...v2.11.4` は 293 commits 先行、behind 1、diverged。ファイル一覧は 300 files で打ち切られるため、行数は記さない。
+ローカル clone の `git rev-list --count v2.11.3..v2.11.4` は 293、`git diff --shortstat v2.11.3...v2.11.4` は 808 files / +106,747 −12,434。
 
-2026-11-18 の非安定追跡:
+2026-11-18 夜の非安定追跡:
 
 | 区間 | commits | diff | 備考 |
 |---|---:|---|---|
-| `v2.11.4..v2.11.5-preview.20261117.1` | 20 | 125 files / +5,066 / −761 | `ce29ceab`。`AIDLC_VERSION` は `2.11.4` |
-| `v2.11.4..origin/main` | 44 | 179 files / +9,783 / −1,107 | `e67406fe`、2026-11-18T10:24:25Z。`AIDLC_VERSION` は `2.11.4` |
+| `v2.11.4..v2.11.5-preview.20261118.1` | 47 | 190 files / +10,525 / −1,178 | `ff2452ba`、2026-11-18T16:41:27Z。`AIDLC_VERSION` は `2.11.4` |
+| `v2.11.4..origin/main` | 49 | 196 files / +10,895 / −1,304 | `c515d065`、2026-11-18T22:17:33Z。`AIDLC_VERSION` は `2.11.4` |
 
 preview と `main` は同一 SHA ではない。版文字列だけでは `v2.11.4` と後続 preview / `main` を区別できない。
 

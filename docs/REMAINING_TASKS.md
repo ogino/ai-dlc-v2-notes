@@ -38,7 +38,7 @@
     版定数も CHANGELOG も変えないコミットがあるため、**版だけを見ると取りこぼす**。
     ```bash
     # 本ノートが記録している同期地点（README / 各章の `基準:` 行）
-    last=61fdb122   # タグ v2.11.4（評価終点。2026-11-18 の origin/main は e67406fe、preview は ce29ceab）
+    last=61fdb122   # タグ v2.11.4（評価終点。2026-11-18 夜の origin/main は c515d065、preview は ff2452ba）
     # ⚠ 先に fetch する。`git ls-remote` は SHA を表示するだけで
     #    refs/remotes/origin/main を更新しないため、直後の log / diff が古い参照を見る
     git fetch origin main --tags
@@ -201,20 +201,20 @@
 - [x] **`v2.11.3` の team Unit 既知ギャップが安定版で閉じたと CHANGELOG が書くか追う**（2026-11-18 解決。実機未確認）—
       `v2.11.4` の CHANGELOG は、skipped stage の end-of-Unit 停止、merge question の clean pass 表示、claim checkout の変更記録の 3 件を閉じたと書く（→ [21 章](../21-release-impact-2114.md)）
 - [ ] **preview / main の `AIDLC_VERSION` が安定版と同じことによる誤認を防ぐ運用を決める**（2026-11-18 更新）—
-      stable `v2.11.4`、最新 preview `v2.11.5-preview.20261117.1`、`origin/main`（`e67406fe`）の version 定数がすべて `2.11.4`。調査・導入判断では tag / SHA を優先する（→ [21.1](../21-release-impact-2114.md)）
+      stable `v2.11.4`、最新 preview `v2.11.5-preview.20261118.1`、`origin/main`（`c515d065`）の version 定数がすべて `2.11.4`。調査・導入判断では tag / SHA を優先する（→ [21.1](../21-release-impact-2114.md)）
 
 > **📌 2026-11-18 時点の上流（安定区間は追従済み）**
 >
 > | 項目 | 値 |
 > |---|---|
 > | Latest | **`v2.11.4`**（`61fdb122`、2026-11-13 公開） |
-> | `origin/main` HEAD | `e67406fe`（2026-11-18 10:24 UTC。`v2.11.4` から 44 commits 先行） |
-> | preview | `v2.11.5-preview.20261117.1`（`ce29ceab`、2026-11-17。`v2.11.4` から 20 commits 先行） |
-> | 本区間（タグ `v2.11.3` → タグ `v2.11.4`） | **293 commits。ファイル数は compare API の上限で未確定** |
+> | `origin/main` HEAD | `c515d065`（2026-11-18 22:17 UTC。`v2.11.4` から 49 commits / 196 files / +10,895 −1,304） |
+> | preview | `v2.11.5-preview.20261118.1`（`ff2452ba`、2026-11-18。`v2.11.4` から 47 commits / 190 files / +10,525 −1,178） |
+> | 本区間（タグ `v2.11.3` → タグ `v2.11.4`） | **293 commits / 808 files / +106,747 −12,434** |
 > | `AIDLC_VERSION` | stable / preview / origin/main とも **`2.11.4`** |
 > | team Unit の v2.11.3 ギャップ | **CHANGELOG 上は `v2.11.4` で解消。実機未確認** |
 >
-> **この区間の追従は [20 章](../20-release-impact-2113.md) で完了した。**
+> **この区間の追従は [21 章](../21-release-impact-2114.md) で完了した。**
 
 > **📌 2026-09-24 時点の上流（本区間は追従済み）**
 >

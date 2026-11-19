@@ -8,7 +8,7 @@
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
 最終同期日: 2026-11-18（タグ `v2.11.4` で測定。preview / `main` も再取得）  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **リリース `v2.11.4`**（`61fdb122`。2026-11-18 の最新 preview は `v2.11.5-preview.20261117.1` = `ce29ceab`、`origin/main` は `e67406fe`）
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **リリース `v2.11.4`**（`61fdb122`。2026-11-18 夜の最新 preview は `v2.11.5-preview.20261118.1` = `ff2452ba`、`origin/main` は `c515d065`）
 
 > **⚠ 上流の `dist/` ディレクトリは 2026-09-08 に削除された。**
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）と `aidlc config` に変わった。
@@ -23,7 +23,7 @@
 > 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md)、2.9.0 → 2.10.0 は [19 章](./19-release-impact-2100.md)、2.10.0 → 2.11.3 は [20 章](./20-release-impact-2113.md)、2.11.3 → 2.11.4 は [21 章](./21-release-impact-2114.md) で扱う。
 
 > **📌 続報（2026-11-18）—— 上流の安定 Latest は `v2.11.4` である。**
-> `v2.11.4`（`61fdb122`、2026-11-13）が公開された。最新 preview は `v2.11.5-preview.20261117.1`（`ce29ceab`）、`origin/main` は `e67406fe`。どちらも `AIDLC_VERSION` は `2.11.4` なので、**版文字列だけで preview / main を判別しない**。
+> `v2.11.4`（`61fdb122`、2026-11-13）が公開された。2026-11-18 夜の最新 preview は `v2.11.5-preview.20261118.1`（`ff2452ba`）、`origin/main` は `c515d065`。どちらも `AIDLC_VERSION` は `2.11.4` なので、**版文字列だけで preview / main を判別しない**。
 
 > **⚠ 版を固定するなら `v2.11.4`（現 Latest）を使う。**
 > **`v2.8.1` / `v2.8.2` / `v2.9.0` / `v2.10.0` / `v2.11.0` / `v2.11.1` / `v2.11.2` / `v2.11.3` / `v2.11.4` はいずれも実在するタグである**
@@ -45,8 +45,8 @@
 >
 > | 導入経路 | 手順 |
 > |---|---|
-> | **ネイティブ導入** | `aidlc update` の後、**プロジェクトごとに `aidlc config --yes`**。pin している場合は `aidlc config --pin 2.11.3` |
-> | **手動コピー運用** | **`aidlc-copy-runtime-2.11.3.tar.gz`** を取得し、ハーネス管理ディレクトリを更新し、ルートのファイルと `aidlc/`（利用者の記憶）は保全する。**丸ごと上書きしてはいけない**（手順は [6 章の手動コピー節](./06-harnesses-install.md#手動でファイルを置きたい場合)）。**`aidlc` コマンドは使わない**（そもそも存在しない） |
+> | **ネイティブ導入** | `aidlc update` の後、**プロジェクトごとに `aidlc config --yes`**。pin している場合は `aidlc config --pin 2.11.4` |
+> | **手動コピー運用** | **`aidlc-copy-runtime-2.11.4.tar.gz`** を取得し、ハーネス管理ディレクトリを更新し、ルートのファイルと `aidlc/`（利用者の記憶）は保全する。**丸ごと上書きしてはいけない**（手順は [6 章の手動コピー節](./06-harnesses-install.md#手動でファイルを置きたい場合)）。**`aidlc` コマンドは使わない**（そもそも存在しない） |
 >
 > **手動コピー運用者は `aidlc update` も `aidlc config --yes` も実行できない。**
 > ネイティブバイナリを入れていないためである（→ [18.4](./18-release-impact-290.md) / [18.5](./18-release-impact-290.md)）。
@@ -146,13 +146,13 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | エージェント | 14（ドメイン 11 + レビュア 2 + Composer 1） |
 | スコープ | 11 + 自動検出 + カスタム compose |
 | 深度 / テスト戦略 | 各 3 段階（独立） |
-| 監査イベント種別 | **131**（タグ `v2.10.0` は 105、`v2.9.0` は 99、`v2.8.1` は 95）※ |
+| 監査イベント種別 | **131**（`v2.11.3` 測定。`v2.11.4` では未測定。タグ `v2.10.0` は 105、`v2.9.0` は 99、`v2.8.1` は 95）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
 | 実装バージョン | **2.11.4**（タグ `v2.11.4` = `61fdb122`。取得日 2026-11-18）※現 Latest は `v2.11.4` |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 
-※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準で **27**（形式見出し 3 本は分類に数えない）。**基準 `c03f9e28` は 22、`v2.8.1` は 23、`v2.9.0` / `v2.10.0` は 25、`v2.11.3` は 27**。イベントは 131 に増え、Question / Host / Installation / Unit などが加わった。
+※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準で **27**（`v2.11.3` 測定。`v2.11.4` では未測定。形式見出し 3 本は分類に数えない）。**基準 `c03f9e28` は 22、`v2.8.1` は 23、`v2.9.0` / `v2.10.0` は 25、`v2.11.3` は 27**。イベントは `v2.11.3` 時点で 131 に増え、Question / Host / Installation / Unit などが加わった。
 ※ **`docs/reference/12-state-machine.md` 基準では 20 分類**（基準 `c03f9e28` では 19）。イベント種別の集合自体は両出典で同一で、**分類数が違うのはグルーピングの粒度の差である**。どちらを引用するかは出典を明記すること。
 ※ **`Interaction Events` は見出しが宣言する件数と表の行数が 1 件ずれている**（基準 `c03f9e28`: 宣言 10 / 行 9、**タグ `v2.8.1` 以降は宣言 11 / 行 10**）。**⚠ この齟齬は `v2.10.0` で解消された**（`261083ce` / #1150 で宣言 13 / 行 13 に是正。初出は preview `v2.9.1-preview.20260920.1`）。**`v2.9.0` は 11 / 10 のままである。**
 
@@ -195,11 +195,12 @@ aidlc doctor
 > ```
 
 **本ノートの数値を再現・照合する場合**は、上流リポジトリを clone してソースを直接測る。
-版を固定するなら **`v2.11.3`**（現 Latest）か SHA を使う。
+現行の導入を固定するなら **`v2.11.4`**（現 Latest）を使う。監査イベント 131 などの資産数は `v2.11.3` 測定なので、その再現には `v2.11.3` を使う。
 
 ```bash
 git clone --branch main https://github.com/awslabs/aidlc-workflows.git   # 最新を追う場合
-# git clone --branch v2.11.3 https://github.com/awslabs/aidlc-workflows.git  # 版を固定する場合
+# git clone --branch v2.11.4 https://github.com/awslabs/aidlc-workflows.git  # 現行版を固定する場合
+# git clone --branch v2.11.3 https://github.com/awslabs/aidlc-workflows.git  # 監査イベント 131 などの v2.11.3 測定値を再現する場合
 cd aidlc-workflows
 ```
 
