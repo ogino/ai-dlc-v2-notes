@@ -195,7 +195,7 @@
       `git merge-base --is-ancestor 52da70ad <tag>` で修正の有無を確認する）
 
 - [ ] **🔴 `v2.11.3` の native binary が Bun 1.4.4 であることと、CVE-2026-111497 対応が導入環境で実際に反映されるかを確かめる**（2026-11-05 追加）—
-      `v2.11.2` 以前の native `aidlc` は該当 Bun 内 Brotli decoder を内包する可能性。Bun 個別更新では native binary は更新されず、`aidlc update` / `aidlc config --pin 2.11.3` が要る（→ [20.3](../20-release-impact-2113.md)）
+      `v2.11.2` 以前の native `aidlc` は該当 Bun 内 Brotli decoder を内包する可能性。Bun 個別更新では native binary は更新されない。CVE 対応の最初の安定版は `2.11.3`、現行の固定先は `aidlc update` / `aidlc config --pin 2.11.4`（→ [20.3](../20-release-impact-2113.md) / [21 章](../21-release-impact-2114.md)）
 - [ ] **`v2.11.0` 以降の Guard Policy 出荷既定 off が実プロジェクトで想定通りか確かめる**（2026-11-05 追加）—
       `classic` 等の既定が `off` で plan approval / review freeze / state transition / reviewer scope の gate が立つ。既存の `aidlc-state.md` に Guard Policy 行が無い場合の `strict` 解決は `v2.11.3` の `resolveGuardPolicy` 読解で確認したが、実機での doctor / 監査出力は未検証（→ [20.4](../20-release-impact-2113.md)）
 - [x] **`v2.11.3` の team Unit 既知ギャップが安定版で閉じたと CHANGELOG が書くか追う**（2026-11-18 解決。実機未確認）—

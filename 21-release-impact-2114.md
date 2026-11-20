@@ -26,10 +26,10 @@ preview と `main` は同一 SHA ではない。版文字列だけでは `v2.11.
 
 1. `--harness kiro` は Kiro IDE と Kiro CLI v3 の共通導入。Kiro CLI V2 は `--harness kiro-v2`。`kiro-ide` は残る。既存プロジェクトの refresh は、そのプロジェクトが持っている Kiro harness を維持する。
 2. v2.11.3 の team Unit ギャップ 3 件は CHANGELOG 上は閉じた。skipped stage が end-of-Unit 承認を止めない。merge question は open finding を clean pass と表示しない。claim checkout の承認済み stage 変更は、人の変更として reopen する。
-3. team の受け渡しは、期限が来た操作を 1 問にまとめる。
+3. team の受け渡しは、次の受け渡しが必要になった段階で 1 問になる。期限でまとめる機能ではない。
 4. `$`、backtick、`>`、`<`、`&`、改行を含む Kiro の依頼は file 経由で渡る。`caea995a` は安定 `v2.11.4` に含まれる。
 5. Copilot CLI で `shell(bun)` または `shell(aidlc)` を拒否しているなら、`.aidlc/bin/aidlc-engine` も拒否対象に加える。
-6. Windows で execution policy が `AllSigned` / `Restricted` の場合、または uninstall journal が壊れている場合、`aidlc update` ではなく one-line installer が必要。
+6. Windows では、Group Policy が execution policy を `AllSigned` / `Restricted` にしている場合、または 2.11.3 が invalid uninstall journal で起動できない場合、2.11.4 への更新に one-line installer が一度必要。その後は通常の更新に戻る。
 7. `infra` plan は Code Generation と Build and Test を含む 15 stages。適用は Environment Provisioning。
 8. `release.yml` の `native-smoke` は引き続き `tests/unit/t238-build-binaries.test.ts` を実行する。full suite job は確認範囲では見当たらなかった。
 
