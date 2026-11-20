@@ -7,8 +7,8 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-11-13（安定 Latest はタグ `v2.11.3`。preview / `main` の追跡地点を再取得）  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **リリース `v2.11.3`**（`a8721be3`。評価終点の取得日 2026-11-05。2026-11-13 の最新 preview と `origin/main` は同一の `161ddb82`）
+最終同期日: 2026-11-18（タグ `v2.11.4` で測定。preview / `main` も再取得）  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **リリース `v2.11.4`**（`61fdb122`。2026-11-18 夜の最新 preview は `v2.11.5-preview.20261118.1` = `ff2452ba`、`origin/main` は `c515d065`）
 
 > **⚠ 上流の `dist/` ディレクトリは 2026-09-08 に削除された。**
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）と `aidlc config` に変わった。
@@ -17,19 +17,18 @@
 >
 > **📌 続報（2026-09-17）—— 上記の 🔴 は解消済み。**
 > `52da70ad` を含む **`v2.8.1` が 2026-09-09 20:12 UTC にリリース**された（本ノートの測定の数時間後）。
-> その後 **v2.8.2（09-11）・v2.9.0（09-15）・v2.10.0（09-24）・v2.11.0（10-08）・v2.11.1（10-20）・v2.11.2（10-28）・v2.11.3（11-04、現 Latest）** が公開されている。
+> その後 **v2.8.2（09-11）・v2.9.0（09-15）・v2.10.0（09-24）・v2.11.0（10-08）・v2.11.1（10-20）・v2.11.2（10-28）・v2.11.3（11-04）・v2.11.4（11-13、現 Latest）** が公開されている。
 > **Copilot / Cursor を使う場合も、v2.8.1 以降を導入すれば不具合は起きない。**
 > **17 章が案内するソース生成の暫定回避策は不要である。**
-> 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md)、2.9.0 → 2.10.0 は [19 章](./19-release-impact-2100.md)、2.10.0 → 2.11.3 は [20 章](./20-release-impact-2113.md) で扱う。
+> 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md)、2.9.0 → 2.10.0 は [19 章](./19-release-impact-2100.md)、2.10.0 → 2.11.3 は [20 章](./20-release-impact-2113.md)、2.11.3 → 2.11.4 は [21 章](./21-release-impact-2114.md) で扱う。
 
-> **📌 続報（2026-11-05）—— 上流は `v2.11.3` まで進み、これが現 Latest である。**
-> `v2.11.0`（10-08）・`v2.11.1`（10-20）・`v2.11.2`（10-28）・`v2.11.3`（11-04）が公開された。
-> `v2.11.4-preview.20261104.1` と当時の `origin/main` は未リリースだった。2026-11-13 再取得でも安定 Latest は `v2.11.3` のままで、最新 preview `v2.11.4-preview.20261112.1` と `origin/main` は同一の `161ddb82`。`AIDLC_VERSION` は `2.11.3` なので、**版文字列だけで release channel を判別しない**。
+> **📌 続報（2026-11-18）—— 上流の安定 Latest は `v2.11.4` である。**
+> `v2.11.4`（`61fdb122`、2026-11-13）が公開された。2026-11-18 夜の最新 preview は `v2.11.5-preview.20261118.1`（`ff2452ba`）、`origin/main` は `c515d065`。どちらも `AIDLC_VERSION` は `2.11.4` なので、**版文字列だけで preview / main を判別しない**。
 
-> **⚠ 版を固定するなら `v2.11.3`（現 Latest）を使う。**
-> **`v2.8.1` / `v2.8.2` / `v2.9.0` / `v2.10.0` / `v2.11.0` / `v2.11.1` / `v2.11.2` / `v2.11.3` はいずれも実在するタグである**
+> **⚠ 版を固定するなら `v2.11.4`（現 Latest）を使う。**
+> **`v2.8.1` / `v2.8.2` / `v2.9.0` / `v2.10.0` / `v2.11.0` / `v2.11.1` / `v2.11.2` / `v2.11.3` / `v2.11.4` はいずれも実在するタグである**
 > （旧記述の「`v2.8.1` タグは存在しない」は 2026-09-09 時点の話で、現在は誤り）。
-> **🔴 `v2.11.2` 以前の native `aidlc` は Bun の CVE-2026-111497 の影響を受ける。固定版を選ぶ場合でも `v2.11.3` の native binary を使う。**
+> **🔴 `v2.11.2` 以前の native `aidlc` は Bun の CVE-2026-111497 の影響を受ける。固定版を選ぶ場合は `v2.11.4` の native binary を使う。**
 >
 > **⚠ 17 章の基準 `c03f9e28` は、リリース版 `v2.8.1`（＝ `215afe1a`）ではない。**
 > どちらも `AIDLC_VERSION` は `2.8.1` だが、タグは 5 コミット後を指す。
@@ -40,14 +39,14 @@
 > v2.9.0 に留まる場合は [18.6](./18-release-impact-290.md) の警告が引き続き当てはまる（→ [19.4](./19-release-impact-2100.md)）。
 >
 > **✅ `v2.10.0` の既知不具合（ネイティブ導入でチーム担当 `Unit Ownership: team` の Construction が始まらない #1286）は、修正 `057b13be` を含む `v2.11.0` 以降で解消された。**
-> **v2.11.3 では Claude Code と GitHub Copilot CLI の team Unit が end-to-end に動く。ただし end-of-Unit gate と merge question に既知ギャップが残る（→ [20.5](./20-release-impact-2113.md)）。**
+> **v2.11.3 では Claude Code と GitHub Copilot CLI の team Unit が end-to-end に動く。v2.11.3 の既知ギャップ 3 件は、v2.11.4 の CHANGELOG 上は閉じた。実機確認はしていない（→ [21 章](./21-release-impact-2114.md)）。**
 
 > **🔴 2.11.3 への更新は作業が要る。導入経路によって手順が違う。**
 >
 > | 導入経路 | 手順 |
 > |---|---|
-> | **ネイティブ導入** | `aidlc update` の後、**プロジェクトごとに `aidlc config --yes`**。pin している場合は `aidlc config --pin 2.11.3` |
-> | **手動コピー運用** | **`aidlc-copy-runtime-2.11.3.tar.gz`** を取得し、ハーネス管理ディレクトリを更新し、ルートのファイルと `aidlc/`（利用者の記憶）は保全する。**丸ごと上書きしてはいけない**（手順は [6 章の手動コピー節](./06-harnesses-install.md#手動でファイルを置きたい場合)）。**`aidlc` コマンドは使わない**（そもそも存在しない） |
+> | **ネイティブ導入** | `aidlc update` の後、**プロジェクトごとに `aidlc config --yes`**。pin している場合は `aidlc config --pin 2.11.4` |
+> | **手動コピー運用** | **`aidlc-copy-runtime-2.11.4.tar.gz`** を取得し、ハーネス管理ディレクトリを更新し、ルートのファイルと `aidlc/`（利用者の記憶）は保全する。**丸ごと上書きしてはいけない**（手順は [6 章の手動コピー節](./06-harnesses-install.md#手動でファイルを置きたい場合)）。**`aidlc` コマンドは使わない**（そもそも存在しない） |
 >
 > **手動コピー運用者は `aidlc update` も `aidlc config --yes` も実行できない。**
 > ネイティブバイナリを入れていないためである（→ [18.4](./18-release-impact-290.md) / [18.5](./18-release-impact-290.md)）。
@@ -125,6 +124,7 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | [18-release-impact-290.md](./18-release-impact-290.md) | 2.8.1 → 2.9.0 のリリース差分。**既定スコープ `classic` が 26 → 18**（破壊的）、**Change Control**（v2.8.1 出荷済み）と既存レコードが暗黙に `strict` になる件、**手動コピー用アセットの分離**、監査イベント 91 → 99、**v2.9.0 に残っていたセンサー・フック系の不具合 3 件（①②はネイティブ導入限定、③は Bun 経路でもフックの PATH 次第で起こる）**（うち 1 件は当時 preview でも未修正だった。**3 件とも v2.10.0 で解消** → 19 章） |
 | [19-release-impact-2100.md](./19-release-impact-2100.md) | 2.9.0 → 2.10.0 のリリース差分（**タグ間で測定**）。**Change Control → Guard Policy** と `relaxed` の意味の拡大（初回 Plan Approval は必須のまま）、**18 章の不具合 3 件の解消**、Construction の新既定、複数ハーネスの共存と組み合わせ制限、Bedrock 出荷既定の撤去、**リリース時フルテストの再撤去**、監査イベント 99 → 105 |
 | [20-release-impact-2113.md](./20-release-impact-2113.md) | 2.10.0 → 2.11.3 のリリース差分（**タグ間で測定**）。**Bun 1.4.4 による CVE-2026-111497 対応**、**Guard Policy の出荷既定が enterprise を除き off**、`collaborators` / `plan_approval` frontmatter、**ネイティブ team Unit の end-to-end 化**、opencode 2 / `AIDLC_UNATTENDED=1` / Windows `aidlc.exe` / plugin catalogue などのスクリプト互換破壊、監査イベント 105 → 131 |
+| [21-release-impact-2114.md](./21-release-impact-2114.md) | 2.11.3 → 2.11.4 のリリース差分（CHANGELOG と公開 API。資産数は未測定）。**Kiro harness 名の変更**、**team Unit ギャップ 3 件の CHANGELOG 上の解消**、Kiro の file 経由依頼、Copilot CLI / Windows の更新手順 |
 | [SOURCES.md](./SOURCES.md) | 調査ソース一覧・免責 |
 
 ### メンテナ向け（作業記録）
@@ -146,13 +146,13 @@ AI-DLC 2.0 は、**「プロンプトを投げて祈る」アドホックな AI 
 | エージェント | 14（ドメイン 11 + レビュア 2 + Composer 1） |
 | スコープ | 11 + 自動検出 + カスタム compose |
 | 深度 / テスト戦略 | 各 3 段階（独立） |
-| 監査イベント種別 | **131**（タグ `v2.10.0` は 105、`v2.9.0` は 99、`v2.8.1` は 95）※ |
+| 監査イベント種別 | **131**（`v2.11.3` 測定。`v2.11.4` では未測定。タグ `v2.10.0` は 105、`v2.9.0` は 99、`v2.8.1` は 95）※ |
 | 対応ハーネス | Claude Code, Kiro IDE, Kiro CLI, Codex CLI, **Cursor**, opencode, GitHub Copilot（計 7 種） |
-| 実装バージョン | **2.11.3**（タグ `v2.11.3` = `a8721be3`。評価終点の取得日 2026-11-05）※2026-11-13 再取得でも現 Latest は `v2.11.3` |
+| 実装バージョン | **2.11.4**（タグ `v2.11.4` = `61fdb122`。取得日 2026-11-18）※現 Latest は `v2.11.4` |
 | 上流実装のライセンス | MIT-0（`aidlc-workflows`） |
 | 本ノートのライセンス | MIT（本リポジトリ `LICENSE`） |
 
-※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準で **27**（形式見出し 3 本は分類に数えない）。**基準 `c03f9e28` は 22、`v2.8.1` は 23、`v2.9.0` / `v2.10.0` は 25、`v2.11.3` は 27**。イベントは 131 に増え、Question / Host / Installation / Unit などが加わった。
+※ 監査カテゴリ数は正典レジストリ `core/knowledge/aidlc-shared/audit-format.md` の Event Registry 見出し基準で **27**（`v2.11.3` 測定。`v2.11.4` では未測定。形式見出し 3 本は分類に数えない）。**基準 `c03f9e28` は 22、`v2.8.1` は 23、`v2.9.0` / `v2.10.0` は 25、`v2.11.3` は 27**。イベントは `v2.11.3` 時点で 131 に増え、Question / Host / Installation / Unit などが加わった。
 ※ **`docs/reference/12-state-machine.md` 基準では 20 分類**（基準 `c03f9e28` では 19）。イベント種別の集合自体は両出典で同一で、**分類数が違うのはグルーピングの粒度の差である**。どちらを引用するかは出典を明記すること。
 ※ **`Interaction Events` は見出しが宣言する件数と表の行数が 1 件ずれている**（基準 `c03f9e28`: 宣言 10 / 行 9、**タグ `v2.8.1` 以降は宣言 11 / 行 10**）。**⚠ この齟齬は `v2.10.0` で解消された**（`261083ce` / #1150 で宣言 13 / 行 13 に是正。初出は preview `v2.9.1-preview.20260920.1`）。**`v2.9.0` は 11 / 10 のままである。**
 
@@ -195,11 +195,12 @@ aidlc doctor
 > ```
 
 **本ノートの数値を再現・照合する場合**は、上流リポジトリを clone してソースを直接測る。
-版を固定するなら **`v2.11.3`**（現 Latest）か SHA を使う。
+現行の導入を固定するなら **`v2.11.4`**（現 Latest）を使う。監査イベント 131 などの資産数は `v2.11.3` 測定なので、その再現には `v2.11.3` を使う。
 
 ```bash
 git clone --branch main https://github.com/awslabs/aidlc-workflows.git   # 最新を追う場合
-# git clone --branch v2.11.3 https://github.com/awslabs/aidlc-workflows.git  # 版を固定する場合
+# git clone --branch v2.11.4 https://github.com/awslabs/aidlc-workflows.git  # 現行版を固定する場合
+# git clone --branch v2.11.3 https://github.com/awslabs/aidlc-workflows.git  # 監査イベント 131 などの v2.11.3 測定値を再現する場合
 cd aidlc-workflows
 ```
 

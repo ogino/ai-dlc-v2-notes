@@ -23,7 +23,8 @@
 - [x] 上流 2.7.0 → 2.8.1 の差分反映（2026-09-09。`main` HEAD `c03f9e28`。**上流の `dist/` 削除に伴う導入手順の全面改訂を含む**）→ [17-release-impact-2801.md](../17-release-impact-2801.md)
 - [x] 上流 2.8.1 → 2.9.0 の差分反映（2026-09-17。`main` HEAD `2931ef02`）→ [18-release-impact-290.md](../18-release-impact-290.md)
 - [x] 上流 2.9.0 → 2.10.0 の差分反映（2026-09-24。**タグ `v2.9.0` → タグ `v2.10.0`（`2a883858`）で測定**）→ [19-release-impact-2100.md](../19-release-impact-2100.md)
-- [x] 上流 2.10.0 → 2.11.3 の差分反映（2026-11-05。**タグ `v2.10.0`（`2a883858`） → タグ `v2.11.3`（`a8721be3`）で測定**。2026-11-13 に preview / `main` の追跡地点を再取得）→ [20-release-impact-2113.md](../20-release-impact-2113.md)
+- [x] 上流 2.10.0 → 2.11.3 の差分反映（2026-11-05。**タグ `v2.10.0`（`2a883858`） → タグ `v2.11.3`（`a8721be3`）で測定**）→ [20-release-impact-2113.md](../20-release-impact-2113.md)
+- [x] 上流 2.11.3 → 2.11.4 の差分反映（2026-11-18。**タグ `v2.11.3`（`a8721be3`） → タグ `v2.11.4`（`61fdb122`）**。CHANGELOG と公開 API。資産数は未測定）→ [21-release-impact-2114.md](../21-release-impact-2114.md)
 - [ ] **追従フローの定例化** — 担当者と頻度を決める
   - **⚠ 2.7.2 で前提が一部変わった。** ネイティブ CLI に `aidlc update` / `aidlc version` /
     `aidlc doctor` が入り、**導入済みの版とリリースの比較**はコマンドでできるようになった。
@@ -37,7 +38,7 @@
     版定数も CHANGELOG も変えないコミットがあるため、**版だけを見ると取りこぼす**。
     ```bash
     # 本ノートが記録している同期地点（README / 各章の `基準:` 行）
-    last=a8721be3   # タグ v2.11.3（評価終点。2026-11-13 の preview と origin/main は同一の 161ddb82）
+    last=61fdb122   # タグ v2.11.4（評価終点。2026-11-18 夜の origin/main は c515d065、preview は ff2452ba）
     # ⚠ 先に fetch する。`git ls-remote` は SHA を表示するだけで
     #    refs/remotes/origin/main を更新しないため、直後の log / diff が古い参照を見る
     git fetch origin main --tags
@@ -194,26 +195,26 @@
       `git merge-base --is-ancestor 52da70ad <tag>` で修正の有無を確認する）
 
 - [ ] **🔴 `v2.11.3` の native binary が Bun 1.4.4 であることと、CVE-2026-111497 対応が導入環境で実際に反映されるかを確かめる**（2026-11-05 追加）—
-      `v2.11.2` 以前の native `aidlc` は該当 Bun 内 Brotli decoder を内包する可能性。Bun 個別更新では native binary は更新されず、`aidlc update` / `aidlc config --pin 2.11.3` が要る（→ [20.3](../20-release-impact-2113.md)）
+      `v2.11.2` 以前の native `aidlc` は該当 Bun 内 Brotli decoder を内包する可能性。Bun 個別更新では native binary は更新されない。CVE 対応の最初の安定版は `2.11.3`、現行の固定先は `aidlc update` / `aidlc config --pin 2.11.4`（→ [20.3](../20-release-impact-2113.md) / [21 章](../21-release-impact-2114.md)）
 - [ ] **`v2.11.0` 以降の Guard Policy 出荷既定 off が実プロジェクトで想定通りか確かめる**（2026-11-05 追加）—
       `classic` 等の既定が `off` で plan approval / review freeze / state transition / reviewer scope の gate が立つ。既存の `aidlc-state.md` に Guard Policy 行が無い場合の `strict` 解決は `v2.11.3` の `resolveGuardPolicy` 読解で確認したが、実機での doctor / 監査出力は未検証（→ [20.4](../20-release-impact-2113.md)）
-- [ ] **`v2.11.3` の team Unit 既知ギャップが preview / main でどこまで解消されたかを追う**（2026-11-05 追加）—
-      `v2.11.3` で Claude Code と GitHub Copilot CLI の team Unit end-to-end は CHANGELOG に記載。一方 end-of-Unit gate と merge question に既知ギャップが残る。2026-11-13 の最新 preview / `main` で解消したかは未確認（→ [20.5](../20-release-impact-2113.md)）
-- [ ] **preview / main で `AIDLC_VERSION` が `2.11.3` のままあることによる誤認を防ぐ運用を決める**（2026-11-05 追加。2026-11-13 も同じ）—
-      stable `v2.11.3`、最新 preview `v2.11.4-preview.20261112.1`、`origin/main`（同一の `161ddb82`）の version 定数がすべて `2.11.3`。調査・導入判断では tag / SHA を優先する（→ [20.1](../20-release-impact-2113.md)）
+- [x] **`v2.11.3` の team Unit 既知ギャップが安定版で閉じたと CHANGELOG が書くか追う**（2026-11-18 解決。実機未確認）—
+      `v2.11.4` の CHANGELOG は、skipped stage の end-of-Unit 停止、merge question の clean pass 表示、claim checkout の変更記録の 3 件を閉じたと書く（→ [21 章](../21-release-impact-2114.md)）
+- [ ] **preview / main の `AIDLC_VERSION` が安定版と同じことによる誤認を防ぐ運用を決める**（2026-11-18 更新）—
+      stable `v2.11.4`、最新 preview `v2.11.5-preview.20261118.1`、`origin/main`（`c515d065`）の version 定数がすべて `2.11.4`。調査・導入判断では tag / SHA を優先する（→ [21.1](../21-release-impact-2114.md)）
 
-> **📌 2026-11-13 時点の上流（安定区間は追従済み）**
+> **📌 2026-11-18 時点の上流（安定区間は追従済み）**
 >
 > | 項目 | 値 |
 > |---|---|
-> | Latest | **`v2.11.3`**（`a8721be3`、2026-11-04 公開。2026-11-13 も不変） |
-> | `origin/main` HEAD | `161ddb82`（2026-11-12 18:05 UTC。最新 preview と同一。compare ではタグから 292 commits 先行） |
-> | preview | `v2.11.4-preview.20261112.1`（`161ddb82`、2026-11-12。`origin/main` と同一） |
-> | 本区間（タグ `v2.10.0` → タグ `v2.11.3`） | **1,575 コミット / 1,813 ファイル / +537,484 −89,414** |
-> | `AIDLC_VERSION` | stable / preview / origin/main とも **`2.11.3`** |
-> | team Unit blocker #1286 | **`v2.11.0` 以降で解消**（`057b13be` を含む）。v2.11.3 に別ギャップ |
+> | Latest | **`v2.11.4`**（`61fdb122`、2026-11-13 公開） |
+> | `origin/main` HEAD | `c515d065`（2026-11-18 22:17 UTC。`v2.11.4` から 49 commits / 196 files / +10,895 −1,304） |
+> | preview | `v2.11.5-preview.20261118.1`（`ff2452ba`、2026-11-18。`v2.11.4` から 47 commits / 190 files / +10,525 −1,178） |
+> | 本区間（タグ `v2.11.3` → タグ `v2.11.4`） | **293 commits / 808 files / +106,747 −12,434** |
+> | `AIDLC_VERSION` | stable / preview / origin/main とも **`2.11.4`** |
+> | team Unit の v2.11.3 ギャップ | **CHANGELOG 上は `v2.11.4` で解消。実機未確認** |
 >
-> **この区間の追従は [20 章](../20-release-impact-2113.md) で完了した。**
+> **この区間の追従は [21 章](../21-release-impact-2114.md) で完了した。**
 
 > **📌 2026-09-24 時点の上流（本区間は追従済み）**
 >

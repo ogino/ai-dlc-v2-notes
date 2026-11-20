@@ -9,8 +9,8 @@
    https://github.com/awslabs/aidlc-workflows/tree/main
 2. 公式 `main` ブランチのローカル clone  
    `git clone --depth 1 --branch main https://github.com/awslabs/aidlc-workflows.git`  
-   （**版を固定して調べるなら `--branch v2.11.3`**（現 Latest）。
-   **`v2.8.1` / `v2.8.2` / `v2.9.0` / `v2.10.0` / `v2.11.0` / `v2.11.1` / `v2.11.2` / `v2.11.3` はいずれも実在するタグである**（旧記述の「タグは存在しない」は 2026-09-09 時点の話）。
+   （**版を固定して調べるなら `--branch v2.11.4`**（現 Latest）。
+    **`v2.8.1` / `v2.8.2` / `v2.9.0` / `v2.10.0` / `v2.11.0` / `v2.11.1` / `v2.11.2` / `v2.11.3` / `v2.11.4` はいずれも実在するタグである**（旧記述の「タグは存在しない」は 2026-09-09 時点の話）。
    **⚠ ただしタグ `v2.8.1`（= `215afe1a`）は 17 章の基準 `c03f9e28` の 5 コミット後を指す。別物である。**
    また **`--depth 1` では過去 SHA との差分が取れない** ——
    `git diff 2fbee12f..origin/main` のような測定には `git fetch --unshallow` が要る）  
@@ -20,7 +20,7 @@
 3. 同 clone 内（精読・突合済み）:
    - `README.md`（GA、ハーネス、バージョン要件）
    - `CHANGELOG.md`（**2.5.x を中心**に参照。2.4 / 2.3 も一部）
-   - `core/tools/aidlc-version.ts` → `2.11.3`（2026-11-13 再取得。安定タグ `v2.11.3` = `a8721be3`。同日の最新 preview `v2.11.4-preview.20261112.1` と `origin/main` は同一の `161ddb82` で `AIDLC_VERSION` は `2.11.3`。2026-11-12 時点は `origin/main` = `165a19c7`、preview `v2.11.4-preview.20261111.1` = `47de5005`。2026-11-11 時点は `origin/main` = `59b64b0d`、preview `v2.11.4-preview.20261110.1` = `92d39a09`。2026-11-05 時点は `origin/main` = `0caa9155`、preview `v2.11.4-preview.20261104.1` = `17c123ca`。2026-09-24 時点 `2.10.0`（タグ `v2.10.0` = `2a883858`）。2026-09-17 時点 `2.9.0`（branch `main` HEAD `2931ef02`）。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`）→ 2026-08-29 時点 `2.6.123`（branch `v2` HEAD `2fbee12f`）→ 2026-09-01 時点 `2.7.0`（branch `main` HEAD `96b11d39`））
+   - `core/tools/aidlc-version.ts` → `2.11.4`（2026-11-18 夜の再取得。安定タグ `v2.11.4` = `61fdb122`。最新 preview `v2.11.5-preview.20261118.1` = `ff2452ba` と `origin/main` = `c515d065` の `AIDLC_VERSION` も `2.11.4`。同日朝の preview は `v2.11.5-preview.20261117.1` = `ce29ceab`、`origin/main` = `e67406fe`。2026-11-13 時点は preview と `origin/main` が同一の `161ddb82` で `AIDLC_VERSION` は `2.11.3`。2026-11-05 時点の安定タグ `v2.11.3` = `a8721be3`。2026-09-24 時点 `2.10.0`（タグ `v2.10.0` = `2a883858`）。2026-09-17 時点 `2.9.0`（branch `main` HEAD `2931ef02`）。初回調査時 `2.5.11` → 2026-08-05 時点 `2.5.37` → 2026-08-10 時点 `2.5.62` → 2026-08-14 時点 `2.6.2` → 2026-08-22 時点 `2.6.49`（HEAD `71d9a9e0`）→ 2026-08-22 時点 `2.6.55`（HEAD `840ba653`）→ 2026-08-29 時点 `2.6.123`（branch `v2` HEAD `2fbee12f`）→ 2026-09-01 時点 `2.7.0`（branch `main` HEAD `96b11d39`））
    - `docs/guide/00-introduction.md`
    - `docs/guide/03-spaces-and-intents.md`
    - `docs/guide/04-phases-and-stages.md`
