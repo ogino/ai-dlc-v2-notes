@@ -7,8 +7,8 @@
 > - 本リポジトリの文章のライセンスは **MIT**（`LICENSE`）。上流実装のライセンスは **MIT-0**（別物）
 
 初回調査日: 2026-07-28（実装バージョン 2.5.11）  
-最終同期日: 2026-11-18（タグ `v2.11.4` で測定。preview / `main` も再取得）  
-対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **リリース `v2.11.4`**（`61fdb122`。2026-11-18 夜の最新 preview は `v2.11.5-preview.20261118.1` = `ff2452ba`、`origin/main` は `c515d065`）
+最終同期日: 2026-11-22（安定 Latest はタグ `v2.11.4`。preview / `main` の追跡地点を再取得）  
+対象実装: [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) **リリース `v2.11.4`**（`61fdb122`。2026-11-22 の最新 preview は `v2.11.5-preview.20261121.1` = `7098f0ef`、`origin/main` は `464626b6`）
 
 > **⚠ 上流の `dist/` ディレクトリは 2026-09-08 に削除された。**
 > 導入はネイティブインストーラ（`install.sh` / `install.ps1`）と `aidlc config` に変わった。
@@ -23,7 +23,7 @@
 > 2.8.1 → 2.9.0 の差分は [18 章](./18-release-impact-290.md)、2.9.0 → 2.10.0 は [19 章](./19-release-impact-2100.md)、2.10.0 → 2.11.3 は [20 章](./20-release-impact-2113.md)、2.11.3 → 2.11.4 は [21 章](./21-release-impact-2114.md) で扱う。
 
 > **📌 続報（2026-11-18）—— 上流の安定 Latest は `v2.11.4` である。**
-> `v2.11.4`（`61fdb122`、2026-11-13）が公開された。2026-11-18 夜の最新 preview は `v2.11.5-preview.20261118.1`（`ff2452ba`）、`origin/main` は `c515d065`。どちらも `AIDLC_VERSION` は `2.11.4` なので、**版文字列だけで preview / main を判別しない**。
+> `v2.11.4`（`61fdb122`、2026-11-13）が公開された。2026-11-22 の最新 preview は `v2.11.5-preview.20261121.1`（`7098f0ef`）、`origin/main` は `464626b6`。どちらも `AIDLC_VERSION` は `2.11.4` なので、**版文字列だけで preview / main を判別しない**。
 
 > **⚠ 版を固定するなら `v2.11.4`（現 Latest）を使う。**
 > **`v2.8.1` / `v2.8.2` / `v2.9.0` / `v2.10.0` / `v2.11.0` / `v2.11.1` / `v2.11.2` / `v2.11.3` / `v2.11.4` はいずれも実在するタグである**
