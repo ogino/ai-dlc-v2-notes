@@ -200,7 +200,7 @@
       `classic` 等の既定が `off` で plan approval / review freeze / state transition / reviewer scope の gate が立つ。既存の `aidlc-state.md` に Guard Policy 行が無い場合の `strict` 解決は `v2.11.3` の `resolveGuardPolicy` 読解で確認したが、実機での doctor / 監査出力は未検証（→ [20.4](../20-release-impact-2113.md)）
 - [x] **`v2.11.3` の team Unit 既知ギャップが安定版で閉じたと CHANGELOG が書くか追う**（2026-11-18 解決。実機未確認）—
       `v2.11.4` の CHANGELOG は、skipped stage の end-of-Unit 停止、merge question の clean pass 表示、claim checkout の変更記録の 3 件を閉じたと書く（→ [21 章](../21-release-impact-2114.md)）
-- [ ] **preview / main の `AIDLC_VERSION` が安定版と同じことによる誤認を防ぐ運用を決める**（2026-11-18 更新）—
+- [ ] **preview / main の `AIDLC_VERSION` が安定版と同じことによる誤認を防ぐ運用を決める**（2026-11-22 更新）—
       stable `v2.11.4`、最新 preview `v2.11.5-preview.20261121.1`、`origin/main`（`464626b6`）の version 定数がすべて `2.11.4`。調査・導入判断では tag / SHA を優先する（→ [21.1](../21-release-impact-2114.md)）
 
 > **📌 2026-11-22 時点の上流（安定区間は追従済み）**
