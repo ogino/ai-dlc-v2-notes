@@ -38,7 +38,7 @@
     版定数も CHANGELOG も変えないコミットがあるため、**版だけを見ると取りこぼす**。
     ```bash
     # 本ノートが記録している同期地点（README / 各章の `基準:` 行）
-    last=61fdb122   # タグ v2.11.4（評価終点。2026-11-22 の origin/main は 464626b6、preview は 7098f0ef）
+    last=61fdb122   # タグ v2.11.4（評価終点。2026-11-24 の origin/main は 441b73ac、preview は 1e64f313）
     # ⚠ 先に fetch する。`git ls-remote` は SHA を表示するだけで
     #    refs/remotes/origin/main を更新しないため、直後の log / diff が古い参照を見る
     git fetch origin main --tags
@@ -46,6 +46,9 @@
     # 差があれば、その範囲を調べる
     git log --oneline $last..origin/main
     git diff --stat $last..origin/main
+    # 2026-11-24 の記録値を再現する場合。origin/main ではなく記録済み SHA を使う
+    git rev-list --count v2.11.4..441b73ac
+    git diff --shortstat v2.11.4..441b73ac
     ```
   - 版・リリース状態の確認は**補助**として次を併用する:
     `rg 'AIDLC_VERSION' core/tools/aidlc-version.ts` ／ CHANGELOG の差分 ／
@@ -200,16 +203,16 @@
       `classic` 等の既定が `off` で plan approval / review freeze / state transition / reviewer scope の gate が立つ。既存の `aidlc-state.md` に Guard Policy 行が無い場合の `strict` 解決は `v2.11.3` の `resolveGuardPolicy` 読解で確認したが、実機での doctor / 監査出力は未検証（→ [20.4](../20-release-impact-2113.md)）
 - [x] **`v2.11.3` の team Unit 既知ギャップが安定版で閉じたと CHANGELOG が書くか追う**（2026-11-18 解決。実機未確認）—
       `v2.11.4` の CHANGELOG は、skipped stage の end-of-Unit 停止、merge question の clean pass 表示、claim checkout の変更記録の 3 件を閉じたと書く（→ [21 章](../21-release-impact-2114.md)）
-- [ ] **preview / main の `AIDLC_VERSION` が安定版と同じことによる誤認を防ぐ運用を決める**（2026-11-22 更新）—
-      stable `v2.11.4`、最新 preview `v2.11.5-preview.20261121.1`、`origin/main`（`464626b6`）の version 定数がすべて `2.11.4`。調査・導入判断では tag / SHA を優先する（→ [21.1](../21-release-impact-2114.md)）
+- [ ] **preview / main の `AIDLC_VERSION` が安定版と同じことによる誤認を防ぐ運用を決める**（2026-11-24 更新）—
+      stable `v2.11.4`、最新 preview `v2.11.5-preview.20261123.1`、`origin/main`（`441b73ac`）の version 定数がすべて `2.11.4`。調査・導入判断では tag / SHA を優先する（→ [21.1](../21-release-impact-2114.md)）
 
-> **📌 2026-11-22 時点の上流（安定区間は追従済み）**
+> **📌 2026-11-24 時点の上流（安定区間は追従済み）**
 >
 > | 項目 | 値 |
 > |---|---|
-> | Latest | **`v2.11.4`**（`61fdb122`、2026-11-13 公開。2026-11-22 も不変） |
-> | `origin/main` HEAD | `464626b6`（2026-11-22 11:19 UTC。`v2.11.4` から 69 commits / 251 files / +14,636 −1,944） |
-> | preview | `v2.11.5-preview.20261121.1`（`7098f0ef`、2026-11-21。`v2.11.4` から 62 commits / 233 files / +13,313 −1,794） |
+> | Latest | **`v2.11.4`**（`61fdb122`、2026-11-13 公開。2026-11-24 も不変） |
+> | `origin/main` HEAD | `441b73ac`（2026-11-24 08:56 UTC。`v2.11.4` から 89 commits / 293 files / +21,131 −2,592） |
+> | preview | `v2.11.5-preview.20261123.1`（`1e64f313`、2026-11-23。`v2.11.4` から 83 commits / 281 files / +19,314 −2,320） |
 > | 本区間（タグ `v2.11.3` → タグ `v2.11.4`） | **293 commits / 808 files / +106,747 −12,434** |
 > | `AIDLC_VERSION` | stable / preview / origin/main とも **`2.11.4`** |
 > | team Unit の v2.11.3 ギャップ | **CHANGELOG 上は `v2.11.4` で解消。実機未確認** |
@@ -253,4 +256,5 @@
 - [ ] 必要なら GitHub Pages や簡易目次の追加
 - [ ] **`DENYLIST_PATTERNS` シークレットの設定**（未設定の間はリークチェックが**失敗する**。fail-closed のため、設定するまで PR はマージできない。手順は `PUBLIC_CONTENT_POLICY.md`）
 - [x] master ブランチ保護ルールの設定（直接 push 禁止・PR 必須・CI パス必須。2026-08-05 設定済み）
+  - **2026-11 の制限**: GitHub Actions が課金上限に達しており、private repository では Actions が動かない。2026-11 中は `scan` が起動しないことを失敗と扱わない。required check が来ない場合だけ管理者マージで進める。その前に `git diff origin/master...HEAD`、`git diff --check origin/master...HEAD`、個人パスの `grep -rlE '/(Users|home)/[A-Za-z0-9._-]+/'`、可能なら `gitleaks detect` を実行する。空白検査は作業ツリーではなく PR 差分を見る。README の行末スペースは Markdown 改行として意図したものなら残す。`DENYLIST_PATTERNS` はローカルに無いので、`PUBLIC_CONTENT_POLICY.md` の禁止項目を目視し、実施した確認を PR コメントへ残す。
   - **fork PR との相互作用**: leak-check は fork PR で必ず失敗するため（secrets 不達）、外部 PR は管理者バイパスなしにはマージできない。手順は `PUBLIC_CONTENT_POLICY.md` の「fork PR の運用手順」を参照
