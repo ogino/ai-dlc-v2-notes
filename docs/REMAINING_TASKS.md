@@ -256,5 +256,5 @@
 - [ ] 必要なら GitHub Pages や簡易目次の追加
 - [ ] **`DENYLIST_PATTERNS` シークレットの設定**（未設定の間はリークチェックが**失敗する**。fail-closed のため、設定するまで PR はマージできない。手順は `PUBLIC_CONTENT_POLICY.md`）
 - [x] master ブランチ保護ルールの設定（直接 push 禁止・PR 必須・CI パス必須。2026-08-05 設定済み）
-  - **2026-11 の制限**: GitHub Actions が課金上限に達しており、private repository では Actions が動かない。2026-11 中は `scan` が起動しないことを失敗と扱わない。ローカルで差分を確認し、required check が来ない PR は管理者マージで進める。
+  - **2026-11 の制限**: GitHub Actions が課金上限に達しており、private repository では Actions が動かない。2026-11 中は `scan` が起動しないことを失敗と扱わない。required check が来ない場合だけ管理者マージで進める。その前に `git diff origin/master...HEAD`、`git diff --check`、個人パスの `grep -rlE '/(Users|home)/[A-Za-z0-9._-]+/'`、可能なら `gitleaks detect` を実行する。`DENYLIST_PATTERNS` はローカルに無いので、`PUBLIC_CONTENT_POLICY.md` の禁止項目を目視し、実施した確認を PR コメントへ残す。
   - **fork PR との相互作用**: leak-check は fork PR で必ず失敗するため（secrets 不達）、外部 PR は管理者バイパスなしにはマージできない。手順は `PUBLIC_CONTENT_POLICY.md` の「fork PR の運用手順」を参照
